@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Dashboard from '@/components/Dashboard';
+import KanbanBoard from '@/components/KanbanBoard';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [authenticated, setAuthenticated] = useState(false);
+  const [view, setView] = useState<'metrics' | 'pipeline'>('metrics');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -27,10 +30,23 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">Stratwyze CRM</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-8">
+            <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
+              Stratwyze CRM
+            </Link>
+            <div className="flex gap-4">
+              <Link href="/leads" className="text-gray-600 hover:text-gray-900 font-medium">
+                Leads
+              </Link>
+              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium">
+                Dashboard
+              </Link>
+            </div>
+          </div>
           <button
             onClick={handleLogout}
             className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
@@ -40,49 +56,35 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto py-8 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Leads</h2>
-            <p className="text-4xl font-bold text-blue-600">0</p>
-            <Link href="/leads" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
-              View Leads →
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Opportunities</h2>
-            <p className="text-4xl font-bold text-green-600">0</p>
-            <Link href="/opportunities" className="text-green-600 hover:text-green-700 mt-4 inline-block">
-              View Opportunities →
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Deals</h2>
-            <p className="text-4xl font-bold text-purple-600">$0</p>
-            <Link href="/deals" className="text-purple-600 hover:text-purple-700 mt-4 inline-block">
-              View Deals →
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/leads/new">
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
-                Create New Lead
-              </button>
-            </Link>
-            <Link href="/proposals/new">
-              <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg">
-                Generate Proposal
-              </button>
-            </Link>
-          </div>
+      {/* View Tabs */}
+      <div className="bg-white border-b sticky top-16 z-40">
+        <div className="max-w-7xl mx-auto px-6 flex gap-8">
+          <button
+            onClick={() => setView('metrics')}
+            className={`py-4 font-semibold border-b-2 transition-colors ${
+              view === 'metrics'
+                ? 'text-blue-600 border-blue-600'
+                : 'text-gray-600 border-transparent hover:text-gray-900'
+            }`}
+          >
+            📊 Metrics
+          </button>
+          <button
+            onClick={() => setView('pipeline')}
+            className={`py-4 font-semibold border-b-2 transition-colors ${
+              view === 'pipeline'
+                ? 'text-blue-600 border-blue-600'
+                : 'text-gray-600 border-transparent hover:text-gray-900'
+            }`}
+          >
+            📋 Pipeline
+          </button>
         </div>
       </div>
+
+      {/* Content */}
+      {view === 'metrics' && <Dashboard />}
+      {view === 'pipeline' && <KanbanBoard />}
     </div>
   );
 }

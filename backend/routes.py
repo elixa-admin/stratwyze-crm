@@ -5,9 +5,11 @@ from uuid import UUID
 import asyncio
 
 from database import get_db
-from models import Lead, Prospect, Organization
+from models import Lead, Prospect, Organization, Opportunity, Stage, Deal, Activity
 from schemas import LeadCreateRequest, LeadUpdateRequest, LeadResponse
 from research import research_company, get_job_status
+from datetime import datetime, timedelta
+from sqlalchemy import func
 
 router = APIRouter()
 
@@ -182,4 +184,140 @@ async def get_brief(lead_id: UUID, db: Session = Depends(get_db)):
         "brief": prospect.executive_brief,
         "tech_stack": prospect.technology_stack,
         "generated_at": prospect.brief_generated_at
+    }
+
+
+# Opportunity endpoints
+@router.post("/api/opportunities")
+async def create_opportunity(name: str, lead_id: UUID, value: float = 0, probability: int = 0, close_date: str = None, db: Session = Depends(get_db)):
+    """Create an opportunity from a lead."""
+    lead = db.query(Lead).filter_by(id=lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    # Get or create discovery stage
+    stage = db.query(Stage).filter_by(name="Discovery").first()
+    if not stage:
+        stage = Stage(name="Discovery", order_index=0)
+        db.add(stage)
+        db.flush()
+
+    opportunity = Opportunity(
+        lead_id=lead_id,
+        name=name,
+        value=value,
+        stage_id=stage.id,
+        probability=probability,
+        expected_close_date=close_date
+    )
+    db.add(opportunity)
+    db.commit()
+    db.refresh(opportunity)
+
+    return {
+        "id": str(opportunity.id),
+        "name": opportunity.name,
+        "value": opportunity.value,
+        "stage_id": str(opportunity.stage_id),
+        "probability": opportunity.probability
+    }
+
+
+@router.get("/api/opportunities")
+async def list_opportunities(db: Session = Depends(get_db)):
+    """List all opportunities grouped by stage."""
+    stages = db.query(Stage).order_by(Stage.order_index).all()
+    result = {}
+
+    for stage in stages:
+        opportunities = db.query(Opportunity).filter_by(stage_id=stage.id).all()
+        result[stage.name] = [
+            {
+                "id": str(opp.id),
+                "name": opp.name,
+                "value": float(opp.value) if opp.value else 0,
+                "probability": opp.probability,
+                "stage_id": str(opp.stage_id),
+                "lead_id": str(opp.lead_id),
+                "close_date": opp.expected_close_date.isoformat() if opp.expected_close_date else None
+            }
+            for opp in opportunities
+        ]
+
+    return result
+
+
+@router.patch("/api/opportunities/{opp_id}")
+async def update_opportunity(opp_id: UUID, stage_id: UUID = None, probability: int = None, value: float = None, db: Session = Depends(get_db)):
+    """Update opportunity (move between stages, update probability/value)."""
+    opp = db.query(Opportunity).filter_by(id=opp_id).first()
+    if not opp:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+
+    if stage_id:
+        opp.stage_id = stage_id
+    if probability is not None:
+        opp.probability = probability
+    if value is not None:
+        opp.value = value
+
+    db.commit()
+    db.refresh(opp)
+
+    return {
+        "id": str(opp.id),
+        "name": opp.name,
+        "stage_id": str(opp.stage_id),
+        "probability": opp.probability,
+        "value": float(opp.value) if opp.value else 0
+    }
+
+
+# Dashboard metrics
+@router.get("/api/dashboard/metrics")
+async def get_dashboard_metrics(db: Session = Depends(get_db)):
+    """Get CEO dashboard metrics."""
+    opportunities = db.query(Opportunity).all()
+
+    # Total pipeline value (weighted by probability)
+    total_pipeline = sum(
+        (float(opp.value) * opp.probability / 100) if opp.value else 0
+        for opp in opportunities
+    )
+
+    # Win rate (closed won / closed won + closed lost)
+    # For now, using simple counts as stand-in
+    won_count = len([o for o in opportunities if o.stage_id and db.query(Stage).filter_by(id=o.stage_id).first().name == "Closed Won"])
+    lost_count = len([o for o in opportunities if o.stage_id and db.query(Stage).filter_by(id=o.stage_id).first().name == "Closed Lost"])
+    win_rate = (won_count / (won_count + lost_count) * 100) if (won_count + lost_count) > 0 else 0
+
+    # Deals this month
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    deals_this_month = len([o for o in opportunities if o.created_at >= thirty_days_ago])
+
+    # Forecast (sum of all open opportunities)
+    open_stages = ["Discovery", "Proposal", "Negotiation"]
+    forecast = sum(
+        float(opp.value) if opp.value else 0
+        for opp in opportunities
+        if opp.stage_id and db.query(Stage).filter_by(id=opp.stage_id).first().name in open_stages
+    )
+
+    # Pipeline by stage
+    stages = db.query(Stage).order_by(Stage.order_index).all()
+    pipeline_by_stage = {}
+    for stage in stages:
+        stage_opps = [o for o in opportunities if o.stage_id == stage.id]
+        pipeline_by_stage[stage.name] = {
+            "count": len(stage_opps),
+            "value": sum(float(o.value) if o.value else 0 for o in stage_opps)
+        }
+
+    return {
+        "total_pipeline_value": total_pipeline,
+        "win_rate_percent": win_rate,
+        "forecast_value": forecast,
+        "deals_this_month": deals_this_month,
+        "pipeline_by_stage": pipeline_by_stage,
+        "total_opportunities": len(opportunities)
     }
