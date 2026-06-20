@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+from werkzeug.security import generate_password_hash, check_password_hash
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
@@ -11,8 +11,6 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class TokenData(BaseModel):
     user_id: str
@@ -25,10 +23,10 @@ class TokenResponse(BaseModel):
     expires_in: int
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return check_password_hash(hashed_password, plain_password)
 
 def create_access_token(user_id: str, email: str, role: str, expires_delta: Optional[timedelta] = None) -> str:
     if expires_delta:
