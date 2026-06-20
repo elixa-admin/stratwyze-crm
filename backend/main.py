@@ -9,10 +9,14 @@ from database import get_db, init_db, create_initial_stages
 from models import User, Organization
 from auth import hash_password, verify_password, create_access_token, verify_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from schemas import UserSignupRequest, UserLoginRequest, TokenResponse, UserResponse
+from routes import router
 
 load_dotenv()
 
 app = FastAPI(title="Stratwyze CRM API", version="0.1.0")
+
+# Include routers
+app.include_router(router)
 
 # CORS middleware
 app.add_middleware(
