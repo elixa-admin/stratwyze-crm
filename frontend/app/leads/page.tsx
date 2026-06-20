@@ -22,6 +22,7 @@ export default function LeadsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [researchingId, setResearchingId] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -71,6 +72,20 @@ export default function LeadsPage() {
     }
 
     setFilteredLeads(filtered);
+  };
+
+  const handleResearch = async (leadId: string) => {
+    setResearchingId(leadId);
+    try {
+      await fetch(`http://localhost:8000/api/leads/${leadId}/research`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      setTimeout(() => setResearchingId(null), 1500);
+    } catch (err) {
+      console.error('Research failed:', err);
+      setResearchingId(null);
+    }
   };
 
   return (
@@ -147,7 +162,14 @@ export default function LeadsPage() {
                         {lead.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm flex gap-2">
+                      <button
+                        onClick={() => handleResearch(lead.id)}
+                        disabled={researchingId === lead.id}
+                        className={`px-2 py-1 rounded text-white font-semibold ${researchingId === lead.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-700'}`}
+                      >
+                        {researchingId === lead.id ? '🔄' : '🔍'}
+                      </button>
                       <Link href={`/prospects/${lead.id}`} className="text-blue-600 hover:text-blue-700">
                         View
                       </Link>
