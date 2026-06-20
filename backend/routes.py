@@ -8,6 +8,7 @@ from database import get_db
 from models import Lead, Prospect, Organization, Opportunity, Stage, Deal, Activity
 from schemas import LeadCreateRequest, LeadUpdateRequest, LeadResponse
 from research import research_company, get_job_status
+from analytics import get_all_analytics
 from datetime import datetime, timedelta
 from sqlalchemy import func
 
@@ -380,3 +381,42 @@ async def create_test_data(db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         return {"error": str(e)}
+
+
+# Advanced Analytics Endpoints
+@router.get("/api/analytics")
+async def get_analytics(db: Session = Depends(get_db)):
+    """Get comprehensive analytics and insights."""
+    try:
+        analytics = get_all_analytics(db)
+        return analytics
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@router.get("/api/analytics/funnel")
+async def get_funnel_analytics(db: Session = Depends(get_db)):
+    """Get sales funnel conversion metrics."""
+    from analytics import calculate_sales_funnel
+    return calculate_sales_funnel(db)
+
+
+@router.get("/api/analytics/forecast")
+async def get_revenue_forecast(db: Session = Depends(get_db)):
+    """Get 3-month revenue forecast."""
+    from analytics import calculate_revenue_forecast
+    return calculate_revenue_forecast(db, months=3)
+
+
+@router.get("/api/analytics/cycle")
+async def get_cycle_metrics(db: Session = Depends(get_db)):
+    """Get deal cycle time analytics."""
+    from analytics import calculate_deal_cycle_metrics
+    return calculate_deal_cycle_metrics(db)
+
+
+@router.get("/api/analytics/performance")
+async def get_performance_metrics(db: Session = Depends(get_db)):
+    """Get historical performance (last 6 months)."""
+    from analytics import calculate_monthly_performance
+    return calculate_monthly_performance(db, months=6)
