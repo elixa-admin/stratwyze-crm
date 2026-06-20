@@ -1,0 +1,23 @@
+{
+  "modelTier": "sonnet",
+  "tokenBudgets": {
+    "hourly": 32000,
+    "sprint": 160000,
+    "daily": 800000,
+    "weekly": 4000000
+  },
+  "modelRouting": {
+    "light": "claude-haiku-4-5-20251001",
+    "medium": "claude-sonnet-4-6",
+    "heavy": "claude-opus-4-8"
+  },
+  "sprintConfig": {
+    "durationDays": 5,
+    "targetTokens": 160000,
+    "stopAt": 128000,
+    "tasksPerSprint": 10
+  },
+  "hooks": {
+    "onSprintComplete": "compact && create SPRINTS_REPORT.md"
+  }
+}
