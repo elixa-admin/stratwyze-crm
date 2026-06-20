@@ -62,13 +62,16 @@ async def signup(request: UserSignupRequest, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
 
-    # Check if organization exists
+    # Check if organization exists, if not create it
     org = db.query(Organization).filter_by(id=request.organization_id).first()
     if not org:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Organization not found"
+        # Auto-create organization with user's name
+        org = Organization(
+            id=request.organization_id,
+            name=f"{request.first_name} {request.last_name}'s Organization"
         )
+        db.add(org)
+        db.flush()
 
     # Create user
     user = User(
