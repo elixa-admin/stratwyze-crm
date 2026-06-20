@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
+import asyncio
 
 from database import get_db
 from models import Lead, Prospect, Organization
 from schemas import LeadCreateRequest, LeadUpdateRequest, LeadResponse
+from research import research_company, get_job_status
 
 router = APIRouter()
 
@@ -111,3 +113,73 @@ async def list_leads_by_organization(org_id: UUID, db: Session = Depends(get_db)
     """List leads for a specific organization."""
     leads = db.query(Lead).filter_by(organization_id=org_id).all()
     return leads
+
+
+# Research endpoints
+@router.post("/api/leads/{lead_id}/research")
+async def start_research(lead_id: UUID, db: Session = Depends(get_db)):
+    """Start AI research for a lead."""
+    lead = db.query(Lead).filter_by(id=lead_id).first()
+    if not lead:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Lead not found"
+        )
+
+    prospect = db.query(Prospect).filter_by(lead_id=lead_id).first()
+    if not prospect:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prospect profile not found"
+        )
+
+    # Start research in background
+    asyncio.create_task(research_company(db, str(lead_id), str(prospect.id)))
+
+    return {
+        "message": "Research started",
+        "lead_id": str(lead_id),
+        "prospect_id": str(prospect.id)
+    }
+
+
+@router.get("/api/leads/{lead_id}/research-status")
+async def get_research_status(lead_id: UUID, db: Session = Depends(get_db)):
+    """Get research status for a lead."""
+    prospect = db.query(Prospect).filter_by(lead_id=lead_id).first()
+    if not prospect:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prospect not found"
+        )
+
+    return {
+        "prospect_id": str(prospect.id),
+        "status": prospect.research_status,
+        "last_researched_at": prospect.last_researched_at,
+        "brief": prospect.executive_brief if prospect.research_status == "complete" else None
+    }
+
+
+@router.get("/api/leads/{lead_id}/brief")
+async def get_brief(lead_id: UUID, db: Session = Depends(get_db)):
+    """Get the executive brief for a lead."""
+    prospect = db.query(Prospect).filter_by(lead_id=lead_id).first()
+    if not prospect:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prospect not found"
+        )
+
+    if not prospect.executive_brief:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Brief not yet generated"
+        )
+
+    return {
+        "prospect_id": str(prospect.id),
+        "brief": prospect.executive_brief,
+        "tech_stack": prospect.technology_stack,
+        "generated_at": prospect.brief_generated_at
+    }

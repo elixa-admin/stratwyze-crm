@@ -77,10 +77,13 @@ class Prospect(Base):
     research_notes = Column(Text)
     executive_brief = Column(Text)  # Generated AI brief
     brief_generated_at = Column(DateTime)
+    research_status = Column(String(50), default='pending')  # 'pending', 'in_progress', 'complete', 'failed'
+    last_researched_at = Column(DateTime)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     lead = relationship("Lead", back_populates="prospect")
+    briefs = relationship("Brief", back_populates="prospect")
 
 class Stage(Base):
     __tablename__ = "stages"
@@ -160,3 +163,14 @@ class Proposal(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     deal = relationship("Deal", back_populates="proposals")
+
+class Brief(Base):
+    __tablename__ = "briefs"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    prospect_id = Column(UUID(as_uuid=True), ForeignKey('prospects.id'), nullable=False, index=True)
+    content = Column(Text)  # Multi-section brief (markdown)
+    model_version = Column(String(50))  # 'claude-opus-4-8', etc.
+    generated_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    prospect = relationship("Prospect", back_populates="briefs")
