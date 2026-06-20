@@ -12,11 +12,6 @@ interface Opportunity {
   close_date?: string;
 }
 
-interface Stage {
-  name: string;
-  opportunities: Opportunity[];
-}
-
 const stageConfig = {
   'Discovery': { color: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-800' },
   'Proposal': { color: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-800' },
@@ -64,11 +59,6 @@ export default function KanbanBoard() {
     const opportunity = fromStage?.find(o => o.id === draggedCard.id);
 
     if (!opportunity) return;
-
-    // Get the stage ID for the target stage
-    const toStageObj = Object.values(stages)
-      .flat()
-      .find(o => o.stage_id); // This is a simplification - ideally we'd have stage IDs
 
     try {
       // Update opportunity with new stage
