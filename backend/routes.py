@@ -321,3 +321,62 @@ async def get_dashboard_metrics(db: Session = Depends(get_db)):
         "pipeline_by_stage": pipeline_by_stage,
         "total_opportunities": len(opportunities)
     }
+
+
+# Test/Demo endpoints
+@router.post("/api/demo/create-test-data")
+async def create_test_data(db: Session = Depends(get_db)):
+    """Create sample opportunities for testing (demo only)."""
+    try:
+        # Get or create Discovery stage
+        stage_discovery = db.query(Stage).filter_by(name="Discovery").first()
+        stage_proposal = db.query(Stage).filter_by(name="Proposal").first()
+        stage_closed_won = db.query(Stage).filter_by(name="Closed Won").first()
+
+        # Create sample opportunities
+        sample_opportunities = [
+            {"name": "Acme Corp - CRM Implementation", "stage": stage_discovery, "value": 50000, "probability": 30},
+            {"name": "TechStartup Inc - Sales Automation", "stage": stage_proposal, "value": 75000, "probability": 60},
+            {"name": "Global Industries - Enterprise Suite", "stage": stage_proposal, "value": 150000, "probability": 45},
+            {"name": "FastGrow LLC - Basic Package", "stage": stage_discovery, "value": 25000, "probability": 20},
+            {"name": "BigCorp International - Premium Plan", "stage": stage_closed_won, "value": 200000, "probability": 100},
+        ]
+
+        for opp_data in sample_opportunities:
+            existing = db.query(Opportunity).filter_by(name=opp_data["name"]).first()
+            if not existing:
+                # Get a lead to associate with (or create a dummy one)
+                lead = db.query(Lead).first()
+                if not lead:
+                    # Create a test lead
+                    org = db.query(Organization).first()
+                    if not org:
+                        org = Organization(name="Test Org", industry="Technology")
+                        db.add(org)
+                        db.flush()
+
+                    lead = Lead(
+                        first_name="John",
+                        last_name="Test",
+                        email="john@example.com",
+                        title="VP Sales",
+                        organization_id=org.id,
+                        status="qualified"
+                    )
+                    db.add(lead)
+                    db.flush()
+
+                opp = Opportunity(
+                    lead_id=lead.id,
+                    name=opp_data["name"],
+                    value=opp_data["value"],
+                    stage_id=opp_data["stage"].id,
+                    probability=opp_data["probability"]
+                )
+                db.add(opp)
+
+        db.commit()
+        return {"message": "Test data created successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
