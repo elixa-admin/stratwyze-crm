@@ -47,36 +47,36 @@ export default function Dashboard() {
         {/* Top 4 Metric Cards */}
         <div className="grid grid-cols-4 gap-6 mb-8">
           {/* Total Pipeline Value */}
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-            <p className="text-gray-600 text-sm font-semibold uppercase">Total Pipeline</p>
-            <p className="text-3xl font-bold text-blue-600 mt-2">
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border-l-4 border-blue-600">
+            <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Total Pipeline</p>
+            <p className="text-3xl font-bold text-blue-600 mt-3">
               ${Math.round(metrics.total_pipeline_value).toLocaleString()}
             </p>
             <p className="text-xs text-gray-500 mt-2">Weighted by probability</p>
           </div>
 
           {/* Win Rate */}
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-            <p className="text-gray-600 text-sm font-semibold uppercase">Win Rate</p>
-            <p className="text-3xl font-bold text-green-600 mt-2">
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border-l-4 border-green-600">
+            <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Win Rate</p>
+            <p className="text-3xl font-bold text-green-600 mt-3">
               {metrics.win_rate_percent.toFixed(1)}%
             </p>
             <p className="text-xs text-gray-500 mt-2">Closed Won / Total Closed</p>
           </div>
 
           {/* Sales Forecast */}
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-            <p className="text-gray-600 text-sm font-semibold uppercase">Forecast</p>
-            <p className="text-3xl font-bold text-purple-600 mt-2">
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border-l-4 border-purple-600">
+            <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Forecast</p>
+            <p className="text-3xl font-bold text-purple-600 mt-3">
               ${Math.round(metrics.forecast_value).toLocaleString()}
             </p>
             <p className="text-xs text-gray-500 mt-2">Open opportunities</p>
           </div>
 
           {/* Deals This Month */}
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-amber-500">
-            <p className="text-gray-600 text-sm font-semibold uppercase">Deals Created</p>
-            <p className="text-3xl font-bold text-amber-600 mt-2">
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border-l-4 border-amber-600">
+            <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Deals Created</p>
+            <p className="text-3xl font-bold text-amber-600 mt-3">
               {metrics.deals_this_month}
             </p>
             <p className="text-xs text-gray-500 mt-2">This month</p>
@@ -84,7 +84,7 @@ export default function Dashboard() {
         </div>
 
         {/* Pipeline Breakdown */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Pipeline by Stage</h2>
           <div className="space-y-4">
             {Object.entries(metrics.pipeline_by_stage).map(([stage, data]) => (
