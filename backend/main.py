@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Response
+from fastapi import FastAPI, Depends, HTTPException, status, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
+from logging_config import log_request, log_error, logger
 
 from database import get_db, init_db, create_initial_stages
 from models import User, Organization
@@ -17,6 +18,21 @@ app = FastAPI(title="Stratwyze CRM API", version="0.1.0")
 
 # Include routers
 app.include_router(router)
+
+# Error handling middleware
+@app.middleware("http")
+async def error_handling_middleware(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        log_request(request.method, request.url.path, response.status_code)
+        return response
+    except Exception as exc:
+        log_error("Unhandled exception", str(exc))
+        return Response(
+            content='{"detail": "Internal server error"}',
+            status_code=500,
+            media_type="application/json"
+        )
 
 # CORS middleware
 app.add_middleware(
