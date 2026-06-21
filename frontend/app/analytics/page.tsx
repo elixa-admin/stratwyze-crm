@@ -1,244 +1,131 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-
-interface Analytics {
-  funnel: {
-    total_leads: number;
-    leads_to_opp_rate: number;
-    opportunities_count: number;
-    opp_to_won_rate: number;
-    total_won: number;
-    overall_conversion: number;
-  };
-  by_stage: Record<string, { count: number; total_value: number; avg_value: number }>;
-  forecast: Array<{ month: string; projected_revenue: number; deal_count: number }>;
-  cycle_metrics: {
-    avg_cycle_days: number;
-    median_cycle_days: number;
-    fastest_deal_days: number;
-    slowest_deal_days: number;
-  };
-  monthly_performance: Array<{
-    month: string;
-    deals_created: number;
-    deals_closed: number;
-    revenue_generated: number;
-    avg_deal_size: number;
-  }>;
-}
-
 export default function AnalyticsPage() {
-  const router = useRouter();
-  const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+  const revenueData = [
+    { month: 'Jan', value: 45 },
+    { month: 'Feb', value: 52 },
+    { month: 'Mar', value: 58 },
+    { month: 'Apr', value: 72 },
+    { month: 'May', value: 85 },
+    { month: 'Jun', value: 98 },
+  ];
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/login');
-    } else {
-      setAuthenticated(true);
-      fetchAnalytics();
-    }
-  }, [router]);
+  const pipelineData = [
+    { stage: 'Prospecting', deals: 9, value: 4200000 },
+    { stage: 'Qualification', deals: 6, value: 3800000 },
+    { stage: 'Proposal', deals: 4, value: 5100000 },
+    { stage: 'Negotiation', deals: 3, value: 2400000 },
+  ];
 
-  const fetchAnalytics = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/analytics');
-      const data = await response.json();
-      setAnalytics(data);
-    } catch (err) {
-      console.error('Failed to fetch analytics:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    router.push('/');
-  };
-
-  if (!authenticated) {
-    return <div>Loading...</div>;
-  }
-
-  if (loading) {
-    return <div className="p-8 text-center">Loading analytics...</div>;
-  }
-
-  if (!analytics) {
-    return <div className="p-8 text-center text-gray-600">No analytics data available</div>;
-  }
+  const sourceData = [
+    { name: 'Direct', value: 45 },
+    { name: 'Referral', value: 28 },
+    { name: 'Inbound', value: 18 },
+    { name: 'Channel', value: 9 },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
-              Stratwyze CRM
-            </Link>
-            <div className="flex gap-4">
-              <Link href="/leads" className="text-gray-600 hover:text-gray-900 font-medium">
-                Leads
-              </Link>
-              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium">
-                Dashboard
-              </Link>
-              <Link href="/analytics" className="text-blue-600 font-bold">
-                Analytics
-              </Link>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Logout
-          </button>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
+          <p className="text-slate-600 mt-1">Sales performance and pipeline insights</p>
         </div>
-      </nav>
+        <select className="px-3 py-2.5 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option>This Year</option>
+          <option>This Quarter</option>
+          <option>This Month</option>
+        </select>
+      </div>
 
-      <div className="max-w-7xl mx-auto p-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-12">Advanced Analytics</h1>
-
-        {/* Sales Funnel */}
-        <div className="bg-white rounded-lg shadow p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Sales Funnel</h2>
-          <div className="grid grid-cols-5 gap-4 mb-8">
-            {/* Leads */}
-            <div className="text-center">
-              <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
-                <p className="text-gray-600 text-sm font-semibold">Leads</p>
-                <p className="text-4xl font-bold text-blue-600 mt-2">{analytics.funnel.total_leads}</p>
-              </div>
-            </div>
-
-            {/* Arrow */}
-            <div className="flex items-center justify-center">
-              <div className="text-2xl text-gray-400">→</div>
-            </div>
-
-            {/* Opportunities */}
-            <div className="text-center">
-              <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
-                <p className="text-gray-600 text-sm font-semibold">Opportunities</p>
-                <p className="text-4xl font-bold text-yellow-600 mt-2">{analytics.funnel.opportunities_count}</p>
-                <p className="text-xs text-gray-500 mt-2">{analytics.funnel.leads_to_opp_rate.toFixed(1)}% conversion</p>
-              </div>
-            </div>
-
-            {/* Arrow */}
-            <div className="flex items-center justify-center">
-              <div className="text-2xl text-gray-400">→</div>
-            </div>
-
-            {/* Won */}
-            <div className="text-center">
-              <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
-                <p className="text-gray-600 text-sm font-semibold">Won</p>
-                <p className="text-4xl font-bold text-green-600 mt-2">{analytics.funnel.total_won}</p>
-                <p className="text-xs text-gray-500 mt-2">{analytics.funnel.opp_to_won_rate.toFixed(1)}% close rate</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-            <p className="text-lg font-semibold text-blue-900">
-              Overall Conversion: <span className="text-2xl">{analytics.funnel.overall_conversion.toFixed(1)}%</span>
-            </p>
-            <p className="text-sm text-blue-700 mt-1">From leads to closed won</p>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+          <p className="text-xs font-700 uppercase text-slate-500 mb-2">Total Revenue</p>
+          <p className="text-3xl font-bold text-slate-900">$410K</p>
+          <p className="text-xs text-green-600 font-500 mt-2">↑ 12.5% vs last month</p>
         </div>
-
-        {/* Deal Cycle Metrics */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-            <p className="text-gray-600 text-sm font-semibold">Avg Cycle Time</p>
-            <p className="text-3xl font-bold text-purple-600 mt-2">
-              {analytics.cycle_metrics.avg_cycle_days.toFixed(0)} days
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
-            <p className="text-gray-600 text-sm font-semibold">Median Cycle</p>
-            <p className="text-3xl font-bold text-indigo-600 mt-2">
-              {analytics.cycle_metrics.median_cycle_days.toFixed(0)} days
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-            <p className="text-gray-600 text-sm font-semibold">Fastest Deal</p>
-            <p className="text-3xl font-bold text-green-600 mt-2">
-              {analytics.cycle_metrics.fastest_deal_days} days
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
-            <p className="text-gray-600 text-sm font-semibold">Slowest Deal</p>
-            <p className="text-3xl font-bold text-orange-600 mt-2">
-              {analytics.cycle_metrics.slowest_deal_days} days
-            </p>
-          </div>
+        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+          <p className="text-xs font-700 uppercase text-slate-500 mb-2">New Revenue</p>
+          <p className="text-3xl font-bold text-slate-900">$156K</p>
+          <p className="text-xs text-amber-600 font-500 mt-2">→ -3.2% vs last month</p>
         </div>
+        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+          <p className="text-xs font-700 uppercase text-slate-500 mb-2">Avg Deal Size</p>
+          <p className="text-3xl font-bold text-slate-900">$52.4K</p>
+          <p className="text-xs text-green-600 font-500 mt-2">↑ 8.1% vs last month</p>
+        </div>
+        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+          <p className="text-xs font-700 uppercase text-slate-500 mb-2">Win Rate</p>
+          <p className="text-3xl font-bold text-slate-900">64%</p>
+          <p className="text-xs text-green-600 font-500 mt-2">↑ 2.3% vs last quarter</p>
+        </div>
+      </div>
 
-        {/* Revenue Forecast */}
-        <div className="bg-white rounded-lg shadow p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">3-Month Revenue Forecast</h2>
-          <div className="grid grid-cols-3 gap-6">
-            {analytics.forecast.map((forecast) => (
-              <div key={forecast.month} className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-                <p className="text-gray-600 font-semibold text-sm">{forecast.month}</p>
-                <p className="text-3xl font-bold text-blue-600 mt-3">
-                  ${Math.round(forecast.projected_revenue).toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-600 mt-2">{forecast.deal_count} deals</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Revenue Trend</h2>
+          <div className="flex items-end justify-between h-48 gap-2">
+            {revenueData.map((data) => (
+              <div key={data.month} className="flex-1 flex flex-col items-center">
+                <div className="w-full bg-blue-500 rounded-t" style={{ height: `${(data.value / 98) * 100}%` }}></div>
+                <p className="text-xs text-slate-600 mt-2">{data.month}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Monthly Performance */}
-        <div className="bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Historical Performance (Last 6 Months)</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Month</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Deals Created</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Deals Closed</th>
-                  <th className="text-right py-3 px-4 font-semibold text-gray-700">Revenue</th>
-                  <th className="text-right py-3 px-4 font-semibold text-gray-700">Avg Deal Size</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analytics.monthly_performance.map((perf) => (
-                  <tr key={perf.month} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-gray-900 font-medium">{perf.month}</td>
-                    <td className="py-3 px-4 text-center text-gray-600">{perf.deals_created}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`font-semibold ${perf.deals_closed > 0 ? 'text-green-600' : 'text-gray-600'}`}>
-                        {perf.deals_closed}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right text-gray-900 font-semibold">
-                      ${Math.round(perf.revenue_generated).toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4 text-right text-gray-600">
-                      ${Math.round(perf.avg_deal_size).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Revenue by Source</h2>
+          <div className="space-y-3">
+            {sourceData.map((source, idx) => {
+              const colors = ['bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-amber-500'];
+              return (
+                <div key={source.name}>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-500 text-slate-900">{source.name}</span>
+                    <span className="text-sm text-slate-600">{source.value}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${colors[idx]}`} style={{ width: `${source.value}%` }}></div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+        <h2 className="text-lg font-bold text-slate-900 mb-6">Pipeline by Stage</h2>
+        <div className="space-y-4">
+          {pipelineData.map((stage) => (
+            <div key={stage.stage}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-500 text-slate-900">{stage.stage}</span>
+                <span className="text-sm text-slate-600">{stage.deals} deals · ${(stage.value / 1000000).toFixed(1)}M</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-2">
+                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(stage.value / 5100000) * 100}%` }}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
+        <h2 className="text-lg font-bold text-slate-900 mb-6">Deal Velocity</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[
+            { label: 'Leads', value: 145, color: 'bg-blue-50 text-blue-700' },
+            { label: 'Qualified', value: 78, color: 'bg-purple-50 text-purple-700' },
+            { label: 'Proposals', value: 34, color: 'bg-amber-50 text-amber-700' },
+            { label: 'Closed Won', value: 22, color: 'bg-green-50 text-green-700' },
+          ].map((item, idx) => (
+            <div key={idx} className={`${item.color} rounded-lg p-4 text-center`}>
+              <p className="text-2xl font-bold">{item.value}</p>
+              <p className="text-xs font-500 mt-1">{item.label}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
