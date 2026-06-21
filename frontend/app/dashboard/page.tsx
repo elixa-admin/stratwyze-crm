@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Dashboard from '@/components/Dashboard';
 import KanbanBoard from '@/components/pipeline/KanbanBoard';
+import GlobalSearch from '@/components/shared/GlobalSearch';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -93,13 +94,7 @@ export default function DashboardPage() {
               ☰
             </button>
 
-            <div className="flex-1 max-w-md">
-              <input
-                type="text"
-                placeholder="Search everything..."
-                className="w-full px-3 py-2.5 text-sm font-400 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
-              />
-            </div>
+            <GlobalSearch />
 
             <div className="flex items-center gap-3">
               <button className="px-4 py-2.5 rounded-lg text-sm font-600 bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm">
