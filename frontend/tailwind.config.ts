@@ -28,6 +28,16 @@ const config: Config = {
           700: '#1D4ED8',
         },
       },
+      fontWeight: {
+        '400': '400',
+        '500': '500',
+        '600': '600',
+        '700': '700',
+        '800': '800',
+      },
+      boxShadow: {
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+      },
       spacing: {
         sidebar: '280px',
         navbar: '64px',
