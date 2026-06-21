@@ -1,0 +1,17 @@
+You are launching a new AISP project.
+
+PROJECT NAME: [name]
+DESCRIPTION: [brief description]
+TECH STACK: [stack]
+
+WORKFLOW:
+1. Brainstorm: What is this project? Who uses it? What problem does it solve?
+2. Subfolder Structure: Where do files live? (src/, components/, hooks/, pages/, etc.)
+3. Project Planning: 3 sprints, ~10 tasks each, 160k token budget total
+4. Project Spec: Feature list, acceptance criteria, success metrics
+5. Sprint 1-3 Plan: Detailed task breakdown with autonomy levels and model routing
+
+OUTPUT: Create SPRINTS_1-3_PLAN.md with everything above. Stop and wait for CEO approval before coding.
+
+Use /branch, /commit, /plan, /implement, /verify as you build.
+Reference /Users/brandondienar/Documents/Codex/Projects/AISP/CEO_DASHBOARD.html for routing decisions.

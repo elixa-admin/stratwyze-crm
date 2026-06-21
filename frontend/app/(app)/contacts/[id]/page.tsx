@@ -36,7 +36,7 @@ const STAGE_COLORS: Record<string, string> = {
 };
 
 const ACTIVITY_ICONS: Record<string, string> = {
-  email: '✉️', call: '📞', meeting: '🗓️', note: '📝',
+  email: 'Em', call: 'Ca', meeting: 'Mt', note: 'Nt',
 };
 
 const STATUS_COLORS: Record<string, string> = {

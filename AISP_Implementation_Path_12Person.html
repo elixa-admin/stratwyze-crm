@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Implementation Path: 47→12 Person Transition</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.strategy-banner {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.strategy-banner strong {
+  color: #f59e0b;
+}
+
+.timeline {
+  position: relative;
+  margin-bottom: 3rem;
+}
+
+.phase {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.phase::before {
+  content: '';
+  position: absolute;
+  left: 69px;
+  top: 80px;
+  width: 2px;
+  height: calc(100% + 2rem);
+  background: linear-gradient(to bottom, #00c2ff, transparent);
+}
+
+.phase:last-child::before {
+  display: none;
+}
+
+.phase-dot {
+  background: #0b0f14;
+  border: 3px solid #00c2ff;
+  border-radius: 50%;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 700;
+  color: #00c2ff;
+  font-size: 13px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.phase-dot.pre { border-color: #9ca3af; color: #9ca3af; }
+.phase-dot.prep { border-color: #3b82f6; color: #3b82f6; }
+.phase-dot.cutover { border-color: #f59e0b; color: #f59e0b; }
+.phase-dot.validate { border-color: #10b981; color: #10b981; }
+.phase-dot.cleanup { border-color: #ef4444; color: #ef4444; }
+
+.phase-content {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.phase-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #e0e7ff;
+}
+
+.checklist {
+  list-style: none;
+  margin: 1rem 0;
+}
+
+.checklist li {
+  padding: 0.5rem 0;
+  padding-left: 1.75rem;
+  position: relative;
+  font-size: 13px;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.checklist li::before {
+  content: '□';
+  position: absolute;
+  left: 0;
+  color: #374151;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.checklist li.complete::before {
+  content: '✓';
+  color: #10b981;
+}
+
+.decision-box {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.decision-box strong {
+  color: #3b82f6;
+}
+
+.risk-box {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.risk-box strong {
+  color: #ef4444;
+}
+
+.success-box {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.success-box strong {
+  color: #10b981;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f3f4f6;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #374151;
+}
+
+.section h2 i {
+  font-size: 24px;
+  color: #00c2ff;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.comparison-table th {
+  background: #0f172a;
+  color: #9ca3af;
+  padding: 1rem;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: 1px solid #374151;
+}
+
+.comparison-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  font-size: 13px;
+}
+
+.comparison-table tr:hover {
+  background: #1f2937;
+}
+
+.comparison-table strong {
+  color: #00c2ff;
+}
+
+.rollback-steps {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.rollback-step {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.rollback-step:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.rollback-step h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e7ff;
+  margin-bottom: 0.5rem;
+}
+
+.rollback-step p {
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00c2ff;
+}
+
+.metric-detail {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.action-required {
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 4px solid #f59e0b;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.action-required strong {
+  color: #f59e0b;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="ti ti-rocket"></i> AISP Implementation Path: 47→12 Person Org</h1>
+    <p>Big bang transition at Sprint 0. Complete cutover with validation and rollback safeguards.</p>
+  </div>
+
+  <div class="strategy-banner">
+    <strong>Strategy:</strong> Complete switchover from 47-agent model to 12-person consolidated org at start of Sprint 0. Old structure archived after validation (Sprint 2). Clean break approach minimizes parallel overhead.
+  </div>
+
+  <!-- Timeline -->
+  <div class="section">
+    <h2><i class="ti ti-calendar"></i> Implementation Timeline</h2>
+
+    <div class="timeline">
+      <!-- Pre-Migration -->
+      <div class="phase">
+        <div class="phase-dot pre">Pre-Sprint 0<br>(Now)</div>
+        <div class="phase-content">
+          <h3>Current State: 47-Agent Model (Archived)</h3>
+          <p style="margin-bottom: 1rem; color: #9ca3af;">All 47 agents documented in markdown (archived to `_archive/`). Master Hub HTML exists but points to old structure.</p>
+
+          <div class="checklist">
+            <li>47-agent structure documented in markdown (archived)</li>
+            <li>Master Hub exists but references old model</li>
+            <li>No agents operational yet (design phase)</li>
+            <li>Token burn potential: Very high if initialized as-is</li>
+          </div>
+
+          <div class="action-required">
+            <strong>Your Action Required:</strong> Approve this implementation plan. Once approved, proceed to Sprint 0 Prep phase.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sprint 0 Prep -->
+      <div class="phase">
+        <div class="phase-dot prep">Sprint 0<br>Prep<br>(Days 1-2)</div>
+        <div class="phase-content">
+          <h3>Preparation: Build New Structure</h3>
+          <p style="margin-bottom: 1rem; color: #9ca3af;">Create all new docs and agent specifications. No agents running yet—purely documentation.</p>
+
+          <div class="checklist">
+            <li>✓ Consolidated org design (DONE)</li>
+            <li>✓ 12-person structure defined (DONE)</li>
+            <li>✓ Job descriptions for 8 agents (DONE)</li>
+            <li>Update Master Hub to point to new consolidated org</li>
+            <li>Create Director Role Guides (CTO, CPO, CSO, CFO)</li>
+            <li>Define Decision Authority (approval thresholds)</li>
+            <li>Create agent initialization templates</li>
+            <li>Backup current state (archive snapshot)</li>
+          </div>
+
+          <div class="decision-box">
+            <strong>Decision Point:</strong> Once prep is complete, confirm you're ready for cutover. No turning back after this.
+          </div>
+        </div>
+      </div>
+
+      <!-- Cutover Day -->
+      <div class="phase">
+        <div class="phase-dot cutover">Sprint 0<br>Cutover<br>(Day 3)</div>
+        <div class="phase-content">
+          <h3>Big Bang Cutover: Activate New Org</h3>
+          <p style="margin-bottom: 1rem; color: #9ca3af;"><strong>The Switch Day.</strong> All 4 directors + 8 agents initialized simultaneously. Old structure deactivated.</p>
+
+          <div class="checklist">
+            <li>Initialize all 4 directors (Anderson, Niobe, Persephone, Dozer)</li>
+            <li>Initialize Zion (Coordinator Agent)</li>
+            <li>Initialize all 8 agents with new roles</li>
+            <li>Brief each director on their team, KPIs, autonomy level</li>
+            <li>Activate decision authority thresholds</li>
+            <li>Route first tasks to new org structure</li>
+            <li>Monitor for errors/unexpected behavior</li>
+          </div>
+
+          <div class="risk-box">
+            <strong>Risk:</strong> If something breaks on cutover day, rollback plan is ready (see Rollback section below). Max 2-hour rollback to old structure if critical issues.
+          </div>
+
+          <div class="success-box">
+            <strong>Success Criteria:</strong> By end of Day 3, all agents initialized, first 10 tasks routed successfully, directors understand their roles.
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation -->
+      <div class="phase">
+        <div class="phase-dot validate">Sprint 1-2<br>Validation<br>(14 days)</div>
+        <div class="phase-content">
+          <h3>Validate: Run New Org Under Load</h3>
+          <p style="margin-bottom: 1rem; color: #9ca3af;">Two-week validation period. Monitor KPIs, catch issues, make adjustments. Old structure still archived (not deleted).</p>
+
+          <div class="checklist">
+            <li>Monitor task completion rates by agent</li>
+            <li>Check autonomy levels (% auto-approve vs. escalations)</li>
+            <li>Verify directors are making decisions <5 min for $5K threshold</li>
+            <li>Test cross-functional coordination (Zion routing)</li>
+            <li>Measure token burn (should be ~65% reduction)</li>
+            <li>Collect feedback from agents/directors</li>
+            <li>Adjust KPIs or autonomy if needed</li>
+            <li>Document lessons learned</li>
+          </div>
+
+          <div class="metric-grid">
+            <div class="metric-card">
+              <div class="metric-label">Task Completion</div>
+              <div class="metric-value">Target: >95%</div>
+              <div class="metric-detail">Autonomous success rate</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Approval Time</div>
+              <div class="metric-value">Target: <5 min</div>
+              <div class="metric-detail">Director response to escalations</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Token Burn</div>
+              <div class="metric-value">Target: 65% reduction</div>
+              <div class="metric-detail">vs. old model</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Agent Errors</div>
+              <div class="metric-value">Target: <2%</div>
+              <div class="metric-detail">Failure rate</div>
+            </div>
+          </div>
+
+          <div class="decision-box">
+            <strong>Decision Point (End of Sprint 2):</strong> Is the new org performing well? If yes → proceed to cleanup. If no → invoke rollback or iterate fixes.
+          </div>
+        </div>
+      </div>
+
+      <!-- Cleanup -->
+      <div class="phase">
+        <div class="phase-dot cleanup">Post-Sprint 2<br>Cleanup<br>(Day 1)</div>
+        <div class="phase-content">
+          <h3>Archive & Delete: Final Break from Old Model</h3>
+          <p style="margin-bottom: 1rem; color: #9ca3af;">Old 47-agent structure completely removed. Clean break. New 12-person org is now canonical.</p>
+
+          <div class="checklist">
+            <li>Verify new org is stable and validated</li>
+            <li>Create final backup of old structure (if needed for history)</li>
+            <li>Delete old 47-agent markdown files from `_archive/`</li>
+            <li>Delete old HTML organogram if not needed</li>
+            <li>Update AISP_Master_Hub.html to remove old references</li>
+            <li>Document migration in project changelog</li>
+            <li>Confirm all directors + agents are fully operational</li>
+          </div>
+
+          <div class="success-box">
+            <strong>Success:</strong> Old structure gone. New 12-person org is the single source of truth. Token burn reduced by 65%.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison: Before/After -->
+  <div class="section">
+    <h2><i class="ti ti-compare"></i> Before/After Comparison</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Old Model (47 agents)</th>
+          <th>New Model (12 agents)</th>
+          <th>Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Total People</td>
+          <td>47 + CEO</td>
+          <td><strong>12 + CEO</strong></td>
+          <td>74% reduction in headcount</td>
+        </tr>
+        <tr>
+          <td>Token Burn (init)</td>
+          <td>12-15K per sprint</td>
+          <td><strong>5K per sprint</strong></td>
+          <td>65% savings per initialization</td>
+        </tr>
+        <tr>
+          <td>Approval Overhead (weekly)</td>
+          <td>12+ items</td>
+          <td><strong>&lt;5 items</strong></td>
+          <td>80% reduction in decisions to you</td>
+        </tr>
+        <tr>
+          <td>Team Span of Control</td>
+          <td>8 teams + CEO</td>
+          <td><strong>4 directors + CEO</strong></td>
+          <td>Easier management</td>
+        </tr>
+        <tr>
+          <td>Complexity</td>
+          <td>Very high (matrix org)</td>
+          <td><strong>Low (hierarchical)</strong></td>
+          <td>Clear reporting lines</td>
+        </tr>
+        <tr>
+          <td>Scaling Mechanism</td>
+          <td>Add more agents (expands width)</td>
+          <td><strong>Specialize juniors (expands depth)</strong></td>
+          <td>Depth-first avoids restructuring</td>
+        </tr>
+        <tr>
+          <td>Weekly Tasks Executed</td>
+          <td>~3,000 (high overhead)</td>
+          <td><strong>~1,700 (lean)</strong></td>
+          <td>Still covers all critical functions</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Rollback Plan -->
+  <div class="section">
+    <h2><i class="ti ti-alert-triangle"></i> Rollback Plan (If Things Break)</h2>
+
+    <p style="margin-bottom: 1.5rem; color: #d1d5db;">If the new 12-person org encounters critical issues during Sprint 0-1, roll back to old 47-agent model. Timeline: ~30 min to 2 hours.</p>
+
+    <div class="rollback-steps">
+      <div class="rollback-step">
+        <h4>Step 1: Detect Issue (Immediate)</h4>
+        <p>Monitor detects: Task failure rate >10%, agent errors >5%, or critical director decision delayed >30 min. You're alerted immediately.</p>
+      </div>
+
+      <div class="rollback-step">
+        <h4>Step 2: Assess Severity (1-5 min)</h4>
+        <p><strong>Critical?</strong> (>10% task failure, security issue, production down) → Rollback. <strong>Non-critical?</strong> (single agent error, timeout) → Fix and iterate.</p>
+      </div>
+
+      <div class="rollback-step">
+        <h4>Step 3: Invoke Rollback (5-10 min)</h4>
+        <p>
+          1. Pause all new org tasks<br>
+          2. Reactivate old 47-agent structure from backup<br>
+          3. Re-initialize old agents with recent context<br>
+          4. Route pending tasks back to old model<br>
+          5. Notify you of rollback completion
+        </p>
+      </div>
+
+      <div class="rollback-step">
+        <h4>Step 4: Root Cause Analysis (Sprint 1)</h4>
+        <p>Diagnose what failed: Agent design issue? Director authority unclear? Consolidation too aggressive? Document findings and fix before re-cutover attempt.</p>
+      </div>
+
+      <div class="rollback-step">
+        <h4>Step 5: Re-Cutover Attempt (Sprint 2+)</h4>
+        <p>After fixes, attempt new org activation again. If successful → proceed to validation. If rollback again → discuss with you whether to abandon new model or try a different approach.</p>
+      </div>
+    </div>
+
+    <div class="risk-box">
+      <strong>Rollback Risk:</strong> Switching back to 47-agent model is messy (token cost, context reloading). But option exists if new model is fundamentally broken. Max 2 rollbacks before we reconsider the design.
+    </div>
+  </div>
+
+  <!-- Decision Authority (Preview) -->
+  <div class="section">
+    <h2><i class="ti ti-gavel"></i> Decision Authority (To Be Finalized)</h2>
+
+    <p style="margin-bottom: 1.5rem; color: #d1d5db;">Next step: Define exact approval thresholds per director. Preview below (to be finalized in next section):</p>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Amount</th>
+          <th>Example Decision</th>
+          <th>Who Decides</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Tier 1</strong></td>
+          <td><strong>&lt;$5K</strong></td>
+          <td>Bug fix, minor feature, code review, deploy</td>
+          <td>Agent/Director (auto-execute)</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 2</strong></td>
+          <td><strong>$5K–$50K</strong></td>
+          <td>New tool, major refactor, hiring agent, arch change</td>
+          <td>Director (Anderson, Niobe, Persephone, Dozer)</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 3</strong></td>
+          <td><strong>$50K–$500K</strong></td>
+          <td>Product pivot, team restructure, M&A, major infra</td>
+          <td>You (BRANDON) + Director input</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 4</strong></td>
+          <td><strong>>$500K</strong></td>
+          <td>Funding round, acquisition, business model change</td>
+          <td>Board + You + Directors</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Next Steps -->
+  <div class="section">
+    <h2><i class="ti ti-checklist"></i> Implementation Checklist</h2>
+
+    <div class="checklist">
+      <li><strong>NOW:</strong> Approve this implementation plan (Big Bang approach)</li>
+      <li><strong>Sprint 0 Prep (Days 1-2):</strong> Create Director Role Guides + Decision Authority docs</li>
+      <li><strong>Sprint 0 Prep (Day 3):</strong> Create agent initialization templates</li>
+      <li><strong>Sprint 0 Cutover (Day 3 EOD):</strong> Activate all directors + agents, verify tasks routing</li>
+      <li><strong>Sprint 1-2 (Daily):</strong> Monitor metrics, iterate fixes, validate org</li>
+      <li><strong>Post-Sprint 2 (Day 1):</strong> Archive old structure, document migration, celebrate</li>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

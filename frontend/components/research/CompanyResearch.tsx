@@ -86,8 +86,7 @@ export default function CompanyResearch({ companyName }: Props) {
       {/* Initial prompt */}
       {!data && !loading && !error && (
         <div className="text-center py-8">
-          <p className="text-3xl mb-3">🔍</p>
-          <p className="text-slate-600 text-sm">Click a tab above to research <span className="font-semibold text-slate-900">{companyName}</span></p>
+          <p className="text-slate-600 text-sm">Select a tab above to research <span className="font-semibold text-slate-900">{companyName}</span></p>
         </div>
       )}
 

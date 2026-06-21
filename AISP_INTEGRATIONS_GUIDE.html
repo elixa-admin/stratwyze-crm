@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Integrations Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.hub { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header h1 i {
+  font-size: 40px;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-button:hover {
+  color: #00c2ff;
+}
+
+.tab-button.active {
+  color: #00c2ff;
+  border-bottom-color: #00c2ff;
+}
+
+.tab-button i {
+  font-size: 18px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #00c2ff;
+}
+
+.section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  color: #f3f4f6;
+}
+
+.section p {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.code-block {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #10b981;
+  line-height: 1.6;
+}
+
+.step {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(0, 194, 255, 0.05) 100%);
+  border-left: 4px solid #10b981;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.step strong {
+  color: #10b981;
+}
+
+.checklist {
+  list-style: none;
+  margin: 1.5rem 0;
+}
+
+.checklist li {
+  padding: 0.75rem 0;
+  padding-left: 2rem;
+  position: relative;
+  color: #d1d5db;
+}
+
+.checklist li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.table thead {
+  background: rgba(0, 194, 255, 0.1);
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #00c2ff;
+  border-bottom: 1px solid #374151;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.info-box {
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.info-box strong {
+  color: #3b82f6;
+}
+
+.footer {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-top: 3rem;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.back-link {
+  color: #00c2ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    gap: 0.5rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 1rem;
+    font-size: 13px;
+  }
+
+  .section h2 {
+    font-size: 20px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="hub">
+  <div class="header">
+    <h1><i class="ti ti-plug"></i> AISP Integrations Guide</h1>
+    <p>How to set up, deploy, collaborate, and track across all AISP tools and platforms</p>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchTab('github')">
+      <i class="ti ti-brand-github"></i> GitHub
+    </button>
+    <button class="tab-button" onclick="switchTab('vercel')">
+      <i class="ti ti-cloud"></i> Vercel
+    </button>
+    <button class="tab-button" onclick="switchTab('slack')">
+      <i class="ti ti-brand-slack"></i> Slack
+    </button>
+    <button class="tab-button" onclick="switchTab('linear')">
+      <i class="ti ti-list-check"></i> Linear
+    </button>
+    <button class="tab-button" onclick="switchTab('patterns')">
+      <i class="ti ti-database"></i> Pattern Library
+    </button>
+  </div>
+
+  <!-- TAB 1: GITHUB -->
+  <div id="github" class="tab-content active">
+    <div class="section">
+      <h2>GitHub: Version Control & CI/CD</h2>
+      <p>GitHub is where all AISP code lives. We use a centralized organization with standardized repo names and branch strategies.</p>
+
+      <h3>Organization Setup: AISP-Company</h3>
+      <p><strong>URL:</strong> https://github.com/AISP-Company</p>
+      <div class="step">
+        <strong>Organization Structure:</strong>
+        <ul class="checklist">
+          <li>Single org: <code>AISP-Company</code></li>
+          <li>Billing: Centralized</li>
+          <li>Teams: Engineering, Product, Sales, Finance (by director)</li>
+          <li>Visibility: Private repos (unless publicly documenting standards)</li>
+        </ul>
+      </div>
+
+      <h3>Repository Naming Convention</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Name Format</th>
+            <th>Example</th>
+            <th>Visibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Standards & Policy</td>
+            <td><code>aisp-standards</code></td>
+            <td>aisp-standards</td>
+            <td>Private or Public</td>
+          </tr>
+          <tr>
+            <td>Main Product</td>
+            <td><code>aisp-portal</code></td>
+            <td>aisp-portal</td>
+            <td>Private</td>
+          </tr>
+          <tr>
+            <td>Project</td>
+            <td><code>aisp-project-[name]</code></td>
+            <td>aisp-project-alpha</td>
+            <td>Private</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Branch Strategy (All Repos)</h3>
+      <div class="info-box">
+        <strong>🔗 Note:</strong> All projects follow the same branch strategy. This ensures consistency across the entire AISP organization.
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Branch</th>
+            <th>Purpose</th>
+            <th>Deployment</th>
+            <th>Protection</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>main</code></td>
+            <td>Production code (tagged releases)</td>
+            <td>Vercel Production</td>
+            <td>Require PR review, tests pass</td>
+          </tr>
+          <tr>
+            <td><code>dev</code></td>
+            <td>Development (Sprints 1-9 accumulate here)</td>
+            <td>Vercel Staging</td>
+            <td>Require PR review</td>
+          </tr>
+          <tr>
+            <td><code>feature/*</code></td>
+            <td>Feature work (branch per feature)</td>
+            <td>Vercel Preview (auto)</td>
+            <td>None (user repo)</td>
+          </tr>
+          <tr>
+            <td><code>hotfix/*</code></td>
+            <td>Production emergency fixes</td>
+            <td>Manual (to main)</td>
+            <td>Require review</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Workflow: Sprint to Production</h3>
+      <div class="step">
+        <strong>Sprints 1-9 (Development):</strong>
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Create feature branch from <code>dev</code>: <code>git checkout -b feature/your-feature dev</code></li>
+          <li>Work on feature (commit daily)</li>
+          <li>Open PR against <code>dev</code></li>
+          <li>Code review, tests pass</li>
+          <li>Merge to <code>dev</code></li>
+          <li>Vercel auto-deploys to staging</li>
+        </ol>
+      </div>
+
+      <div class="step">
+        <strong>Sprint 10 (Deployment):</strong>
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Final integration testing on <code>dev</code></li>
+          <li>Create PR: <code>dev</code> → <code>main</code></li>
+          <li>Code review, verify all tests pass</li>
+          <li>Merge to <code>main</code></li>
+          <li>Tag release: <code>git tag v1.2 main && git push origin v1.2</code></li>
+          <li>Vercel auto-deploys to production</li>
+        </ol>
+      </div>
+
+      <h3>GitHub Actions / CI Workflow</h3>
+      <p>Every repo has a <code>.github/workflows/</code> folder with:</p>
+      <ul class="checklist">
+        <li>Unit tests on every PR</li>
+        <li>Integration tests on PR to <code>dev</code></li>
+        <li>E2E tests on PR to <code>main</code></li>
+        <li>Build verification (no size regressions)</li>
+        <li>Linting & formatting checks</li>
+      </ul>
+
+      <h3>Setup: First Time</h3>
+      <div class="code-block">
+# Clone the repo
+git clone https://github.com/AISP-Company/aisp-project-alpha.git
+cd aisp-project-alpha
+
+# Create development branch if needed
+git checkout -b dev origin/dev
+
+# Create your feature branch
+git checkout -b feature/your-feature dev
+
+# Make changes, commit, push
+git add .
+git commit -m "feat: your feature description"
+git push -u origin feature/your-feature
+
+# Open PR in GitHub UI
+# → Compare: dev ... feature/your-feature
+# → Request reviews
+# → Wait for CI to pass
+# → Merge once approved
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: VERCEL -->
+  <div id="vercel" class="tab-content">
+    <div class="section">
+      <h2>Vercel: Deployment & Environments</h2>
+      <p>Vercel handles all deployments. Every project has production and staging environments. Previews auto-generate per PR.</p>
+
+      <h3>Project Setup: Production + Staging</h3>
+      <p>Each project gets TWO Vercel projects:</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Environment</th>
+            <th>Name</th>
+            <th>URL</th>
+            <th>Branch</th>
+            <th>Deploy Trigger</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Production</td>
+            <td>aisp-project-alpha</td>
+            <td>project-alpha.vercel.app</td>
+            <td>main</td>
+            <td>Merge to main (Sprint 10)</td>
+          </tr>
+          <tr>
+            <td>Staging</td>
+            <td>aisp-project-alpha-staging</td>
+            <td>project-alpha-staging.vercel.app</td>
+            <td>dev</td>
+            <td>Merge to dev (Sprints 1-9)</td>
+          </tr>
+          <tr>
+            <td>Preview</td>
+            <td>Auto-created</td>
+            <td>auto-preview.vercel.app</td>
+            <td>feature/*</td>
+            <td>Every PR (auto)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Environment Variables Setup</h3>
+      <p>Configure in Vercel Dashboard → Settings → Environment Variables</p>
+
+      <div class="step">
+        <strong>Production Variables (main branch):</strong>
+        <ul class="checklist">
+          <li><code>API_URL</code> = production API endpoint</li>
+          <li><code>DATABASE_URL</code> = production database (secret)</li>
+          <li><code>LOG_LEVEL</code> = "error" (minimal logging)</li>
+          <li>Any other production secrets</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <strong>Staging Variables (dev branch):</strong>
+        <ul class="checklist">
+          <li><code>API_URL</code> = staging API endpoint</li>
+          <li><code>DATABASE_URL</code> = staging database (secret)</li>
+          <li><code>LOG_LEVEL</code> = "debug" (detailed logging)</li>
+          <li>Same keys as production, different values</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <strong>Preview Variables (feature/* branches):</strong>
+        <ul class="checklist">
+          <li>Uses staging variables by default</li>
+          <li>Override for testing (optional)</li>
+        </ul>
+      </div>
+
+      <h3>Deployment Workflow</h3>
+      <p><strong>Automatic Deployments:</strong></p>
+      <ol style="margin-left: 1.5rem;">
+        <li>Push code to GitHub</li>
+        <li>GitHub notifies Vercel</li>
+        <li>Vercel builds (2-5 min)</li>
+        <li>Vercel deploys (auto)</li>
+        <li>Preview/Staging/Production live</li>
+      </ol>
+
+      <h3>Rollback Procedure (Emergency)</h3>
+      <div class="info-box">
+        <strong>⚠️ Use only if production is broken.</strong> For normal fixes, just push a new commit.
+      </div>
+
+      <ol style="margin-left: 1.5rem;">
+        <li>GitHub: Identify the good commit (e.g., v1.1 tag)</li>
+        <li>Git: <code>git checkout v1.1 && git push -f origin main</code> (force push old version)</li>
+        <li>Vercel: Revert automatically triggers new deployment</li>
+        <li>Verify: Check https://project-alpha.vercel.app is back online</li>
+        <li>Post-mortem: Figure out what broke in the bad commit</li>
+      </ol>
+
+      <h3>Monitoring & Logs</h3>
+      <p><strong>Vercel Dashboard → Deployments → [Environment] → Logs:</strong></p>
+      <ul class="checklist">
+        <li>Build logs: See compile errors, dependencies</li>
+        <li>Runtime logs: See app errors (production)</li>
+        <li>Function logs: Serverless function execution</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 3: SLACK -->
+  <div id="slack" class="tab-content">
+    <div class="section">
+      <h2>Slack: Team Communication & Alerts</h2>
+      <p>Slack is where the team coordinates and gets critical alerts. All deployments, bugs, and escalations go here.</p>
+
+      <h3>Workspace Setup</h3>
+      <p><strong>Workspace:</strong> AISP-Company Slack</p>
+      <p><strong>URL:</strong> https://aisp-company.slack.com</p>
+
+      <h3>Channel Structure</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th>Purpose</th>
+            <th>Members</th>
+            <th>Notifications</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#dev</td>
+            <td>Engineering discussions, code reviews, PRs</td>
+            <td>All engineers + CTO</td>
+            <td>GitHub PR notifications (auto)</td>
+          </tr>
+          <tr>
+            <td>#deployments</td>
+            <td>Deployment status, release notes</td>
+            <td>All team + CTO + CPO</td>
+            <td>Vercel deploy notifications (auto)</td>
+          </tr>
+          <tr>
+            <td>#alerts</td>
+            <td>Critical system alerts (production issues)</td>
+            <td>CTO, On-call engineer</td>
+            <td>Infrastructure monitoring (auto)</td>
+          </tr>
+          <tr>
+            <td>#incidents</td>
+            <td>Incident response & triage</td>
+            <td>First responder + on-call team</td>
+            <td>Manual (team posts)</td>
+          </tr>
+          <tr>
+            <td>#general</td>
+            <td>Company-wide announcements</td>
+            <td>Everyone</td>
+            <td>Manual (team posts)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Bot Setup</h3>
+      <div class="step">
+        <strong>GitHub Integration:</strong>
+        <ul class="checklist">
+          <li>Slack app: GitHub (official)</li>
+          <li>Connected to: github.com/AISP-Company</li>
+          <li>Posts to: #dev channel</li>
+          <li>Notifies: PR opens, reviews, merges</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <strong>Vercel Integration:</strong>
+        <ul class="checklist">
+          <li>Vercel project settings → Integrations</li>
+          <li>Add Slack app</li>
+          <li>Posts to: #deployments channel</li>
+          <li>Notifies: Build start, success, failure</li>
+        </ul>
+      </div>
+
+      <h3>Alert Escalation</h3>
+      <p><strong>#alerts → @on-call:</strong> Critical alerts mention @on-call role</p>
+      <p><strong>On-call rotation:</strong> Weekly, rotating engineer. Updates in pinned message.</p>
+      <p><strong>Response SLA:</strong> Critical alert → acknowledged within 5 min → fix or escalate within 15 min</p>
+
+      <h3>Incident Response in #incidents</h3>
+      <ol style="margin-left: 1.5rem;">
+        <li>Report incident: "🚨 Production down — auth service returning 503"</li>
+        <li>Assign responder: "Taking lead @Engineer"</li>
+        <li>Thread: Investigation details, commands tried, ETA</li>
+        <li>Resolution: "✅ Fixed — merged hotfix to main at 14:32. Root cause was..."</li>
+        <li>Post-mortem: "📋 Post-mortem Thursday 10 AM"</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- TAB 4: LINEAR -->
+  <div id="linear" class="tab-content">
+    <div class="section">
+      <h2>Linear: Task Tracking & Project Management</h2>
+      <p>Linear tracks all work: features, bugs, refactors. Integrates with GitHub for automatic PR closing.</p>
+
+      <h3>Workspace Setup</h3>
+      <p><strong>URL:</strong> https://linear.app/aisp-company</p>
+      <div class="step">
+        <strong>Team Setup:</strong>
+        <ul class="checklist">
+          <li>Single workspace: AISP-Company</li>
+          <li>Projects: One per Wave/Initiative</li>
+          <li>Cycles: 2-week sprints (matching AISP sprints)</li>
+          <li>Members: All directors + engineers</li>
+        </ul>
+      </div>
+
+      <h3>Project Structure</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Scope</th>
+            <th>Owner</th>
+            <th>Cycle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PORTAL</td>
+            <td>AISP Portal main product</td>
+            <td>Anderson (CTO)</td>
+            <td>2-week sprints</td>
+          </tr>
+          <tr>
+            <td>ALPHA</td>
+            <td>Project Alpha</td>
+            <td>Project lead</td>
+            <td>2-week sprints</td>
+          </tr>
+          <tr>
+            <td>INFRA</td>
+            <td>Infrastructure & DevOps</td>
+            <td>Anderson (CTO)</td>
+            <td>2-week sprints</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Workflow States</h3>
+      <div class="code-block">
+Backlog → Todo → In Progress → In Review → Done
+
+Backlog:       Not started, not committed to sprint
+Todo:          In current sprint, not started
+In Progress:   Engineer working on it
+In Review:     PR open, waiting for review
+Done:          PR merged, shipped
+      </div>
+
+      <h3>Creating & Managing Issues</h3>
+      <div class="step">
+        <strong>When creating an issue:</strong>
+        <ul class="checklist">
+          <li>Clear title: "Add OAuth2 support for Google"</li>
+          <li>Description: What + Why + Success criteria</li>
+          <li>Assign to: The engineer who'll do it</li>
+          <li>Priority: P1 (urgent) → P4 (nice-to-have)</li>
+          <li>Project: PORTAL, ALPHA, or INFRA</li>
+          <li>Cycle: Current sprint (or backlog if future)</li>
+        </ul>
+      </div>
+
+      <h3>GitHub Integration: Auto-Close</h3>
+      <p>When you include an issue number in your GitHub commit, Linear auto-closes the issue:</p>
+      <div class="code-block">
+git commit -m "feat: add OAuth2 Google support (PORTAL-42)"
+#                                                  ↑
+#                                    Closes PORTAL-42 in Linear
+      </div>
+
+      <p><strong>Linear auto-closes when:</strong></p>
+      <ul class="checklist">
+        <li>PR is merged to <code>main</code> or <code>dev</code></li>
+        <li>Commit message includes issue number (e.g., PORTAL-42, ALPHA-18)</li>
+        <li>Issue moves to Done, date set to merge date</li>
+      </ul>
+
+      <h3>Sprint Planning (Weekly)</h3>
+      <p><strong>Monday 9 AM (Standup):</strong></p>
+      <ol style="margin-left: 1.5rem;">
+        <li>Review backlog (highest priority items)</li>
+        <li>Assign to sprints</li>
+        <li>Move to Todo</li>
+        <li>Estimate story points (optional)</li>
+      </ol>
+
+      <h3>Reports & Burndown</h3>
+      <ul class="checklist">
+        <li><strong>Cycle View:</strong> See sprint progress, done items, at-risk items</li>
+        <li><strong>Burndown Chart:</strong> Track sprint velocity</li>
+        <li><strong>Roadmap:</strong> Multi-cycle view for planning</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 5: PATTERN LIBRARY -->
+  <div id="patterns" class="tab-content">
+    <div class="section">
+      <h2>Pattern Library: Knowledge Base & Smart Toolkit</h2>
+      <p>The Pattern Library is a shared SQLite database of bug fixes, solutions, and learned patterns used across all AISP projects.</p>
+
+      <h3>What It Stores</h3>
+      <ul class="checklist">
+        <li>Bug fixes: "How to fix auth token expiry"</li>
+        <li>Solutions: "How to optimize slow database queries"</li>
+        <li>Patterns: "Recurring infrastructure issues"</li>
+        <li>Skills: Automated fixes that run on detection</li>
+        <li>Confidence scores: How reliable is each pattern?</li>
+      </ul>
+
+      <h3>Location & Access</h3>
+      <div class="code-block">
+Local:  ~/.claude/knowledge_base/patterns.db
+GitHub: AISP-Company/aisp-standards (synchronized weekly)
+Backup: AWS S3 (automated daily)
+      </div>
+
+      <h3>How to Query Patterns</h3>
+      <p><strong>Example: Find all auth-related fixes</strong></p>
+      <div class="code-block">
+sqlite3 ~/.claude/knowledge_base/patterns.db
+sqlite> SELECT id, name, tags, confidence_score
+        FROM patterns
+        WHERE tags LIKE '%auth%'
+        AND confidence_score > 0.85
+        ORDER BY confidence_score DESC;
+      </div>
+
+      <p><strong>Example: Find patterns by confidence</strong></p>
+      <div class="code-block">
+sqlite> SELECT id, name, usage_count, success_rate
+        FROM patterns
+        WHERE confidence_score >= 0.90
+        AND usage_count > 3
+        ORDER BY success_rate DESC;
+      </div>
+
+      <h3>How to Add a New Pattern</h3>
+      <div class="step">
+        <strong>After fixing a bug:</strong>
+        <ol style="margin-left: 1.5rem;">
+          <li>Document the fix: symptoms, root cause, solution</li>
+          <li>Add to pattern database: <code>INSERT INTO patterns ...</code></li>
+          <li>Tag it: auth, database, performance, etc.</li>
+          <li>Set confidence: How sure are you this will work again?</li>
+          <li>Commit to git (weekly sync to GitHub)</li>
+        </ol>
+      </div>
+
+      <div class="code-block">
+INSERT INTO patterns (
+  id, name, tags, symptoms, root_cause, solution,
+  confidence_score, usage_count, last_used
+) VALUES (
+  'auth_token_expiry',
+  'Auth Token Expiry Fix',
+  'auth,token,401,api',
+  'Token expired,401 Unauthorized',
+  'OAuth token expired; refresh failed',
+  'Run refresh token endpoint; cache new token',
+  0.98,
+  5,
+  '2026-06-20'
+);
+      </div>
+
+      <h3>Weekly Sync: SQLite ↔ GitHub</h3>
+      <p><strong>Automatic (every Sunday 11 PM):</strong></p>
+      <ol style="margin-left: 1.5rem;">
+        <li>Export patterns.db as JSON</li>
+        <li>Commit to AISP-Company/aisp-standards</li>
+        <li>All projects pull latest patterns (auto on startup)</li>
+      </ol>
+
+      <p><strong>Manual (if urgent):</strong></p>
+      <div class="code-block">
+bash ~/.claude/sync_patterns_to_github.sh
+      </div>
+
+      <h3>Cross-Project Sharing</h3>
+      <p><strong>All AISP projects share ONE pattern library.</strong></p>
+      <ul class="checklist">
+        <li>Pattern from Project Alpha is available to AISP Portal</li>
+        <li>No duplication: if both had same bug, pattern found once</li>
+        <li>Learning compounds: more projects = smarter patterns</li>
+        <li>Tags help discovery: search by domain, not project</li>
+      </ul>
+
+      <h3>Confidence Scoring (Auto-Update)</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Confidence</th>
+            <th>Meaning</th>
+            <th>Auto-Run?</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0.90+</td>
+            <td>Highly reliable</td>
+            <td>Yes (aggressive)</td>
+            <td>auth_token_refresh (used 10x, 100% success)</td>
+          </tr>
+          <tr>
+            <td>0.85-0.89</td>
+            <td>Reliable</td>
+            <td>Yes (with notice)</td>
+            <td>db_query_optimize (used 5x, 95% success)</td>
+          </tr>
+          <tr>
+            <td>0.70-0.84</td>
+            <td>Suggest only</td>
+            <td>No (human picks)</td>
+            <td>new pattern, or 1-2 uses</td>
+          </tr>
+          <tr>
+            <td>&lt;0.70</td>
+            <td>Archive</td>
+            <td>No</td>
+            <td>Known to be unreliable; keep for history</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><a href="AISP_Master_Hub.html" class="back-link">← Back to Master Hub</a> | <a href="AISP_VISION_STATEMENT.html" class="back-link">Vision Statement</a></p>
+    <p>Last updated: June 20, 2026 | AISP Integrations Guide</p>
+  </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+  // Hide all tabs
+  const tabs = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => tab.classList.remove('active'));
+
+  // Remove active from all buttons
+  const buttons = document.querySelectorAll('.tab-button');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  // Show selected tab
+  document.getElementById(tabName).classList.add('active');
+
+  // Add active to clicked button
+  event.target.closest('.tab-button').classList.add('active');
+}
+</script>
+
+</body>
+</html>

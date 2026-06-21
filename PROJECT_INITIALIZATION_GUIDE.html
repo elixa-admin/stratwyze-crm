@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Project Initialization Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.hub { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header h1 i {
+  font-size: 40px;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.quick-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.nav-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-card:hover {
+  border-color: #00c2ff;
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+}
+
+.nav-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-card p {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: #00c2ff;
+}
+
+.tab-button.active {
+  color: #00c2ff;
+  border-bottom-color: #00c2ff;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section h2 i {
+  font-size: 32px;
+  color: #10b981;
+}
+
+.section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  color: #f3f4f6;
+}
+
+.section h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  color: #d1d5db;
+}
+
+.section p {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.answer-box {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(0, 194, 255, 0.05) 100%);
+  border-left: 4px solid #10b981;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.answer-box strong {
+  color: #10b981;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.checklist {
+  list-style: none;
+  margin: 1rem 0;
+}
+
+.checklist li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.checklist li:before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.table thead {
+  background: rgba(0, 194, 255, 0.1);
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #00c2ff;
+  border-bottom: 1px solid #374151;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  color: #d1d5db;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.code-block {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #10b981;
+  line-height: 1.6;
+}
+
+.step-box {
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.step-box strong {
+  color: #3b82f6;
+}
+
+.folder-tree {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #d1d5db;
+  line-height: 1.8;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.comparison-item {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.comparison-item h4 {
+  color: #00c2ff;
+  margin-top: 0;
+}
+
+.footer {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-top: 3rem;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.footer a {
+  color: #00c2ff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    gap: 0.25rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="hub">
+  <div class="header">
+    <h1><i class="ti ti-rocket"></i> Project Initialization Guide</h1>
+    <p>How to launch a new project under AISP: answers to all 8 critical questions (a-h)</p>
+  </div>
+
+  <!-- Quick Navigation -->
+  <div class="section">
+    <h2><i class="ti ti-lightning-bolt"></i> Quick Navigation: Your 8 Questions (a-h)</h2>
+    <div class="quick-nav">
+      <div class="nav-card" onclick="switchTab('question-a')">
+        <h3><i class="ti ti-building"></i> (a) Company Structure</h3>
+        <p>How is AISP organized?</p>
+      </div>
+      <div class="nav-card" onclick="switchTab('question-b')">
+        <h3><i class="ti ti-briefcase"></i> (b) Individual Roles</h3>
+        <p>What does each role do?</p>
+      </div>
+      <div class="nav-card" onclick="switchTab('question-c')">
+        <h3><i class="ti ti-plug"></i> (c) Tools to Use</h3>
+        <p>GitHub, Vercel, Slack, Linear?</p>
+      </div>
+      <div class="nav-card" onclick="switchTab('question-d')">
+        <h3><i class="ti ti-zap"></i> (d) Autonomy Level</h3>
+        <p>What can agents decide?</p>
+      </div>
+      <div class="nav-card" onclick="switchTab('question-e')">
+        <h3><i class="ti ti-trending-up"></i> (e) How We Scale</h3>
+        <p>Multi-project strategy?</p>
+      </div>
+      <div class="nav-card" onclick="switchTab('question-f')">
+        <h3><i class="ti ti-folder"></i> (f) Folder Structure</h3>
+        <p>What directories exist?</p>
+      </div>
+      <div class="nav-card" onclick="switchTab('question-g')">
+        <h3><i class="ti ti-settings"></i> (g) Tool Execution</h3>
+        <p>When are skills invoked?</p>
+      </div>
+      <div class="nav-card" onclick="switchTab('question-h')">
+        <h3><i class="ti ti-help"></i> (h) Kick-Off Prompt</h3>
+        <p>How to initialize a project?</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchTab('question-a')">a) Structure</button>
+    <button class="tab-button" onclick="switchTab('question-b')">b) Roles</button>
+    <button class="tab-button" onclick="switchTab('question-c')">c) Tools</button>
+    <button class="tab-button" onclick="switchTab('question-d')">d) Autonomy</button>
+    <button class="tab-button" onclick="switchTab('question-e')">e) Scaling</button>
+    <button class="tab-button" onclick="switchTab('question-f')">f) Folders</button>
+    <button class="tab-button" onclick="switchTab('question-g')">g) Execution</button>
+    <button class="tab-button" onclick="switchTab('question-h')">h) Kick-Off</button>
+  </div>
+
+  <!-- TAB A: COMPANY STRUCTURE -->
+  <div id="question-a" class="tab-content active">
+    <div class="section">
+      <h2><i class="ti ti-building"></i> (a) Company Structure: The AISP Organization</h2>
+
+      <p>Every project under AISP inherits this company structure. It's the same 14-person model for all projects.</p>
+
+      <h3>The 14-Person Organization</h3>
+      <div class="code-block">
+BRANDON (CEO)
+├─ ANDERSON (CTO) → Trinity, Tank, Neo
+├─ NIOBE (CPO) → Morpheus, Ghost
+├─ PERSEPHONE (CSO) → Agent Smith, Cypher
+├─ DOZER (CFO) → The Architect
+└─ ZION (Coordinator) - Cross-team
+      </div>
+
+      <h3>Why This Structure?</h3>
+      <ul class="checklist">
+        <li><strong>Scale without hiring:</strong> Same org, infinite projects</li>
+        <li><strong>Clear reporting:</strong> Every agent reports to a director</li>
+        <li><strong>Decision authority:</strong> Clear escalation paths</li>
+        <li><strong>Proven at 14 people:</strong> Optimal size for autonomy vs. coordination</li>
+      </ul>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer:</strong> Your project will automatically inherit this structure. You don't create a new org — you instantiate this same 14-person model for your project.
+        <p style="margin-top: 1rem; margin-bottom: 0;">When you run `/launch-your-project`, the skill will:</p>
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Create the project folder (AISP-ProjectName/)</li>
+          <li>Symlink to company structure docs</li>
+          <li>Create project-specific memory/config files</li>
+          <li>Set up project-level agents (spawned, not shared)</li>
+        </ol>
+      </div>
+
+      <h3>Reference Documents</h3>
+      <ul class="checklist">
+        <li><a href="AISP_Consolidated_Org_12Person.html" style="color: #00c2ff;">AISP_Consolidated_Org_12Person.html</a> — Full org chart with 3 views</li>
+        <li><a href="AISP_Role_Playbooks.html" style="color: #00c2ff;">AISP_Role_Playbooks.html</a> — What each role does</li>
+        <li><a href="AISP_Decision_Authority.html" style="color: #00c2ff;">AISP_Decision_Authority.html</a> — Decision thresholds per role</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB B: INDIVIDUAL ROLES -->
+  <div id="question-b" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-briefcase"></i> (b) Individual Roles: What Each Person/Agent Does</h2>
+
+      <p>Each role has clear responsibilities, decision authority, and KPIs. All roles exist in every AISP project.</p>
+
+      <h3>Role Mapping</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Name</th>
+            <th>Primary Responsibility</th>
+            <th>Decisions <$50K</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CEO</strong></td>
+            <td>Brandon (You)</td>
+            <td>Vision, strategy, wave planning, >$50K decisions</td>
+            <td>No (all escalations)</td>
+          </tr>
+          <tr>
+            <td><strong>CTO</strong></td>
+            <td>Anderson</td>
+            <td>Engineering, code quality, infrastructure</td>
+            <td>Yes (auto-approve)</td>
+          </tr>
+          <tr>
+            <td><strong>CPO</strong></td>
+            <td>Niobe</td>
+            <td>Product, roadmap, user research</td>
+            <td>Yes (auto-approve)</td>
+          </tr>
+          <tr>
+            <td><strong>CSO</strong></td>
+            <td>Persephone</td>
+            <td>Sales, growth, partnerships</td>
+            <td>Yes (auto-approve)</td>
+          </tr>
+          <tr>
+            <td><strong>CFO</strong></td>
+            <td>Dozer</td>
+            <td>Finance, budgets, operations</td>
+            <td>Yes (auto-approve)</td>
+          </tr>
+          <tr>
+            <td><strong>Coordinator</strong></td>
+            <td>Zion</td>
+            <td>Cross-team orchestration, escalations</td>
+            <td>No (facilitates only)</td>
+          </tr>
+          <tr>
+            <td><strong>Agents (8)</strong></td>
+            <td>Neo, Trinity, Tank, etc.</td>
+            <td>Autonomous execution, self-correcting</td>
+            <td>No (escalate ambiguous goals)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer:</strong> Your new project will ask: "Who is your CTO?" (director owner). That director then:
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Becomes the project's technical lead</li>
+          <li>Gets agents spawned under them for this project</li>
+          <li>Makes decisions for their domain <$50K</li>
+          <li>Escalates >$50K to you (CEO)</li>
+        </ol>
+      </div>
+
+      <h3>Reference Document</h3>
+      <ul class="checklist">
+        <li><a href="AISP_ROLE_PLAYBOOKS.html" style="color: #00c2ff;">AISP_ROLE_PLAYBOOKS.html</a> — Deep dive into each role</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB C: TOOLS TO USE -->
+  <div id="question-c" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-plug"></i> (c) Tools to Use: GitHub, Vercel, Slack, Linear, Pattern Library</h2>
+
+      <p>Every AISP project uses the same integration stack. No custom tooling — standardized across all projects.</p>
+
+      <h3>The Integration Stack</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Purpose</th>
+            <th>Setup Effort</th>
+            <th>Per-Project?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>GitHub</strong></td>
+            <td>Version control, CI/CD</td>
+            <td>Low (repo created auto)</td>
+            <td>Yes (aisp-projectname repo)</td>
+          </tr>
+          <tr>
+            <td><strong>Vercel</strong></td>
+            <td>Deployment, staging, preview</td>
+            <td>Low (linked at init)</td>
+            <td>Yes (2x projects: prod + staging)</td>
+          </tr>
+          <tr>
+            <td><strong>Slack</strong></td>
+            <td>Notifications, team comms</td>
+            <td>Low (channels auto-created)</td>
+            <td>Yes (project-specific channels)</td>
+          </tr>
+          <tr>
+            <td><strong>Linear</strong></td>
+            <td>Task tracking, sprints</td>
+            <td>Low (project auto-created)</td>
+            <td>Yes (one Linear project per AISP project)</td>
+          </tr>
+          <tr>
+            <td><strong>Pattern Library</strong></td>
+            <td>Shared knowledge base, patterns</td>
+            <td>Zero (shared across all)</td>
+            <td>No (company-wide shared)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer:</strong> The `/launch-your-project` skill will automatically:
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Create GitHub repo (aisp-projectname)</li>
+          <li>Configure Vercel (prod + staging auto-deployed)</li>
+          <li>Create Slack channels (#dev, #deployments, #alerts)</li>
+          <li>Create Linear project (AISP-PROJECTNAME)</li>
+          <li>Grant access to pattern library (shared, no init needed)</li>
+        </ol>
+      </div>
+
+      <h3>Reference Document</h3>
+      <ul class="checklist">
+        <li><a href="AISP_INTEGRATIONS_GUIDE.html" style="color: #00c2ff;">AISP_INTEGRATIONS_GUIDE.html</a> — Setup & deployment for all tools</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB D: AUTONOMY LEVEL -->
+  <div id="question-d" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-zap"></i> (d) Autonomy Level: What Agents Can Decide</h2>
+
+      <p>Agents operate within clear guardrails. They decide execution; humans decide strategy.</p>
+
+      <h3>Autonomy by Role</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Who</th>
+            <th>Can Decide Autonomously</th>
+            <th>Must Escalate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Agents</strong></td>
+            <td>How to execute a task (methodology, approach, optimization)</td>
+            <td>What to work on (goals), ambiguous criteria, >5 loop iterations</td>
+          </tr>
+          <tr>
+            <td><strong>Directors</strong></td>
+            <td>Domain decisions <$50K, team management, KPIs</td>
+            <td>Strategic shifts >$50K, CEO approval</td>
+          </tr>
+          <tr>
+            <td><strong>CEO (You)</strong></td>
+            <td>Vision, strategy, all >$50K decisions</td>
+            <td>Board approval for >$500K</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Agent Loop: The Autonomy Pattern</h3>
+      <div class="step-box">
+        <strong>Plan → Execute → Observe → Verify → Iterate (max 5x)</strong>
+        <p style="margin-top: 1rem;">Agent gets a goal with success criteria (objective, measurable). Agent loops until criteria are met. If criteria are still unmet after 5 loops, agent escalates to director.</p>
+      </div>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer:</strong> When you initialize your project, you'll specify:
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Project autonomy level (95% for dev teams, 80% for new products, etc.)</li>
+          <li>Escalation triggers (what must be human-approved)</li>
+          <li>Success criteria format (objective, measurable)</li>
+          <li>Loop iteration limit (default 5, can adjust per project)</li>
+        </ol>
+      </div>
+
+      <h3>Reference Document</h3>
+      <ul class="checklist">
+        <li><a href="AISP_COMPANY_PLAYBOOK.html" style="color: #00c2ff;">AISP_COMPANY_PLAYBOOK.html</a> (Tab: Autonomous Systems)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB E: SCALING STRATEGY -->
+  <div id="question-e" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-trending-up"></i> (e) How We Scale: Multi-Project Strategy</h2>
+
+      <p>AISP scales by replicating the same 14-person org structure across unlimited projects, with shared standards and learning.</p>
+
+      <h3>Scaling Model</h3>
+      <div class="folder-tree">
+AISP/ (Company Portal)
+├─ _company_standards/ (shared, symlinked to all projects)
+├─ _shared_resources/ (shared KB, patterns, skills)
+└─ projects/
+   ├─ AISP-Portal/ (main product)
+   ├─ AISP-ProjectAlpha/ (project 1)
+   ├─ AISP-ProjectBeta/ (project 2)
+   └─ AISP-ProjectGamma/ (project 3+)
+
+Each project:
+├─ Own GitHub repo
+├─ Own Vercel deployment (prod + staging)
+├─ Own Linear project
+├─ Own Slack channels
+├─ Own context window (isolated)
+├─ Access to shared standards (via symlinks)
+├─ Access to shared pattern library
+└─ Same 14-person org structure
+      </div>
+
+      <h3>Scaling Timeline</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Wave</th>
+            <th>Duration</th>
+            <th>Projects</th>
+            <th>Goal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Wave 1</strong></td>
+            <td>30 sprints (~60 weeks)</td>
+            <td>1 (AISP Portal)</td>
+            <td>Validate org, prove autonomy, 95% automation</td>
+          </tr>
+          <tr>
+            <td><strong>Wave 2</strong></td>
+            <td>30 sprints</td>
+            <td>3-5 projects</td>
+            <td>Prove replicability, 98% automation, shared learning</td>
+          </tr>
+          <tr>
+            <td><strong>Wave 3+</strong></td>
+            <td>30 sprints per wave</td>
+            <td>Unlimited</td>
+            <td>Proven model, ready to scale/license, 99%+ automation</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer:</strong> When initializing a project, you specify:
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Which Wave (Wave 1, 2, 3+)</li>
+          <li>How many projects in parallel (resource constraint)</li>
+          <li>Whether this project shares agents or gets unique agents</li>
+          <li>Pattern library access level (read, write, or both)</li>
+        </ol>
+      </div>
+
+      <h3>Reference Document</h3>
+      <ul class="checklist">
+        <li><a href="AISP_MULTI_PROJECT_ARCHITECTURE_FINAL.md" style="color: #00c2ff;">AISP_MULTI_PROJECT_ARCHITECTURE_FINAL.md</a> — Full scaling strategy</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB F: FOLDER STRUCTURE -->
+  <div id="question-f" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-folder"></i> (f) Folder Structure: Hierarchy & Organization</h2>
+
+      <p>All AISP projects follow the same folder structure. Zero variation — consistency enables scaling.</p>
+
+      <h3>Standard Project Folder Structure</h3>
+      <div class="folder-tree">
+AISP-ProjectAlpha/
+├─ _standards → symlink to ../../_company_standards/
+├─ _shared_resources → symlink to ../../_shared_resources/
+│
+├─ _config/
+│  ├─ .env (project-specific variables)
+│  ├─ smart_toolkit_config.json
+│  ├─ agent_config.json
+│  └─ .env.company → symlink to company env
+│
+├─ docs/
+│  ├─ WAVE_1_PLAN.md
+│  ├─ BUILD_PHASE_1.1_PLAN.md
+│  ├─ SPRINT_1_PLAN.md
+│  └─ [wave/phase/sprint docs]
+│
+├─ src/
+│  ├─ dev/ (development-only code)
+│  │  ├─ mock_data.js
+│  │  └─ debugging_tools.js
+│  ├─ prod/ (production code)
+│  │  ├─ api/
+│  │  ├─ components/
+│  │  └─ utils/
+│  └─ shared/ (project-internal shared code)
+│
+├─ tests/
+│  ├─ unit/
+│  ├─ integration/
+│  └─ e2e/
+│
+├─ memory/
+│  ├─ toolkit_memory.json (project-specific patterns)
+│  ├─ agent_memory.json (project-specific agents)
+│  └─ learnings.json (accumulated knowledge)
+│
+├─ .github/
+│  └─ workflows/
+│     ├─ ci.yml (tests on every commit)
+│     ├─ deploy.yml (deploy on merge to main)
+│     └─ test.yml (test suite runner)
+│
+├─ .gitignore
+├─ vercel.json (deployment config)
+├─ package.json (if Node.js)
+└─ README.md (project-specific)
+      </div>
+
+      <h3>Symlinks (Shared Resources)</h3>
+      <div class="answer-box">
+        <strong>✅ How they work:</strong>
+        <p>Your project has:</p>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li><code>_standards/</code> → points to AISP/_company_standards/ (read-only)</li>
+          <li><code>_shared_resources/</code> → points to AISP/_shared_resources/ (access to KB + skills)</li>
+        </ul>
+        <p style="margin-top: 1rem;"><strong>When standards change</strong> (e.g., DEVELOPMENT_NOMENCLATURE_STANDARD.md), all projects see the update immediately via symlinks. No duplication, single source of truth.</p>
+      </div>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer:</strong> The `/launch-your-project` skill will:
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Create this exact folder structure in AISP-ProjectName/</li>
+          <li>Create symlinks to _standards/ and _shared_resources/</li>
+          <li>Create .env and config files</li>
+          <li>Initialize memory/ folder with empty JSON files</li>
+          <li>Create GitHub workflows (.github/)</li>
+          <li>Copy vercel.json template</li>
+        </ol>
+      </div>
+
+      <h3>Reference Document</h3>
+      <ul class="checklist">
+        <li><a href="AISP_MULTI_PROJECT_ARCHITECTURE_FINAL.md" style="color: #00c2ff;">AISP_MULTI_PROJECT_ARCHITECTURE_FINAL.md</a> (Section: Local Folder Structure)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB G: TOOL EXECUTION -->
+  <div id="question-g" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-settings"></i> (g) Tool/Skill/Plugin Execution: When & How</h2>
+
+      <p>Tools and skills are invoked at specific lifecycle moments. This prevents chaos and ensures consistency.</p>
+
+      <h3>Execution Timeline for a New Project</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Trigger</th>
+            <th>What Gets Invoked</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Project Init</strong></td>
+            <td>User: `/launch-your-project`</td>
+            <td>Project init skill (interactive Q&A)</td>
+            <td>Folder structure, git repo, config files created</td>
+          </tr>
+          <tr>
+            <td><strong>Agent Creation</strong></td>
+            <td>Recurring task detected (standup, planning)</td>
+            <td>Automated agent creation (via system monitor)</td>
+            <td>New agent spawned under director, memory initialized</td>
+          </tr>
+          <tr>
+            <td><strong>Agent Deployment</strong></td>
+            <td>Complex recurring task → needs cloud agent</td>
+            <td>User: `/launch-your-agent` (managed agents)</td>
+            <td>Agent deployed to Anthropic cloud, scheduled</td>
+          </tr>
+          <tr>
+            <td><strong>Code Commit</strong></td>
+            <td>Developer: `git push`</td>
+            <td>GitHub Actions (CI/CD, tests, linting)</td>
+            <td>Tests run, coverage checked, deployment triggered</td>
+          </tr>
+          <tr>
+            <td><strong>Pattern Match</strong></td>
+            <td>Agent encounters similar problem</td>
+            <td>Smart Toolkit (pattern library query)</td>
+            <td>Suggested solution auto-invoked if 90%+ confidence</td>
+          </tr>
+          <tr>
+            <td><strong>Deployment (Sprint 10)</strong></td>
+            <td>Merge to main branch</td>
+            <td>Vercel deployment, smoke tests</td>
+            <td>Production live, metrics collected</td>
+          </tr>
+          <tr>
+            <td><strong>Escalation</strong></td>
+            <td>Agent exceeds autonomy threshold</td>
+            <td>Alert to director, escalation channel</td>
+            <td>Director reviews, makes decision, logs feedback</td>
+          </tr>
+          <tr>
+            <td><strong>Wave Completion</strong></td>
+            <td>Sprint 30 ends (end of wave)</td>
+            <td>Wave reflection & documentation</td>
+            <td>Lessons learned, metrics, next wave plan</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Smart Toolkit Auto-Invocation</h3>
+      <div class="step-box">
+        <strong>When a problem is encountered:</strong>
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Agent queries pattern library (SQLite)</li>
+          <li>Search returns matching patterns with confidence scores</li>
+          <li>If confidence ≥90%: Auto-run the fix</li>
+          <li>If confidence 85-89%: Suggest to agent (agent chooses)</li>
+          <li>If confidence <85%: Store as new pattern for learning</li>
+        </ol>
+      </div>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer:</strong> Skills & tools are invoked AUTOMATICALLY based on triggers:
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>User only runs: `/launch-your-project` (once) + `/launch-your-agent` (when creating managed agents)</li>
+          <li>Everything else is automatic (GitHub Actions, pattern library, escalations, etc.)</li>
+          <li>No manual tool management needed</li>
+        </ul>
+      </div>
+
+      <h3>Reference Document</h3>
+      <ul class="checklist">
+        <li><a href="AISP_COMPANY_PLAYBOOK.html" style="color: #00c2ff;">AISP_COMPANY_PLAYBOOK.html</a> (Tab: Autonomous Systems)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB H: KICK-OFF PROMPT / INITIALIZATION -->
+  <div id="question-h" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-help"></i> (h) Kick-Off Prompt: How to Initialize a New Project</h2>
+
+      <p>The `/launch-your-project` skill is the single entry point for all new projects. It's an interactive questionnaire (like `/launch-your-agent`).</p>
+
+      <h3>The `/launch-your-project` Skill</h3>
+      <div class="step-box">
+        <strong>Command:</strong> `/launch-your-project`
+        <p style="margin-top: 1rem;"><strong>What it does:</strong> Interactive questionnaire that gathers project info, then auto-generates folder structure, git repo, config files, and documentation.</p>
+      </div>
+
+      <h3>The Questionnaire (What Gets Asked)</h3>
+      <div class="answer-box">
+        <strong>Section 1: Project Identity</strong>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li><strong>Project name:</strong> "What's your project called?" (e.g., "ProjectAlpha")</li>
+          <li><strong>Description:</strong> "What problem does it solve?" (one paragraph)</li>
+          <li><strong>Launch goal:</strong> "What success looks like at launch?" (measurable)</li>
+        </ul>
+
+        <strong style="display: block; margin-top: 1rem;">Section 2: Team & Ownership</strong>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li><strong>Project owner (Director):</strong> "Who leads this? (Anderson/Niobe/Persephone/Dozer)"</li>
+          <li><strong>Team size:</strong> "How many people on your core team? (including agents)"</li>
+          <li><strong>Stakeholders:</strong> "Who needs to approve decisions? (escalation path)"</li>
+        </ul>
+
+        <strong style="display: block; margin-top: 1rem;">Section 3: Technical Setup</strong>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li><strong>Tech stack:</strong> "What tech? (Node, Python, Next.js, etc.)"</li>
+          <li><strong>GitHub repo name:</strong> "Confirmed as: aisp-projectname"</li>
+          <li><strong>Vercel project:</strong> "Production + staging? (auto-created)"</li>
+        </ul>
+
+        <strong style="display: block; margin-top: 1rem;">Section 4: AISP Integration</strong>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li><strong>Autonomy level:</strong> "What % autonomous? (80/90/95%)"</li>
+          <li><strong>Wave:</strong> "Which wave? (Wave 1, 2, 3+)"</li>
+          <li><strong>Escalation triggers:</strong> "What decisions need human approval?"</li>
+          <li><strong>Success criteria:</strong> "How do you measure success? (objective, measurable)"</li>
+        </ul>
+
+        <strong style="display: block; margin-top: 1rem;">Section 5: Additional Setup</strong>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li><strong>Slack channels:</strong> "Create project channels? (auto: #dev, #deployments, #alerts)"</li>
+          <li><strong>Linear project:</strong> "Track tasks? (auto-created)"</li>
+          <li><strong>Managed agents:</strong> "Any cloud agents? (Neo, Ghost, Tank, custom)"</li>
+        </ul>
+      </div>
+
+      <h3>What Gets Auto-Generated After You Answer</h3>
+      <div class="step-box">
+        <strong>The skill will create:</strong>
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li><strong>Folder structure:</strong> AISP/projects/AISP-ProjectName/ with all subfolders</li>
+          <li><strong>Git repo:</strong> Initialize git, create .gitignore, link to GitHub (aisp-projectname)</li>
+          <li><strong>Config files:</strong> .env, .env.company (symlink), smart_toolkit_config.json, agent_config.json</li>
+          <li><strong>Documentation:</strong> README.md, WAVE_1_PLAN.md template, project-specific docs</li>
+          <li><strong>Symlinks:</strong> _standards/ and _shared_resources/ pointing to company-level</li>
+          <li><strong>Memory files:</strong> toolkit_memory.json, agent_memory.json (initialized, empty)</li>
+          <li><strong>GitHub workflows:</strong> .github/workflows/ with CI/CD templates (ci.yml, deploy.yml, test.yml)</li>
+          <li><strong>Vercel setup:</strong> vercel.json created, linked to Anthropic/Vercel integration</li>
+          <li><strong>Slack channels:</strong> #aisp-projectname-dev, #aisp-projectname-deployments, etc.</li>
+          <li><strong>Linear project:</strong> AISP-PROJECTNAME project created with default workflows</li>
+          <li><strong>Initial commit:</strong> All files committed with message "Initial commit: project setup from AISP template"</li>
+        </ol>
+      </div>
+
+      <h3>Example: After You Answer</h3>
+      <div class="code-block">
+$ /launch-your-project
+
+✨ AISP Project Initialization
+
+1️⃣  Project name? > ProjectAlpha
+2️⃣  Description? > Machine learning ops dashboard for our data team
+3️⃣  Launch goal? > Beta launch with 3 early customers by Q3 2026
+4️⃣  Project owner? > Niobe (CPO)
+5️⃣  Team size? > 4 (Morpheus + 1 engineer + 2 agents)
+...
+[More questions]
+...
+
+🚀 Initializing...
+✅ Folder created: AISP/projects/AISP-ProjectAlpha/
+✅ Git repo initialized
+✅ Config files created
+✅ Symlinks created (_standards/, _shared_resources/)
+✅ GitHub repo created: aisp-project-alpha
+✅ Vercel projects created (prod + staging)
+✅ Slack channels created (#aisp-project-alpha-dev, etc.)
+✅ Linear project created (AISP-PROJECTALPHA)
+✅ Initial commit pushed
+
+🎉 PROJECT READY
+Folder: AISP/projects/AISP-ProjectAlpha/
+GitHub: https://github.com/AISP-Company/aisp-project-alpha
+Docs: AISP/projects/AISP-ProjectAlpha/docs/WAVE_1_PLAN.md
+
+Next: `cd AISP/projects/AISP-ProjectAlpha && npm install`
+      </div>
+
+      <h3>For Your New Project</h3>
+      <div class="answer-box">
+        <strong>✅ Answer (h): The Kick-Off Prompt</strong>
+        <p>There is NO manual prompt. You run ONE command:</p>
+        <p style="margin-top: 1rem; margin-left: 1.5rem; font-family: 'Courier New', monospace; background: #111827; padding: 1rem; border-radius: 4px;">/launch-your-project</p>
+        <p style="margin-top: 1rem;">The skill then asks 15-20 questions interactively. You answer, and the entire project is initialized automatically. No manual folder creation, no copy-paste of config files, no manual GitHub setup.</p>
+      </div>
+
+      <h3>Reference Document</h3>
+      <ul class="checklist">
+        <li>PROJECT_INITIALIZATION_SKILL.md (how the skill works, for developers building it)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><a href="AISP_Master_Hub.html">← Back to Master Hub</a> | <a href="AISP_COMPANY_PLAYBOOK.html">Company Playbook</a></p>
+    <p>Last updated: June 20, 2026 | Project Initialization Guide v1.0</p>
+  </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+  const tabs = document.querySelectorAll('.tab-content');
+  const buttons = document.querySelectorAll('.tab-button');
+
+  tabs.forEach(tab => tab.classList.remove('active'));
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById(tabName).classList.add('active');
+
+  // Find and activate the corresponding button
+  const buttonSelector = `.tab-button[onclick="switchTab('${tabName}')"]`;
+  const activeButton = document.querySelector(buttonSelector);
+  if (activeButton) {
+    activeButton.classList.add('active');
+  }
+}
+</script>
+
+</body>
+</html>

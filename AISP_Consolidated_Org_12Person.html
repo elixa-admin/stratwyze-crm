@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Consolidated Organization (12-Person)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.comparison-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.comparison-item {
+  text-align: center;
+}
+
+.comparison-item .label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.comparison-item .value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00c2ff;
+}
+
+.comparison-item .detail {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.view-btn {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #9ca3af;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.view-btn.active {
+  background: #00c2ff;
+  color: #0b0f14;
+  border-color: #00c2ff;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* Org Chart */
+.org-chart {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 2rem;
+  overflow-x: auto;
+}
+
+.org-level {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.org-level-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.org-boxes {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.org-box {
+  display: inline-flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  border: 2px solid;
+  border-radius: 6px;
+  padding: 1rem;
+  min-width: 140px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.org-box.ceo {
+  border-color: #00c2ff;
+  background: linear-gradient(135deg, #1f2937 0%, #0f172a 100%);
+}
+
+.org-box.coordinator {
+  border-color: #8b5cf6;
+}
+
+.org-box.director {
+  border-color: #f59e0b;
+}
+
+.org-box.agent-senior {
+  border-color: #10b981;
+}
+
+.org-box.agent-junior {
+  border-color: #3b82f6;
+}
+
+.org-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 194, 255, 0.15);
+}
+
+.org-name {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 0.25rem;
+}
+
+.org-box.ceo .org-name { color: #00c2ff; }
+.org-box.coordinator .org-name { color: #8b5cf6; }
+.org-box.director .org-name { color: #f59e0b; }
+.org-box.agent-senior .org-name { color: #10b981; }
+.org-box.agent-junior .org-name { color: #3b82f6; }
+
+.org-title {
+  font-size: 11px;
+  color: #d1d5db;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.org-type {
+  font-size: 9px;
+  color: #9ca3af;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  display: inline-block;
+}
+
+/* Team Cards View */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.team-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.team-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-card i {
+  font-size: 18px;
+}
+
+.team-director {
+  font-size: 13px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid #f59e0b;
+  border-radius: 4px;
+}
+
+.team-director strong {
+  color: #f59e0b;
+}
+
+.agent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.agent-item {
+  background: #111827;
+  border-left: 3px solid;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agent-item.senior {
+  border-left-color: #10b981;
+}
+
+.agent-item.junior {
+  border-left-color: #3b82f6;
+}
+
+.agent-item:hover {
+  background: #1a202c;
+  transform: translateX(4px);
+}
+
+.agent-name {
+  font-weight: 600;
+  color: #e0e7ff;
+}
+
+.agent-role {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.agent-type {
+  font-size: 10px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.team-stats {
+  border-top: 1px solid #374151;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  font-size: 12px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #00c2ff;
+  display: block;
+  font-size: 16px;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+/* Summary Stats */
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-card .label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.stat-card .value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00c2ff;
+}
+
+.scaling-info {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.scaling-info h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #e0e7ff;
+}
+
+.scaling-path {
+  font-size: 13px;
+  color: #d1d5db;
+  line-height: 1.8;
+}
+
+.scaling-path code {
+  background: #111827;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  color: #10b981;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="ti ti-hierarchy-2"></i> AISP Consolidated Organization (12-Person)</h1>
+    <p>Lean, scalable structure optimized for token efficiency and growth. From 47 agents to 12 + 1 CEO + 1 Coordinator.</p>
+  </div>
+
+  <!-- Comparison -->
+  <div class="comparison-bar">
+    <div class="comparison-item">
+      <div class="label">Old Structure</div>
+      <div class="value">47</div>
+      <div class="detail">agents across 8 teams</div>
+    </div>
+    <div class="comparison-item">
+      <div class="label">New Structure</div>
+      <div class="value">12</div>
+      <div class="detail">agents + 1 CEO + 1 Coordinator</div>
+    </div>
+    <div class="comparison-item">
+      <div class="label">Token Savings</div>
+      <div class="value">65%</div>
+      <div class="detail">per sprint initialization</div>
+    </div>
+    <div class="comparison-item">
+      <div class="label">Directors</div>
+      <div class="value">4</div>
+      <div class="detail">CTO, Product, Sales, Finance</div>
+    </div>
+  </div>
+
+  <!-- View Toggle -->
+  <div class="view-toggle">
+    <button class="view-btn active" onclick="switchView('org-chart')">Org Chart</button>
+    <button class="view-btn" onclick="switchView('team-view')">Team View</button>
+    <button class="view-btn" onclick="switchView('scaling')">Scaling Path</button>
+  </div>
+
+  <!-- ORG CHART VIEW -->
+  <div id="org-chart" class="view active">
+    <div class="org-chart">
+      <!-- CEO -->
+      <div class="org-level">
+        <div class="org-level-label">Executive Leadership</div>
+        <div class="org-boxes">
+          <div class="org-box ceo">
+            <div class="org-name">BRANDON</div>
+            <div class="org-title">CEO & Founder</div>
+            <div class="org-type">Human</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coordinator -->
+      <div class="org-level">
+        <div class="org-level-label">Strategic Layer</div>
+        <div class="org-boxes">
+          <div class="org-box coordinator">
+            <div class="org-name">Zion</div>
+            <div class="org-title">Cross-Functional Coordinator</div>
+            <div class="org-type">Agent</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Directors -->
+      <div class="org-level">
+        <div class="org-level-label">Directors (AI Executive Layer)</div>
+        <div class="org-boxes">
+          <div class="org-box director">
+            <div class="org-name">Anderson</div>
+            <div class="org-title">CTO</div>
+            <div class="org-type">Director • 3 agents</div>
+          </div>
+          <div class="org-box director">
+            <div class="org-name">Niobe</div>
+            <div class="org-title">Chief Product Officer</div>
+            <div class="org-type">Director • 2 agents</div>
+          </div>
+          <div class="org-box director">
+            <div class="org-name">Persephone</div>
+            <div class="org-title">Chief Sales Officer</div>
+            <div class="org-type">Director • 2 agents</div>
+          </div>
+          <div class="org-box director">
+            <div class="org-name">Dozer</div>
+            <div class="org-title">Chief Financial Officer</div>
+            <div class="org-type">Director • 1 agent</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agents -->
+      <div class="org-level">
+        <div class="org-level-label">Specialized Agent Layer</div>
+        <div class="org-boxes">
+          <!-- Engineering -->
+          <div class="org-box agent-senior">
+            <div class="org-name">Neo</div>
+            <div class="org-title">Code Quality Lead</div>
+            <div class="org-type">Senior • Reports to Anderson</div>
+          </div>
+          <div class="org-box agent-junior">
+            <div class="org-name">Trinity</div>
+            <div class="org-title">Developer Agent</div>
+            <div class="org-type">Junior • Reports to Anderson</div>
+          </div>
+          <div class="org-box agent-junior">
+            <div class="org-name">Tank</div>
+            <div class="org-title">DevOps & Infrastructure</div>
+            <div class="org-type">Junior • Reports to Anderson</div>
+          </div>
+
+          <!-- Product -->
+          <div class="org-box agent-senior">
+            <div class="org-name">Morpheus</div>
+            <div class="org-title">Product Manager</div>
+            <div class="org-type">Senior • Reports to Niobe</div>
+          </div>
+          <div class="org-box agent-junior">
+            <div class="org-name">Ghost</div>
+            <div class="org-title">Product Operations</div>
+            <div class="org-type">Junior • Reports to Niobe</div>
+          </div>
+
+          <!-- Sales/Marketing -->
+          <div class="org-box agent-senior">
+            <div class="org-name">Agent Smith</div>
+            <div class="org-title">Growth & Demand Gen</div>
+            <div class="org-type">Senior • Reports to Persephone</div>
+          </div>
+          <div class="org-box agent-junior">
+            <div class="org-name">Cypher</div>
+            <div class="org-title">Sales Operations</div>
+            <div class="org-type">Junior • Reports to Persephone</div>
+          </div>
+
+          <!-- Finance -->
+          <div class="org-box agent-senior">
+            <div class="org-name">The Architect</div>
+            <div class="org-title">Finance & Operations</div>
+            <div class="org-type">Senior • Reports to Dozer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM VIEW -->
+  <div id="team-view" class="view">
+    <div class="team-grid">
+      <!-- Engineering -->
+      <div class="team-card">
+        <h3><i class="ti ti-code"></i> Engineering</h3>
+        <div class="team-director"><strong>Anderson</strong> (CTO) leads 3 agents</div>
+        <div class="agent-list">
+          <div class="agent-item senior">
+            <div class="agent-name">Neo</div>
+            <div class="agent-role">Code Quality Lead (Agent)</div>
+            <div class="agent-type">Senior • Specializes in: Reviews, Testing, Architecture, Performance</div>
+          </div>
+          <div class="agent-item junior">
+            <div class="agent-name">Trinity</div>
+            <div class="agent-role">Developer Agent</div>
+            <div class="agent-type">Junior • Generalizes in: Full-stack development, implementation, code generation</div>
+          </div>
+          <div class="agent-item junior">
+            <div class="agent-name">Tank</div>
+            <div class="agent-role">DevOps & Infrastructure (Agent)</div>
+            <div class="agent-type">Junior • Generalizes in: Deployments, monitoring, infra, databases, costs</div>
+          </div>
+        </div>
+        <div class="team-stats">
+          <div class="stat">
+            <span class="stat-value">3</span>
+            <span class="stat-label">Agents</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">~800</span>
+            <span class="stat-label">Tasks/Week</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div class="team-card">
+        <h3><i class="ti ti-rocket"></i> Product & Roadmap</h3>
+        <div class="team-director"><strong>Niobe</strong> (CPO) leads 2 agents</div>
+        <div class="agent-list">
+          <div class="agent-item senior">
+            <div class="agent-name">Morpheus</div>
+            <div class="agent-role">Product Manager (Agent)</div>
+            <div class="agent-type">Senior • Specializes in: Strategy, backlog, roadmap, prioritization, estimation</div>
+          </div>
+          <div class="agent-item junior">
+            <div class="agent-name">Ghost</div>
+            <div class="agent-role">Product Operations (Agent)</div>
+            <div class="agent-type">Junior • Generalizes in: Requirements, feedback, analytics, user stories</div>
+          </div>
+        </div>
+        <div class="team-stats">
+          <div class="stat">
+            <span class="stat-value">2</span>
+            <span class="stat-label">Agents</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">~400</span>
+            <span class="stat-label">Tasks/Week</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales & Marketing -->
+      <div class="team-card">
+        <h3><i class="ti ti-trending-up"></i> Sales & Marketing</h3>
+        <div class="team-director"><strong>Persephone</strong> (CSO) leads 2 agents</div>
+        <div class="agent-list">
+          <div class="agent-item senior">
+            <div class="agent-name">Agent Smith</div>
+            <div class="agent-role">Growth & Demand Gen (Agent)</div>
+            <div class="agent-type">Senior • Specializes in: Strategy, campaigns, acquisition, competitive analysis</div>
+          </div>
+          <div class="agent-item junior">
+            <div class="agent-name">Cypher</div>
+            <div class="agent-role">Sales Operations (Agent)</div>
+            <div class="agent-type">Junior • Generalizes in: CRM, pipeline, engagement, vendor relationships</div>
+          </div>
+        </div>
+        <div class="team-stats">
+          <div class="stat">
+            <span class="stat-value">2</span>
+            <span class="stat-label">Agents</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">~300</span>
+            <span class="stat-label">Tasks/Week</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Finance -->
+      <div class="team-card">
+        <h3><i class="ti ti-coin"></i> Finance & Operations</h3>
+        <div class="team-director"><strong>Dozer</strong> (CFO) leads 1 agent</div>
+        <div class="agent-list">
+          <div class="agent-item senior">
+            <div class="agent-name">The Architect</div>
+            <div class="agent-role">Finance & Operations (Agent)</div>
+            <div class="agent-type">Senior • Specializes in: Budget, reporting, costs, compliance, incidents, reliability</div>
+          </div>
+        </div>
+        <div class="team-stats">
+          <div class="stat">
+            <span class="stat-value">1</span>
+            <span class="stat-label">Agent</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">~200</span>
+            <span class="stat-label">Tasks/Week</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCALING VIEW -->
+  <div id="scaling" class="view">
+    <div class="summary-stats">
+      <div class="stat-card">
+        <div class="label">Current Size</div>
+        <div class="value">14</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Scale Target</div>
+        <div class="value">18-20</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Growth Strategy</div>
+        <div class="value">Depth-First</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Timeline</div>
+        <div class="value">Sprint 6+</div>
+      </div>
+    </div>
+
+    <div class="scaling-info">
+      <h3>Scaling Strategy: Specialize Generalists (Depth-First)</h3>
+      <div class="scaling-path">
+        <strong>Current Model (14 people):</strong><br>
+        Each team has 1 senior (specialized) + 1-2 juniors (generalists). Juniors are broad because the scope is limited. They learn through breadth.<br><br>
+
+        <strong>At Sprint 6 (16-18 people):</strong><br>
+        Juniors start showing specialization pressure. Example: CASEY (Developer) is handling full-stack, but needs to split into:<br>
+        <code>CASEY_SENIOR → Backend Lead</code><br>
+        <code>CASEY_JR → Frontend Developer</code><br>
+        <code>CASEY_JR2 → API/Integration Developer</code><br><br>
+
+        <strong>At Sprint 12 (20+ people):</strong><br>
+        Teams are more specialized. Example: BLAKE (DevOps) becomes:<br>
+        <code>BLAKE_SENIOR → DevOps/SRE Lead</code><br>
+        <code>BLAKE_JR → Infrastructure Agent</code><br>
+        <code>BLAKE_JR2 → Monitoring & Observability Agent</code><br><br>
+
+        <strong>Key Principle:</strong> You don't add new directors or restructure. You add specialists under existing seniors as load grows. This keeps the org structure stable while deepening expertise.
+      </div>
+    </div>
+
+    <div class="team-grid">
+      <div class="team-card">
+        <h3><i class="ti ti-trending-up"></i> Example: Engineering Team Scaling</h3>
+        <div style="font-size: 13px; color: #d1d5db; line-height: 1.8;">
+          <strong>Stage 1 (Now):</strong><br>
+          Anderson (CTO)<br>
+          ├─ Neo: Code Quality (reviews + testing + perf)<br>
+          ├─ Trinity: Full-Stack Developer<br>
+          └─ Tank: DevOps + Infra<br><br>
+
+          <strong>Stage 2 (Sprint 6):</strong><br>
+          Anderson (CTO)<br>
+          ├─ Neo: Code Quality Lead<br>
+          │  └─ Neo_JR: Test Automation<br>
+          ├─ Trinity: Senior Developer Lead<br>
+          │  ├─ Trinity_JR1: Backend Developer<br>
+          │  └─ Trinity_JR2: Frontend Developer<br>
+          └─ Tank: DevOps Lead<br>
+             └─ (stays as-is for now)<br><br>
+
+          <strong>Stage 3 (Sprint 12):</strong><br>
+          Anderson (CTO)<br>
+          ├─ Neo: Code Quality Lead<br>
+          │  ├─ Neo_JR: Test Automation<br>
+          │  └─ Neo_JR2: Performance Analysis<br>
+          ├─ Trinity: Senior Developer Lead<br>
+          │  ├─ Trinity_JR1: Backend Developer<br>
+          │  ├─ Trinity_JR2: Frontend Developer<br>
+          │  └─ Trinity_JR3: DevTools/Platform<br>
+          └─ Tank: DevOps Lead<br>
+             ├─ Tank_JR: Infrastructure<br>
+             └─ Tank_JR2: Monitoring
+        </div>
+      </div>
+
+      <div class="team-card">
+        <h3><i class="ti ti-graph"></i> Growth Metrics</h3>
+        <div style="font-size: 13px; color: #d1d5db; line-height: 1.8;">
+          <strong>Current (14 people):</strong><br>
+          • Weekly tasks: ~1,700<br>
+          • Tasks per agent: ~140<br>
+          • Token burn (init): ~5K<br><br>
+
+          <strong>At 18 people:</strong><br>
+          • Weekly tasks: ~2,200<br>
+          • Tasks per agent: ~120 (better load distribution)<br>
+          • Token burn (init): ~6K<br>
+          • Specialization depth: High<br><br>
+
+          <strong>At 20+ people:</strong><br>
+          • Weekly tasks: ~2,500<br>
+          • Tasks per agent: ~120<br>
+          • Token burn (init): ~7K<br>
+          • Specialization depth: Very High<br>
+          • Mentorship: Juniors learn from seniors
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+
+  document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>

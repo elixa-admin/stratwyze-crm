@@ -1,167 +1,138 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+const MOCK = {
+  totalPipeline: 2340000,
+  winRate: 34,
+  forecast: 890000,
+  dealsThisMonth: 7,
+  stages: [
+    { label: 'Prospecting', count: 12, value: 880000 },
+    { label: 'Qualification', count: 8, value: 620000 },
+    { label: 'Proposal', count: 5, value: 430000 },
+    { label: 'Negotiation', count: 3, value: 310000 },
+    { label: 'Closed Won', count: 6, value: 100000 },
+  ],
+  recentDeals: [
+    { name: 'Acme Enterprise Deal', company: 'Acme Corp', value: '$250K', stage: 'Negotiation', owner: 'AB', delta: '+12%' },
+    { name: 'Global Corp Renewal', company: 'Global Inc', value: '$180K', stage: 'Proposal', owner: 'MR', delta: '+8%' },
+    { name: 'TechStart Initial', company: 'TechStart', value: '$45K', stage: 'Qualification', owner: 'JD', delta: 'New' },
+    { name: 'Fortune 500 Discussion', company: 'Fortune500', value: '$500K', stage: 'Prospecting', owner: 'SJ', delta: 'New' },
+    { name: 'Mid-Market Close', company: 'MidCo', value: '$120K', stage: 'Negotiation', owner: 'AB', delta: '+5%' },
+  ],
+};
 
-interface Metrics {
-  total_pipeline_value: number;
-  win_rate_percent: number;
-  forecast_value: number;
-  deals_this_month: number;
-  pipeline_by_stage: Record<string, { count: number; value: number }>;
-  total_opportunities: number;
-}
+const STAGE_COLORS: Record<string, string> = {
+  Prospecting: 'bg-slate-100 text-slate-600',
+  Qualification: 'bg-blue-50 text-blue-700',
+  Proposal: 'bg-amber-50 text-amber-700',
+  Negotiation: 'bg-orange-50 text-orange-700',
+  'Closed Won': 'bg-emerald-50 text-emerald-700',
+};
+
+const IconTrend = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+  </svg>
+);
+const IconTarget = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+  </svg>
+);
+const IconForecast = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" /><line x1="2" y1="20" x2="22" y2="20" />
+  </svg>
+);
+const IconDeals = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+  </svg>
+);
+
+const fmt = (n: number) => n >= 1000000 ? `$${(n / 1000000).toFixed(1)}M` : `$${Math.round(n / 1000)}K`;
 
 export default function Dashboard() {
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const total = MOCK.stages.reduce((s, st) => s + st.value, 0);
 
-  useEffect(() => {
-    fetchMetrics();
-  }, []);
-
-  const fetchMetrics = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/dashboard/metrics');
-      const data = await response.json();
-      setMetrics(data);
-    } catch (err) {
-      console.error('Failed to fetch metrics:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <div className="text-center text-slate-600 py-16">Loading dashboard...</div>;
-  }
-
-  if (!metrics) {
-    return <div className="text-center text-slate-500 py-16">No data available</div>;
-  }
+  const kpis = [
+    { label: 'Total Pipeline', value: fmt(MOCK.totalPipeline), sub: '+12.5% this month', Icon: IconTrend, accent: 'text-blue-600 bg-blue-50' },
+    { label: 'Win Rate', value: `${MOCK.winRate}%`, sub: 'Closed Won / Total Closed', Icon: IconTarget, accent: 'text-emerald-600 bg-emerald-50' },
+    { label: 'Forecast', value: fmt(MOCK.forecast), sub: 'Open opportunities', Icon: IconForecast, accent: 'text-amber-600 bg-amber-50' },
+    { label: 'Deals This Month', value: `${MOCK.dealsThisMonth}`, sub: 'Created in June', Icon: IconDeals, accent: 'text-purple-600 bg-purple-50' },
+  ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Good morning, Anthony</h1>
-        <p className="text-slate-600 mt-2">Here's what's happening with your business today</p>
-      </div>
-
-      {/* KPI Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Total Pipeline Value */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs hover:shadow-sm transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="section-label">Total Pipeline</div>
-            <div className="text-2xl">📈</div>
-          </div>
-          <p className="text-4xl font-bold text-slate-900">
-            ${Math.round(metrics.total_pipeline_value / 1000)}K
-          </p>
-          <p className="text-sm text-slate-600 mt-2">+12.5% this month</p>
-        </div>
-
-        {/* Win Rate */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs hover:shadow-sm transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="section-label">Win Rate</div>
-            <div className="text-2xl">🎯</div>
-          </div>
-          <p className="text-4xl font-bold text-slate-900">
-            {metrics.win_rate_percent.toFixed(0)}%
-          </p>
-          <p className="text-sm text-slate-600 mt-2">Closed Won / Total Closed</p>
-        </div>
-
-        {/* Forecast */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs hover:shadow-sm transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="section-label">Forecast</div>
-            <div className="text-2xl">⚡</div>
-          </div>
-          <p className="text-4xl font-bold text-slate-900">
-            ${Math.round(metrics.forecast_value / 1000)}K
-          </p>
-          <p className="text-sm text-slate-600 mt-2">Open opportunities</p>
-        </div>
-
-        {/* Deals This Month */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs hover:shadow-sm transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="section-label">Deals Created</div>
-            <div className="text-2xl">✨</div>
-          </div>
-          <p className="text-4xl font-bold text-slate-900">
-            {metrics.deals_this_month}
-          </p>
-          <p className="text-sm text-slate-600 mt-2">This month</p>
-        </div>
-      </div>
-
-      {/* Pipeline by Stage */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
-        <h2 className="text-xl font-bold text-slate-900 mb-6">Pipeline by Stage</h2>
-        <div className="space-y-6">
-          {Object.entries(metrics.pipeline_by_stage).map(([stage, data]) => (
-            <div key={stage}>
-              <div className="flex justify-between items-center mb-3">
-                <p className="font-600 text-slate-900">{stage}</p>
-                <p className="text-sm font-500 text-slate-600">
-                  {data.count} deals · ${Math.round(data.value / 1000)}K
-                </p>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.min(
-                      (data.value / (metrics.total_pipeline_value || 1)) * 100,
-                      100
-                    )}%`
-                  }}
-                />
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {kpis.map(({ label, value, sub, Icon, accent }) => (
+          <div key={label} className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-sm transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</p>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${accent}`}>
+                <Icon />
               </div>
             </div>
-          ))}
-        </div>
+            <p className="text-3xl font-bold text-slate-900 tracking-tight">{value}</p>
+            <p className="text-xs text-slate-500 mt-1.5">{sub}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Summary Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Quick Stats</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        {/* Pipeline by Stage */}
+        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
+          <h2 className="text-sm font-semibold text-slate-900 mb-5">Pipeline by Stage</h2>
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-600 font-500">Total Opportunities</span>
-              <span className="font-bold text-slate-900">{metrics.total_opportunities}</span>
-            </div>
-            <div className="border-t border-slate-200"></div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-600 font-500">Avg Deal Size</span>
-              <span className="font-bold text-slate-900">
-                ${Math.round(
-                  metrics.total_pipeline_value / (metrics.total_opportunities || 1) / 1000
-                )}K
-              </span>
-            </div>
+            {MOCK.stages.map((stage) => (
+              <div key={stage.label}>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-sm text-slate-700">{stage.label}</span>
+                  <span className="text-xs text-slate-500">{stage.count} deals · {fmt(stage.value)}</span>
+                </div>
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-blue-500 transition-all"
+                    style={{ width: `${(stage.value / total) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 pt-4 border-t border-slate-100 flex justify-between text-xs text-slate-500">
+            <span>Total opportunities: <strong className="text-slate-900">34</strong></span>
+            <span>Avg deal: <strong className="text-slate-900">{fmt(MOCK.totalPipeline / 34)}</strong></span>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs">
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Pipeline Health</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-600 font-500">Momentum</span>
-              <span className={`font-bold ${metrics.deals_this_month > 2 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                {metrics.deals_this_month > 2 ? '↑ Strong' : '→ Moderate'}
-              </span>
-            </div>
-            <div className="border-t border-slate-200"></div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-600 font-500">Conversion</span>
-              <span className={`font-bold ${metrics.win_rate_percent > 25 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                {metrics.win_rate_percent > 25 ? '✓ Good' : '△ Review'}
-              </span>
-            </div>
+        {/* Recent Deals */}
+        <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-900">Recent Deals</h2>
+            <a href="/pipeline" className="text-xs text-blue-600 hover:text-blue-700 font-medium">View all</a>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {MOCK.recentDeals.map((deal) => (
+              <div key={deal.name} className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                  {deal.owner}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900 truncate">{deal.name}</p>
+                  <p className="text-xs text-slate-500 truncate">{deal.company}</p>
+                </div>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STAGE_COLORS[deal.stage] ?? 'bg-slate-100 text-slate-600'}`}>
+                  {deal.stage}
+                </span>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-sm font-semibold text-slate-900">{deal.value}</p>
+                  <p className="text-xs text-emerald-600">{deal.delta}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

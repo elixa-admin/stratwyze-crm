@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Vision Statement</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #0b0f14 0%, #111827 100%);
+  color: #e0e7ff;
+  line-height: 1.8;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 4rem;
+  border-bottom: 2px solid #00c2ff;
+  padding-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 48px;
+  font-weight: 700;
+  color: #00c2ff;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.header h1 i {
+  font-size: 52px;
+}
+
+.header .tagline {
+  font-size: 18px;
+  color: #9ca3af;
+  font-weight: 300;
+}
+
+.section {
+  margin-bottom: 4rem;
+}
+
+.section h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c2ff;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section h2 i {
+  font-size: 32px;
+  color: #10b981;
+}
+
+.section p {
+  font-size: 16px;
+  color: #d1d5db;
+  margin-bottom: 1.5rem;
+  line-height: 1.9;
+}
+
+.section ul {
+  list-style: none;
+  margin-bottom: 1.5rem;
+}
+
+.section li {
+  font-size: 16px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  padding-left: 30px;
+  position: relative;
+}
+
+.section li:before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-size: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.metric-card {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.metric-card .value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 0.5rem;
+}
+
+.metric-card .label {
+  font-size: 13px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.wave-box {
+  background: rgba(0, 194, 255, 0.05);
+  border-left: 4px solid #00c2ff;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.wave-box h3 {
+  font-size: 18px;
+  color: #00c2ff;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wave-box p {
+  font-size: 15px;
+  color: #d1d5db;
+  margin-bottom: 0.75rem;
+}
+
+.philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.philosophy-item {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.5) 0%, rgba(17, 24, 39, 0.5) 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.philosophy-item i {
+  font-size: 40px;
+  color: #00c2ff;
+  margin-bottom: 1rem;
+}
+
+.philosophy-item h3 {
+  font-size: 16px;
+  color: #f3f4f6;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.philosophy-item p {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 0;
+}
+
+.advantage-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.advantage-item {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.advantage-item strong {
+  color: #10b981;
+  font-size: 15px;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.advantage-item p {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.cta-section {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(0, 194, 255, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  padding: 2.5rem;
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.cta-section h3 {
+  font-size: 22px;
+  color: #00c2ff;
+  margin-bottom: 1rem;
+}
+
+.cta-section p {
+  font-size: 16px;
+  color: #d1d5db;
+  margin-bottom: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  background: #10b981;
+  color: #0b0f14;
+  padding: 12px 28px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  margin: 0 8px;
+  border: 1px solid #10b981;
+}
+
+.button:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.button.secondary {
+  background: transparent;
+  color: #00c2ff;
+  border: 1px solid #00c2ff;
+}
+
+.button.secondary:hover {
+  background: rgba(0, 194, 255, 0.1);
+}
+
+.footer {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-top: 4rem;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.footer a {
+  color: #00c2ff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 2rem 1.5rem;
+  }
+
+  .header h1 {
+    font-size: 32px;
+  }
+
+  .section h2 {
+    font-size: 22px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1><i class="ti ti-rocket"></i> AISP Vision</h1>
+    <p class="tagline">The Future of Autonomous Consulting</p>
+  </div>
+
+  <!-- What We Are -->
+  <div class="section">
+    <h2><i class="ti ti-building"></i> What We Are</h2>
+    <p>AISP is an <strong>AI-native consulting agency</strong>. We replace traditional hierarchies with <strong>autonomous AI agents guided by human strategic judgment</strong>.</p>
+
+    <p>We are building a <strong>14-person autonomous organization</strong>:</p>
+    <ul>
+      <li><strong>1 Human CEO</strong> (you) — Strategic decisions, Wave planning, company vision</li>
+      <li><strong>4 AI Directors</strong> — CTO, CPO, CSO, CFO — Team leadership, KPI ownership, boundary decisions</li>
+      <li><strong>8 AI Agents</strong> — Specialized execution across engineering, product, sales, finance</li>
+      <li><strong>1 AI Coordinator</strong> — Cross-team orchestration</li>
+    </ul>
+
+    <p>Unlike traditional consulting, we don't hire more people as you scale. We <strong>replicate the agent architecture across projects</strong>. Same 14-person structure, infinite projects.</p>
+  </div>
+
+  <!-- What We're Building -->
+  <div class="section">
+    <h2><i class="ti ti-timeline"></i> What We're Building</h2>
+    <p>Three-wave roadmap to proven, scalable autonomous model:</p>
+
+    <div class="wave-box">
+      <h3><i class="ti ti-number-1"></i> Wave 1: Foundation (Now → Feb 2027)</h3>
+      <p><strong>Build one autonomous org:</strong> AISP Portal with 14-person structure.</p>
+      <p><strong>What gets deployed:</strong> Org consolidation, automated agent creation, agent loops, 3 managed agents, smart pattern library.</p>
+      <p><strong>Target:</strong> 95% autonomy, 30% token savings, proven internal operation.</p>
+    </div>
+
+    <div class="wave-box">
+      <h3><i class="ti ti-number-2"></i> Wave 2: Multi-Project (Feb → Oct 2027)</h3>
+      <p><strong>Replicate structure:</strong> 3-5 projects under AISP umbrella, same org model.</p>
+      <p><strong>What gets built:</strong> Cross-project pattern sharing, expanded agent teams.</p>
+      <p><strong>Target:</strong> 98% autonomy, 40% token savings, scalable model proven.</p>
+    </div>
+
+    <div class="wave-box">
+      <h3><i class="ti ti-number-3"></i> Wave 3+: Scale (Oct 2027+)</h3>
+      <p><strong>Proven repeatable pattern:</strong> Unlimited projects with same structure.</p>
+      <p><strong>Business options:</strong> Continue as internal agency, license the model, sell the platform.</p>
+      <p><strong>Target:</strong> 99%+ autonomy, 50%+ token savings, model ready for market.</p>
+    </div>
+  </div>
+
+  <!-- Our Bet -->
+  <div class="section">
+    <h2><i class="ti ti-target"></i> Our Bet</h2>
+    <p>We're betting on four measurable outcomes:</p>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="value">25-50%</div>
+        <div class="label">Token Savings</div>
+      </div>
+      <div class="metric-card">
+        <div class="value">95%+</div>
+        <div class="label">Autonomy Rate</div>
+      </div>
+      <div class="metric-card">
+        <div class="value">10x</div>
+        <div class="label">Faster Dev</div>
+      </div>
+      <div class="metric-card">
+        <div class="value">∞</div>
+        <div class="label">Scalability</div>
+      </div>
+    </div>
+
+    <ul>
+      <li><strong>Token Savings (25-50%):</strong> Smart pattern library, automated agent creation, and agent loops eliminate redundant work. Same output, fewer tokens.</li>
+      <li><strong>Autonomy (95%+):</strong> Only strategic decisions need you. Agents handle 95% of work autonomously within clear thresholds.</li>
+      <li><strong>Speed (10x):</strong> No human-in-the-loop delays. Autonomous execution runs 24/7. Deploy in days, not weeks.</li>
+      <li><strong>Quality (Consistent):</strong> Agent loops self-correct. Better output on first try. Memory-based learning compounds over time.</li>
+    </ul>
+  </div>
+
+  <!-- Our Philosophy -->
+  <div class="section">
+    <h2><i class="ti ti-brain"></i> Our Philosophy</h2>
+    <p><strong>AI agents are not dumb automation.</strong> Our agents:</p>
+
+    <div class="philosophy-grid">
+      <div class="philosophy-item">
+        <i class="ti ti-book"></i>
+        <h3>Learn</h3>
+        <p>Memory-based learning from feedback. Better decisions next time.</p>
+      </div>
+      <div class="philosophy-item">
+        <i class="ti ti-refresh"></i>
+        <h3>Self-Correct</h3>
+        <p>Agent loops iterate until success. No human verification needed.</p>
+      </div>
+      <div class="philosophy-item">
+        <i class="ti ti-chart-line"></i>
+        <h3>Improve</h3>
+        <p>Pattern library compounds. Knowledge shared across projects.</p>
+      </div>
+      <div class="philosophy-item">
+        <i class="ti ti-shield-check"></i>
+        <h3>Decide</h3>
+        <p>Autonomy within guardrails. Clear thresholds for escalation.</p>
+      </div>
+    </div>
+
+    <p style="margin-top: 2rem;"><strong>Your job shifts from execution to orchestration:</strong></p>
+    <ul>
+      <li>Teach agents (feedback loops)</li>
+      <li>Make strategic bets (Wave planning)</li>
+      <li>Measure outcomes (KPIs, autonomy rates)</li>
+      <li>Decide the big questions (direction, tradeoffs)</li>
+    </ul>
+  </div>
+
+  <!-- Competitive Advantage -->
+  <div class="section">
+    <h2><i class="ti ti-crown"></i> Competitive Advantage</h2>
+    <p>What makes AISP different from traditional consulting or one-off AI automation:</p>
+
+    <div class="advantage-list">
+      <div class="advantage-item">
+        <strong>💰 Cost</strong>
+        <p>30-50% token efficiency. Same work, far fewer tokens.</p>
+      </div>
+      <div class="advantage-item">
+        <strong>⚡ Speed</strong>
+        <p>Autonomous execution. Deploy in days, not weeks.</p>
+      </div>
+      <div class="advantage-item">
+        <strong>✅ Quality</strong>
+        <p>Self-correcting loops. Better first try, not trial-and-error.</p>
+      </div>
+      <div class="advantage-item">
+        <strong>📈 Learning</strong>
+        <p>Memory compounds. Gets smarter every week, not static.</p>
+      </div>
+      <div class="advantage-item">
+        <strong>♾️ Scalability</strong>
+        <p>One structure, infinite projects. Linear growth without hiring.</p>
+      </div>
+      <div class="advantage-item">
+        <strong>🎯 Repeatability</strong>
+        <p>Proven model. Same success recipe for every project.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Metrics by Wave -->
+  <div class="section">
+    <h2><i class="ti ti-chart-bar"></i> Success Metrics by Wave</h2>
+
+    <div class="wave-box">
+      <h3>Wave 1: Foundation (Target: Feb 2027)</h3>
+      <ul>
+        <li><strong>Autonomy:</strong> 95% of tasks completed without human prompt</li>
+        <li><strong>Token Savings:</strong> 30% vs. manual baseline</li>
+        <li><strong>Deployed:</strong> 1 org (AISP Portal v1.2)</li>
+        <li><strong>Agents:</strong> 14-person structure live and learning</li>
+        <li><strong>Success:</strong> Org runs itself. You approve decisions, don't do work.</li>
+      </ul>
+    </div>
+
+    <div class="wave-box">
+      <h3>Wave 2: Multi-Project (Target: Oct 2027)</h3>
+      <ul>
+        <li><strong>Autonomy:</strong> 98% of tasks autonomous</li>
+        <li><strong>Token Savings:</strong> 40% vs. baseline</li>
+        <li><strong>Deployed:</strong> 3-5 projects under AISP umbrella</li>
+        <li><strong>Model Proven:</strong> Same structure works across different projects</li>
+        <li><strong>Success:</strong> Scalable pattern validated.</li>
+      </ul>
+    </div>
+
+    <div class="wave-box">
+      <h3>Wave 3+: Scale (Target: 2028+)</h3>
+      <ul>
+        <li><strong>Autonomy:</strong> 99%+ (only CEO involvement on strategy)</li>
+        <li><strong>Token Savings:</strong> 50%+ per sprint</li>
+        <li><strong>Business:</strong> Model ready to license, sell, or expand internally</li>
+        <li><strong>Success:</strong> Proven, repeatable, profitable autonomous consulting model.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CTA Section -->
+  <div class="cta-section">
+    <h3>Ready to Go Deeper?</h3>
+    <p>This vision is brought to life through our systems and structure. Explore them below:</p>
+    <div>
+      <a href="AISP_COMPANY_PLAYBOOK.html" class="button">Company Playbook</a>
+      <a href="AISP_Master_Hub.html" class="button secondary">Back to Hub</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>AISP Vision Statement | Updated June 20, 2026</p>
+    <p><a href="AISP_Master_Hub.html">← Back to Master Hub</a></p>
+  </div>
+</div>
+
+</body>
+</html>

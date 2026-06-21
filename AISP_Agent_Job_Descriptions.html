@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Agent Job Descriptions (12-Person Org)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.search-box {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-box input {
+  flex: 1;
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  color: #e0e7ff;
+  font-size: 14px;
+}
+
+.search-box input::placeholder {
+  color: #6b7280;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: #111827;
+  border: 1px solid #374151;
+  color: #9ca3af;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.filter-btn.active {
+  background: #00c2ff;
+  color: #0b0f14;
+  border-color: #00c2ff;
+}
+
+.filter-btn:hover:not(.active) {
+  border-color: #4b5563;
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.agent-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.agent-card:hover {
+  border-color: #00c2ff;
+  box-shadow: 0 8px 24px rgba(0, 194, 255, 0.1);
+}
+
+.agent-header {
+  background: linear-gradient(135deg, #2d3748 0%, #1f2937 100%);
+  padding: 1.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.agent-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e0e7ff;
+  margin-bottom: 0.25rem;
+}
+
+.agent-title {
+  font-size: 14px;
+  color: #00c2ff;
+  margin-bottom: 0.75rem;
+}
+
+.agent-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: rgba(0, 194, 255, 0.15);
+  border: 1px solid #00c2ff;
+  color: #00c2ff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge.senior {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.badge.junior {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.badge.cto {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.badge.product {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: #a855f7;
+  color: #a855f7;
+}
+
+.badge.sales {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: #f97316;
+  color: #f97316;
+}
+
+.badge.finance {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.agent-content {
+  padding: 1.5rem;
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.section-content {
+  font-size: 13px;
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
+.reports-to {
+  background: #111827;
+  border-left: 3px solid #f59e0b;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.reports-to strong {
+  color: #f59e0b;
+}
+
+.responsibility-list {
+  list-style: none;
+  margin: 0.75rem 0;
+}
+
+.responsibility-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.responsibility-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #00c2ff;
+  font-weight: 700;
+}
+
+.kpi-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  font-size: 12px;
+}
+
+.kpi-item {
+  background: #111827;
+  border: 1px solid #374151;
+  padding: 0.5rem;
+  border-radius: 4px;
+  color: #d1d5db;
+}
+
+.kpi-label {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.kpi-target {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.autonomy-level {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+}
+
+.autonomy-level strong {
+  color: #10b981;
+}
+
+.consolidation-box {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid #3b82f6;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.scaling-note {
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid #a855f7;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.scaling-note strong {
+  color: #a855f7;
+}
+
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: #9ca3af;
+  grid-column: 1 / -1;
+}
+
+.summary {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00c2ff;
+}
+
+.summary-detail {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="ti ti-briefcase"></i> AISP Agent Job Descriptions</h1>
+    <p>Detailed role specifications for all 8 agents in the consolidated 12-person organization.</p>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary">
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-label">Total Agents</div>
+        <div class="summary-value">8</div>
+        <div class="summary-detail">+ 1 CEO + 1 Coordinator = 14 people</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Senior Agents</div>
+        <div class="summary-value">4</div>
+        <div class="summary-detail">Specialized leadership roles</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Junior Agents</div>
+        <div class="summary-value">4</div>
+        <div class="summary-detail">Generalist support roles</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Weekly Tasks</div>
+        <div class="summary-value">~1,700</div>
+        <div class="summary-detail">Autonomous execution</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="search-box">
+    <i class="ti ti-search"></i>
+    <input type="text" id="searchInput" placeholder="Search by agent name, role, or team...">
+    <div class="filter-buttons">
+      <button class="filter-btn active" onclick="filterTeam('')">All</button>
+      <button class="filter-btn" onclick="filterTeam('Engineering')">Engineering</button>
+      <button class="filter-btn" onclick="filterTeam('Product')">Product</button>
+      <button class="filter-btn" onclick="filterTeam('Sales')">Sales</button>
+      <button class="filter-btn" onclick="filterTeam('Finance')">Finance</button>
+    </div>
+  </div>
+
+  <!-- Agent Cards -->
+  <div class="agent-grid" id="agentGrid"></div>
+
+</div>
+
+<script>
+const agents = [
+  {
+    name: 'Neo',
+    title: 'Code Quality Lead (Agent)',
+    team: 'Engineering',
+    level: 'Senior',
+    reportsTo: 'Anderson (CTO)',
+    responsibility: [
+      'PR code reviews (style, security, architecture)',
+      'Test automation strategy and execution',
+      'Performance analysis and optimization',
+      'Code quality standards enforcement',
+      'Security pattern detection',
+      'Architecture validation for new features'
+    ],
+    weeklyVolume: '40-50 PRs reviewed, 20-30 issues identified',
+    kpis: [
+      { label: 'Review Time', target: '<8 min' },
+      { label: 'Issues Found', target: '>95%' },
+      { label: 'Security Issues', target: '100% caught' },
+      { label: 'Code Quality Score', target: '>95/100' }
+    ],
+    autonomy: 'Auto-approve <$5K. Escalate architecture decisions >$5K to Anderson.',
+    consolidates: 'Replaces: Neo + JORDAN (testing) + KIRA (architecture) + LIAM (performance). Consolidates code quality domain under one senior leadership.',
+    scaling: 'Sprint 6+: Split into Neo_SENIOR (reviews/strategy) + Neo_JR (test automation) + Neo_JR2 (performance analysis). Specialists emerge from generalist base.'
+  },
+  {
+    name: 'Trinity',
+    title: 'Developer Agent (Full-Stack)',
+    team: 'Engineering',
+    level: 'Junior',
+    reportsTo: 'Anderson (CTO)',
+    responsibility: [
+      'Full-stack code implementation',
+      'Feature development and bug fixes',
+      'Code generation and scaffolding',
+      'General technical problem-solving',
+      'Documentation and inline comments'
+    ],
+    weeklyVolume: '8-12 features/sprints, 20-30 bug fixes',
+    kpis: [
+      { label: 'Feature Delivery', target: '>90%' },
+      { label: 'Code Coverage', target: '>85%' },
+      { label: 'Bug Fix Time', target: '<2 days' },
+      { label: 'Build Success', target: '>98%' }
+    ],
+    autonomy: 'Auto-execute coding tasks <$5K. Escalate architectural changes to ALEX/ECHO.',
+    consolidates: 'Replaces: OLIVER (build) + PARKER (release) + 6 specialized agents. One generalist developer handles broad coding work.',
+    scaling: 'Sprint 6+: Split into CASEY_SENIOR (lead/architecture) + CASEY_JR1 (backend) + CASEY_JR2 (frontend). Specialization by domain as scope grows.'
+  },
+  {
+    name: 'Tank',
+    title: 'DevOps & Infrastructure (Agent)',
+    team: 'Engineering',
+    level: 'Junior',
+    reportsTo: 'Anderson (CTO)',
+    responsibility: [
+      'Deployment orchestration and automation',
+      'Production monitoring and alerting',
+      'Infrastructure provisioning and scaling',
+      'Database administration and optimization',
+      'Cost optimization and budget tracking',
+      'Incident response coordination'
+    ],
+    weeklyVolume: '5-10 deployments, 1 infrastructure change, 7 backups verified',
+    kpis: [
+      { label: 'Deploy Success', target: '>98%' },
+      { label: 'System Uptime', target: '99.99%' },
+      { label: 'P95 Latency', target: '<200ms' },
+      { label: 'MTTR (incidents)', target: '<15 min' },
+      { label: 'Cost Trend', target: 'Decreasing' }
+    ],
+    autonomy: 'Auto-execute deployments & monitoring. Escalate infrastructure changes >$5K to Anderson/Persephone.',
+    consolidates: 'Replaces: Tank + DREW + MORGAN + ULYSSES + CAMERON (ops cost). Consolidates entire infrastructure/ops domain under one agent.',
+    scaling: 'Sprint 12+: Split into Tank_SENIOR (strategy) + Tank_JR1 (infrastructure) + Tank_JR2 (monitoring/observability). Specialization by domain.'
+  },
+  {
+    name: 'Morpheus',
+    title: 'Product Manager (Agent)',
+    team: 'Product',
+    level: 'Senior',
+    reportsTo: 'Niobe (CPO)',
+    responsibility: [
+      'Sprint planning and backlog management',
+      'Feature prioritization and roadmap',
+      'User story creation and refinement',
+      'Acceptance criteria definition',
+      'Story point estimation',
+      'Release coordination',
+      'Velocity tracking and forecasting'
+    ],
+    weeklyVolume: '30-40 issues triaged, 1 sprint planned, 20-30 stories created',
+    kpis: [
+      { label: 'Sprint Velocity', target: '±10%' },
+      { label: 'Feature Delivery', target: '>95% on-time' },
+      { label: 'Backlog Freshness', target: '100%' },
+      { label: 'User Story Quality', target: '>95/100' }
+    ],
+    autonomy: 'Auto-prioritize backlog. Escalate roadmap changes >$5K to Niobe. Product strategy to you (Brandon).',
+    consolidates: 'Replaces: Morpheus + MAYA + JASPER + QUINN. Consolidates all product management under one senior PM leadership.',
+    scaling: 'Sprint 6+: Add Morpheus_JR (product ops). Morpheus focuses on strategy/roadmap, junior handles execution. Mentorship-driven growth.'
+  },
+  {
+    name: 'Ghost',
+    title: 'Product Operations (Agent)',
+    team: 'Product',
+    level: 'Junior',
+    reportsTo: 'Niobe (CPO)',
+    responsibility: [
+      'User requirement gathering and analysis',
+      'User story formatting and linking',
+      'Acceptance test generation',
+      'User feedback collection and synthesis',
+      'Feature request clustering and analysis',
+      'Product analytics and reporting'
+    ],
+    weeklyVolume: '5-10 feature requests, 20-30 acceptance tests, 50+ feedback items',
+    kpis: [
+      { label: 'Requirements Completeness', target: '>95%' },
+      { label: 'Test Generation Accuracy', target: '>90%' },
+      { label: 'Feedback Coverage', target: '>80%' },
+      { label: 'Feedback Turnaround', target: '<2 days' }
+    ],
+    autonomy: 'Auto-generate stories & tests. Escalate requirements conflicts to Morpheus.',
+    consolidates: 'Replaces: Ghost + RIVER (product feedback) + general product support work. Generalist product operations.',
+    scaling: 'Sprint 12+: As product scope grows, Ghost can specialize (e.g., analytics lead). For now, broad product operations.'
+  },
+  {
+    name: 'Agent Smith',
+    title: 'Growth & Demand Gen (Agent)',
+    team: 'Sales & Marketing',
+    level: 'Senior',
+    reportsTo: 'Persephone (Chief Sales Officer)',
+    responsibility: [
+      'Marketing campaign strategy and execution',
+      'Lead generation and funnel optimization',
+      'Customer acquisition strategies',
+      'Competitive intelligence and analysis',
+      'Product positioning and messaging',
+      'Growth metrics and reporting'
+    ],
+    weeklyVolume: '2-3 campaigns, 5-10 competitive analyses, weekly growth reports',
+    kpis: [
+      { label: 'Lead Gen Volume', target: '>50/week' },
+      { label: 'Customer Acquisition Cost', target: '<$50' },
+      { label: 'Campaign ROI', target: '>3:1' },
+      { label: 'Market Coverage', target: '>90%' }
+    ],
+    autonomy: 'Auto-execute campaigns <$5K. Escalate strategy decisions >$5K to Persephone.',
+    consolidates: 'NEW ROLE. Sales/Marketing is new function in consolidated org. Agent Smith drives growth strategy.',
+    scaling: 'Sprint 6+: Add Agent Smith_JR (campaign execution). Agent Smith focuses on strategy, junior handles daily campaigns. Team grows with revenue focus.'
+  },
+  {
+    name: 'Cypher',
+    title: 'Sales Operations (Agent)',
+    team: 'Sales & Marketing',
+    level: 'Junior',
+    reportsTo: 'Persephone (Chief Sales Officer)',
+    responsibility: [
+      'CRM management and pipeline tracking',
+      'Sales process automation',
+      'Customer engagement and communication',
+      'Vendor and partner relationship management',
+      'Sales metrics and pipeline reporting',
+      'Customer success coordination'
+    ],
+    weeklyVolume: '100+ pipeline updates, 10-20 customer engagements, 2-3 vendor interactions',
+    kpis: [
+      { label: 'Pipeline Accuracy', target: '>90%' },
+      { label: 'Customer Response Time', target: '<4 hrs' },
+      { label: 'Deal Velocity', target: '>5 deals/month' },
+      { label: 'Customer Satisfaction', target: '>4.5/5' }
+    ],
+    autonomy: 'Auto-manage CRM and customer communications. Escalate customer escalations to Persephone.',
+    consolidates: 'NEW ROLE. Sales operations generalist supporting sales growth.',
+    scaling: 'Sprint 12+: As sales scales, Cypher might specialize (e.g., customer success lead). For now, broad sales ops.'
+  },
+  {
+    name: 'The Architect',
+    title: 'Finance & Operations (Agent)',
+    team: 'Finance & Operations',
+    level: 'Senior',
+    reportsTo: 'Dozer (CFO)',
+    responsibility: [
+      'Budget tracking and reconciliation',
+      'Financial reporting and forecasting',
+      'Cloud spend analysis and optimization',
+      'Cost reduction recommendations',
+      'Compliance and audit management',
+      'Incident and reliability tracking',
+      'Infrastructure capacity planning'
+    ],
+    weeklyVolume: '1 spend analysis, 2-3 cost optimizations, 1 financial report, 7 compliance checks',
+    kpis: [
+      { label: 'Budget Variance', target: '±5%' },
+      { label: 'Cost Trend', target: 'Decreasing' },
+      { label: 'Audit Findings', target: '0' },
+      { label: 'Cost per Transaction', target: '<$0.10' },
+      { label: 'SLA Compliance', target: '>99.9%' }
+    ],
+    autonomy: 'Auto-execute budgeting & cost optimization. Escalate major financial decisions >$5K to Dozer.',
+    consolidates: 'Replaces: Dozer + CAMERON (cost) + HUNTER + FINLEY + PHOENIX (incident/reliability) + DREW (infra planning). Finance + Operations consolidation.',
+    scaling: 'Sprint 12+: Optionally add The Architect_JR (finance specialist). The Architect stays focused on budget/cost strategy. But for now, one senior handles all.'
+  }
+];
+
+function renderAgents(filter = '', search = '') {
+  const grid = document.getElementById('agentGrid');
+  grid.innerHTML = '';
+
+  const filtered = agents.filter(a => {
+    const teamMatch = filter === '' || a.team === filter;
+    const searchMatch = search === '' ||
+      a.name.toLowerCase().includes(search) ||
+      a.title.toLowerCase().includes(search) ||
+      a.team.toLowerCase().includes(search);
+    return teamMatch && searchMatch;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">No agents match your search.</div>';
+    return;
+  }
+
+  filtered.forEach(agent => {
+    const teamClass = agent.team === 'Engineering' ? 'cto' : agent.team === 'Product' ? 'product' : agent.team === 'Sales & Marketing' ? 'sales' : 'finance';
+    const levelClass = agent.level === 'Senior' ? 'senior' : 'junior';
+
+    const html = `
+      <div class="agent-card" data-team="${agent.team}">
+        <div class="agent-header">
+          <div class="agent-name">${agent.name}</div>
+          <div class="agent-title">${agent.title}</div>
+          <div class="agent-meta">
+            <span class="badge ${levelClass}">${agent.level}</span>
+            <span class="badge ${teamClass}">${agent.team}</span>
+          </div>
+        </div>
+        <div class="agent-content">
+          <div class="reports-to"><strong>Reports To:</strong> ${agent.reportsTo}</div>
+
+          <div class="section">
+            <div class="section-title">Key Responsibilities</div>
+            <ul class="responsibility-list">
+              ${agent.responsibility.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Weekly Volume</div>
+            <div class="section-content">${agent.weeklyVolume}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">KPIs</div>
+            <div class="kpi-list">
+              ${agent.kpis.map(k => `
+                <div class="kpi-item">
+                  <div class="kpi-label">${k.label}</div>
+                  <div class="kpi-target">${k.target}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Autonomy Level</div>
+            <div class="autonomy-level">${agent.autonomy}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Consolidation Notes</div>
+            <div class="consolidation-box">${agent.consolidates}</div>
+          </div>
+
+          <div class="scaling-note">
+            <strong>Scaling Path:</strong> ${agent.scaling}
+          </div>
+        </div>
+      </div>
+    `;
+    grid.innerHTML += html;
+  });
+}
+
+function filterTeam(team) {
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  const search = document.getElementById('searchInput').value;
+  renderAgents(team, search);
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const team = document.querySelector('.filter-btn.active').textContent.trim();
+  const actualTeam = team === 'All' ? '' : team;
+  renderAgents(actualTeam, e.target.value.toLowerCase());
+});
+
+renderAgents();
+</script>
+
+</body>
+</html>

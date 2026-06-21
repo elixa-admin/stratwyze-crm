@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Master Hub</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.hub { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00c2ff;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-card .label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #00c2ff;
+  margin-bottom: 0.25rem;
+}
+
+.stat-card .sublabel {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f3f4f6;
+}
+
+.section h2 i {
+  font-size: 24px;
+  color: #00c2ff;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.nav-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.nav-card:hover {
+  border-color: #00c2ff;
+  background: linear-gradient(135deg, #1f2937 0%, #0f172a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 194, 255, 0.1);
+}
+
+.nav-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-card p {
+  font-size: 13px;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.nav-card i {
+  font-size: 20px;
+}
+
+.quick-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.quick-link {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  color: #e0e7ff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.quick-link:hover {
+  background: #2d3748;
+  border-color: #00c2ff;
+  color: #00c2ff;
+}
+
+.quick-link i {
+  display: block;
+  font-size: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.org-preview {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+}
+
+.org-preview code {
+  color: #00c2ff;
+  line-height: 1.8;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.metric {
+  background: #1f2937;
+  border-left: 3px solid #00c2ff;
+  border-radius: 4px;
+  padding: 1.25rem;
+}
+
+.metric .title {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.metric .value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00c2ff;
+}
+
+.metric .detail {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.footer {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-top: 3rem;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tag {
+  display: inline-block;
+  background: #374151;
+  color: #d1d5db;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.tag.tier1 { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+.tag.tier2 { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+.tag.tier3 { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; }
+</style>
+</head>
+<body>
+
+<div class="hub">
+  <div class="header">
+    <h1><i class="ti ti-brain"></i> AISP Master Hub</h1>
+    <p>Command center for your consolidated 14-person AI organization. Lean, scalable, token-efficient. Version 2.0 — June 2026</p>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="hero-stats">
+    <div class="stat-card">
+      <div class="label">Total Organization Size</div>
+      <div class="value">14</div>
+      <div class="sublabel">1 CEO + 4 Directors + 8 Agents + 1 Coordinator</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Weekly Tasks</div>
+      <div class="value">1,700+</div>
+      <div class="sublabel">Lean, autonomous execution</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Autonomy Rate</div>
+      <div class="value">95%</div>
+      <div class="sublabel">Only ~5 items/week need your approval</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Token Burn Reduction</div>
+      <div class="value">65%</div>
+      <div class="sublabel">vs. 47-agent model per sprint</div>
+    </div>
+  </div>
+
+  <!-- Quick Navigation -->
+  <div class="section">
+    <h2><i class="ti ti-compass"></i> Navigate</h2>
+    <div class="nav-grid">
+      <a href="AISP_Consolidated_Org_12Person.html" class="nav-card">
+        <h3><i class="ti ti-hierarchy-2"></i> Consolidated Organization (12-Person)</h3>
+        <p>CURRENT: Interactive org chart, team structure, scaling path, and agent roster</p>
+        <div class="tag tier1">14 people (1 CEO + 4 Directors + 1 Coordinator + 8 Agents)</div>
+      </a>
+      <a href="AISP_Agent_Job_Descriptions.html" class="nav-card">
+        <h3><i class="ti ti-briefcase"></i> Agent Job Descriptions</h3>
+        <p>Detailed role specs for all 8 agents: responsibilities, KPIs, autonomy, consolidation notes, scaling path</p>
+        <div class="tag tier1">Searchable by team/role</div>
+      </a>
+      <a href="AISP_Director_Onboarding.html" class="nav-card">
+        <h3><i class="ti ti-book"></i> Director Onboarding Guides</h3>
+        <p>Complete role guides for Anderson, Niobe, Persephone, Dozer: team, KPIs, rhythm, first 30 days</p>
+        <div class="tag tier1">4 Directors</div>
+      </a>
+      <a href="AISP_Decision_Authority.html" class="nav-card">
+        <h3><i class="ti ti-gavel"></i> Decision Authority Framework</h3>
+        <p>Approval thresholds ($5K/$50K/$500K), who decides what, escalation paths, special cases</p>
+        <div class="tag tier1">Governance</div>
+      </a>
+      <a href="AISP_Task_Ownership_Matrix.html" class="nav-card">
+        <h3><i class="ti ti-list-check"></i> Task Ownership Matrix</h3>
+        <p>Who owns what tasks by function, team, and role. Searchable and filterable responsibility map</p>
+        <div class="tag tier1">Task assignments</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Managed Agents (Autonomous) -->
+  <div class="section">
+    <h2><i class="ti ti-robot"></i> Managed Agents (Autonomous, Cloud-Deployed)</h2>
+    <div class="nav-grid">
+      <div class="nav-card" style="cursor: default;">
+        <h3><i class="ti ti-check-circle"></i> NEO — Code Quality Monitor</h3>
+        <p>Reviews all PRs daily. Identifies security issues, coverage gaps, architectural concerns. Learns from feedback.</p>
+        <div class="tag tier1">Daily 6:00 AM</div>
+        <div class="tag tier1">Owner: Anderson</div>
+        <div class="tag"># Saves 3h/week</div>
+      </div>
+      <div class="nav-card" style="cursor: default;">
+        <h3><i class="ti ti-message-circle"></i> GHOST — Feedback Synthesis</h3>
+        <p>Synthesizes user feedback weekly. Identifies themes, churn signals, segment insights. Memory-based learning.</p>
+        <div class="tag tier1">Fridays 5:00 PM</div>
+        <div class="tag tier1">Owner: Niobe</div>
+        <div class="tag"># Saves 4h/week</div>
+      </div>
+      <div class="nav-card" style="cursor: default;">
+        <h3><i class="ti ti-heartbeat"></i> TANK — Infrastructure Monitor</h3>
+        <p>Monitors system health 2x daily. Detects outages, cost anomalies, optimizations. Baseline learning over time.</p>
+        <div class="tag tier1">6:00 AM, 6:00 PM</div>
+        <div class="tag tier1">Owner: Anderson + Dozer</div>
+        <div class="tag"># Saves 5h/week</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Implementation -->
+  <div class="section">
+    <h2><i class="ti ti-rocket"></i> Implementation & Transition</h2>
+    <div class="nav-grid">
+      <a href="AISP_Implementation_Path_12Person.html" class="nav-card">
+        <h3><i class="ti ti-calendar"></i> Implementation Path</h3>
+        <p>Big bang cutover timeline, prep phase, validation (Sprint 0-2), cleanup, rollback plan</p>
+        <div class="tag tier2">Transition Plan</div>
+      </a>
+      <a href="AISP_Company_Brief_v3.html" class="nav-card">
+        <h3><i class="ti ti-briefcase"></i> Company Brief</h3>
+        <p>Routing matrix, tool selection rules, autonomy tiers, guidance principles (legacy reference)</p>
+        <div class="tag tier1">Reference</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Organization Overview -->
+  <div class="section">
+    <h2><i class="ti ti-git-branch"></i> Organization Structure (Consolidated 12-Person)</h2>
+    <div class="org-preview"><code>BRANDON (CEO)
+├─ Zion — Cross-Functional Coordinator (Agent)
+├─ Anderson (CTO) — Engineering [3 agents: Neo, Trinity, Tank]
+├─ Niobe (CPO) — Product [2 agents: Morpheus, Ghost]
+├─ Persephone (CSO) — Sales & Marketing [2 agents: Agent Smith, Cypher]
+└─ Dozer (CFO) — Finance & Operations [1 agent: The Architect]
+
+TOTAL: 1 CEO + 4 Directors + 1 Coordinator + 8 Agents = 14 people
+TOKEN SAVINGS: 65% reduction vs. 47-agent model
+WEEKLY TASKS: ~1,700 autonomous executions</code></div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="section">
+    <h2><i class="ti ti-chart-bar"></i> Operational Metrics</h2>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="title">Autonomous Execution Rate</div>
+        <div class="value">95%</div>
+        <div class="detail">Tasks completed without human approval</div>
+      </div>
+      <div class="metric">
+        <div class="title">Weekly Manual Approvals</div>
+        <div class="value">&lt;5</div>
+        <div class="detail">Average items waiting for your review</div>
+      </div>
+      <div class="metric">
+        <div class="title">Agent Failure Rate</div>
+        <div class="value">&lt;2%</div>
+        <div class="detail">Task completion reliability</div>
+      </div>
+      <div class="metric">
+        <div class="title">Cost per Task</div>
+        <div class="value">$0.04</div>
+        <div class="detail">Average token cost</div>
+      </div>
+      <div class="metric">
+        <div class="title">Time to Deploy</div>
+        <div class="value">10 min</div>
+        <div class="detail">End-to-end release cycle</div>
+      </div>
+      <div class="metric">
+        <div class="title">Production Uptime</div>
+        <div class="value">99.99%</div>
+        <div class="detail">Target SLA compliance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leadership Structure -->
+  <div class="section">
+    <h2><i class="ti ti-layers-3"></i> Leadership Structure</h2>
+    <div class="nav-grid">
+      <div class="nav-card" style="cursor: default;">
+        <h3><i class="ti ti-crown"></i> CEO + Coordinator</h3>
+        <p><strong>BRANDON (CEO)</strong> — Final authority on >$50K decisions. <strong>Zion</strong> — Coordinates cross-functional work.</p>
+        <div class="tag tier1">Human</div>
+        <div class="tag">Agent</div>
+      </div>
+      <div class="nav-card" style="cursor: default;">
+        <h3><i class="ti ti-user-check"></i> Directors (AI Executives)</h3>
+        <p><strong>4 directors</strong> — Anderson (CTO), Niobe (CPO), Persephone (CSO), Dozer (CFO). Each auto-approve &lt;$5K, decide $5K–$50K.</p>
+        <div class="tag tier2">Auto &lt;$5K</div>
+        <div class="tag">Decide $5K–$50K</div>
+      </div>
+      <div class="nav-card" style="cursor: default;">
+        <h3><i class="ti ti-zap"></i> Agents (Specialists)</h3>
+        <p><strong>8 agents</strong> — 4 Senior (specialized), 4 Junior (generalists). Examples: Neo, Morpheus, Agent Smith, The Architect.</p>
+        <div class="tag tier1">Auto-execute</div>
+        <div class="tag">Report to Directors</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documentation Links -->
+  <div class="section">
+    <h2><i class="ti ti-book"></i> Reference Docs</h2>
+    <div class="quick-nav">
+      <a href="AISP_CONTEXT_ARCHITECTURE.md" class="quick-link">
+        <i class="ti ti-layout"></i>
+        <div>Context Architecture</div>
+      </a>
+      <a href="AISP_IMPLEMENTATION_GUIDE.md" class="quick-link">
+        <i class="ti ti-checklist"></i>
+        <div>Implementation Guide</div>
+      </a>
+      <a href="AISP_TOOL_SELECTION_ENGINE.md" class="quick-link">
+        <i class="ti ti-tools"></i>
+        <div>Tool Selection</div>
+      </a>
+      <a href="AISP_AI_EMPLOYEE_ROSTER.md" class="quick-link">
+        <i class="ti ti-users"></i>
+        <div>Agent Roster</div>
+      </a>
+      <a href="AISP_METHODOLOGY_MASTER_SUMMARY.md" class="quick-link">
+        <i class="ti ti-target"></i>
+        <div>Methodology</div>
+      </a>
+      <a href="AISP_CEO_Dashboard.html" class="quick-link">
+        <i class="ti ti-dashboard"></i>
+        <div>KPI Dashboard</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Getting Started -->
+  <div class="section">
+    <h2><i class="ti ti-rocket"></i> Getting Started</h2>
+    <div style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border: 1px solid #374151; border-radius: 8px; padding: 2rem;">
+      <ol style="color: #e0e7ff; font-size: 14px; line-height: 2; margin-left: 1.5rem;">
+        <li><strong>Explore the Hub</strong> — You are here. This is your consolidated 12-person org entry point.</li>
+        <li><strong>Understand the Org</strong> — Read AISP_Consolidated_Org_12Person.html for structure, team breakdown, and scaling path.</li>
+        <li><strong>Review Agent Roles</strong> — Check AISP_Agent_Job_Descriptions.html to see responsibilities, KPIs, and consolidation notes for each agent.</li>
+        <li><strong>Director Onboarding</strong> — Read AISP_Director_Onboarding.html for role guides, decision authority, and first 30 days for Anderson, Niobe, Persephone, Dozer.</li>
+        <li><strong>Approval Framework</strong> — Review AISP_Decision_Authority.html to understand $5K/$50K/$500K thresholds and escalation paths.</li>
+        <li><strong>Implementation Plan</strong> — Check AISP_Implementation_Path_12Person.html for the transition timeline and rollback safeguards.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p><strong>AISP Master Hub</strong> — 14-person consolidated organization (47→12 agent consolidation). Single entry point for all org context.</p>
+    <p style="margin-top: 1rem;">Last updated: June 20, 2026 | Organization consolidation reduces token burn by 65%. Implementation begins Sprint 0.</p>
+  </div>
+
+</div>
+
+</body>
+</html>

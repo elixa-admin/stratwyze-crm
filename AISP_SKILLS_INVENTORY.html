@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Skills Inventory & Integration</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.hub { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header h1 i { font-size: 40px; }
+.header p { font-size: 14px; color: #9ca3af; }
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.tab-button:hover { color: #00c2ff; }
+.tab-button.active { color: #00c2ff; border-bottom-color: #00c2ff; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section h2 i { font-size: 32px; color: #10b981; }
+
+.skill-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s;
+}
+
+.skill-card:hover {
+  border-color: #00c2ff;
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+}
+
+.skill-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skill-purpose {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+.skill-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.detail-item {
+  background: rgba(0, 194, 255, 0.05);
+  border-left: 2px solid #10b981;
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.detail-label {
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: #e0e7ff;
+  font-weight: 500;
+}
+
+.use-cases {
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 2px solid #10b981;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.use-cases strong { color: #10b981; display: block; margin-bottom: 0.5rem; }
+
+.use-cases ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.use-cases li {
+  padding: 0.25rem 0;
+  font-size: 13px;
+  color: #d1d5db;
+  position: relative;
+}
+
+.use-cases li:before {
+  content: "▸";
+  position: absolute;
+  left: -0.75rem;
+  color: #10b981;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.workflow-box {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(0, 194, 255, 0.05) 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.workflow-box h4 {
+  color: #10b981;
+  font-size: 14px;
+  margin-bottom: 0.5rem;
+}
+
+.workflow-box p {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.table thead { background: rgba(0, 194, 255, 0.1); }
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #00c2ff;
+  border-bottom: 1px solid #374151;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  color: #d1d5db;
+}
+
+.table tr:last-child td { border-bottom: none; }
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-available {
+  background: #10b98126;
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.status-testing {
+  background: #f9731626;
+  color: #f97316;
+  border: 1px solid #f97316;
+}
+
+.status-planned {
+  background: #3b82f626;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+}
+
+.footer {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-top: 3rem;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.footer a {
+  color: #00c2ff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .skill-details { grid-template-columns: 1fr; }
+  .tabs { gap: 0.25rem; }
+  .tab-button { padding: 0.5rem 0.75rem; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hub">
+  <div class="header">
+    <h1><i class="ti ti-wand"></i> AISP Skills Inventory & Integration</h1>
+    <p>All available skills, their integration points, and auto-suggestion triggers for AISP workflows</p>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchTab('core-skills')">Core Skills</button>
+    <button class="tab-button" onclick="switchTab('workflow-integration')">Workflow Integration</button>
+    <button class="tab-button" onclick="switchTab('auto-suggestion')">Auto-Suggestion System</button>
+    <button class="tab-button" onclick="switchTab('goal-integration')">Goal Integration</button>
+  </div>
+
+  <!-- TAB 1: CORE SKILLS -->
+  <div id="core-skills" class="tab-content active">
+    <div class="section">
+      <h2><i class="ti ti-wand"></i> Core Skills Available in AISP</h2>
+      <p>These are the primary skills integrated into AISP workflows. Each skill is triggered at specific lifecycle moments.</p>
+
+      <!-- LAUNCH-YOUR-PROJECT -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-rocket"></i> /launch-your-project</div>
+        <div class="skill-purpose">Initialize a new AISP project with complete setup (folders, config, repos, deployment)</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">User runs command once per project</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Designed ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">7 minutes (Q&A + setup)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Frequency</div>
+            <div class="detail-value">Once per project (Wave 1+)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Initialize AISP-Portal (Wave 1)</li>
+            <li>Launch AISP-ProjectAlpha (Wave 2)</li>
+            <li>Spin up new projects at scale (Wave 3+)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- LAUNCH-YOUR-AGENT -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-zap"></i> /launch-your-agent</div>
+        <div class="skill-purpose">Create and deploy cloud-based managed agents (Neo, Ghost, Tank, etc.)</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">Complex recurring task needs cloud deployment</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Implemented ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">10 minutes per agent</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Frequency</div>
+            <div class="detail-value">Once per managed agent (3-6 agents per Wave)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Deploy Neo (code quality, 6 AM daily)</li>
+            <li>Deploy Ghost (feedback synthesis, Fri 5 PM)</li>
+            <li>Deploy Tank (infrastructure monitor, 2x daily)</li>
+            <li>Scale to Phase 2 agents (The Architect, Agent Smith, Zion)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- GOAL -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-target"></i> /goal</div>
+        <div class="skill-purpose">Interactive goal-setting for Waves, Build Phases, and Sprints</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">Start of Wave, Build Phase, or Sprint</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Available ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">15-30 min (generates plan + success criteria)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Frequency</div>
+            <div class="detail-value">3x per Wave (each Build Phase) + per Sprint (optional)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Set Wave 1 goals (30-sprint vision)</li>
+            <li>Set Build Phase 1.1 goals (10-sprint chunk)</li>
+            <li>Set Sprint 1 goals (1-2 week detail)</li>
+            <li>Establish success metrics and KPIs</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CODE-REVIEW -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-code-review"></i> /code-review</div>
+        <div class="skill-purpose">Single PR code review with detailed feedback (linting, security, architecture)</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">PR created on feature branch → auto-review</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Available ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">5-10 min per PR</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Frequency</div>
+            <div class="detail-value">Every PR (continuous)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Supplement Neo's automated code quality checks</li>
+            <li>Deep-dive review on sensitive PRs (auth, payments)</li>
+            <li>Training signal for agents learning code patterns</li>
+            <li>Human oversight on critical paths</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ULTRAREVIEW -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-brain"></i> /ultrareview</div>
+        <div class="skill-purpose">Multi-agent comprehensive code review of entire branch (expensive, high-quality)</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">Before Sprint 10 deployment (or manual request)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Available ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">20-30 min (comprehensive)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Cost</div>
+            <div class="detail-value">Billed by Anthropic (~$50-200 per review)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Gate before Sprint 10 deployment (mandatory for major versions)</li>
+            <li>High-risk features (payments, auth, data migration)</li>
+            <li>Multi-team integration points</li>
+            <li>Wave completion quality assurance</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- EXECUTE-SPRINT-BUILD -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-player-play"></i> /execute-sprint-build</div>
+        <div class="skill-purpose">Automated sprint execution: parse plan, run all tasks, deploy, verify</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">Sprint plan created → execution authorized</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Available ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">Varies (full sprint automation, ~40-80K tokens)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Frequency</div>
+            <div class="detail-value">Per sprint (can be manual or auto-triggered)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Execute full sprint plan (Sprints 1-10)</li>
+            <li>Parallel execution of independent tasks</li>
+            <li>Auto-commit and deploy on completion</li>
+            <li>Monitor token budget per sprint</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PLAN (Architecture) -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-layout-grid"></i> /plan</div>
+        <div class="skill-purpose">Architecture & design planning: multi-step implementation strategy</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">Major feature, refactor, or architectural decision needed</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Available ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">15-30 min (design phase)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Frequency</div>
+            <div class="detail-value">Per major decision (2-4x per Build Phase)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Design Build Phase architecture (Phases 1.1, 1.2, 1.3)</li>
+            <li>Plan multi-project scaling strategy (Wave 2)</li>
+            <li>Evaluate tech stack choices</li>
+            <li>Refactor large subsystems</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- FAST -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-lightning-bolt"></i> /fast</div>
+        <div class="skill-purpose">Toggle fast mode for iterative work (Opus + faster output)</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">User toggles for iterative tasks</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Available ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">Instant (toggle)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Cost</div>
+            <div class="detail-value">Standard (Opus pricing, faster output)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Sprint implementation (fast feedback loops)</li>
+            <li>Debugging and rapid iteration</li>
+            <li>Interactive design sessions</li>
+            <li>Quick refinements and tweaks</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- MEMORY -->
+      <div class="skill-card">
+        <div class="skill-name"><i class="ti ti-brain"></i> /memory</div>
+        <div class="skill-purpose">Manage project memory: save/load/update learnings (patterns, decisions, context)</div>
+        <div class="skill-details">
+          <div class="detail-item">
+            <div class="detail-label">Trigger</div>
+            <div class="detail-value">Explicit save/load or auto-invoked between sessions</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <span class="status-badge status-available">Available ✓</span>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">Instant (file read/write)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Frequency</div>
+            <div class="detail-value">Per session (automatic load on context start)</div>
+          </div>
+        </div>
+        <div class="use-cases">
+          <strong>Use Cases:</strong>
+          <ul>
+            <li>Load project learnings at session start</li>
+            <li>Save agent/toolkit patterns</li>
+            <li>Store sprint decisions and context</li>
+            <li>Persist Wave completion docs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: WORKFLOW INTEGRATION -->
+  <div id="workflow-integration" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-timeline"></i> Skills Integrated into AISP Workflow Lifecycle</h2>
+      <p>When each skill is invoked and how they connect together throughout a Wave lifecycle.</p>
+
+      <h3>Wave Start (Week 1)</h3>
+      <div class="workflow-grid">
+        <div class="workflow-box">
+          <h4>1. /launch-your-project</h4>
+          <p>Initialize new project (Wave 1 only)</p>
+        </div>
+        <div class="workflow-box">
+          <h4>2. /goal</h4>
+          <p>Set Wave vision + success criteria (30 sprints)</p>
+        </div>
+        <div class="workflow-box">
+          <h4>3. /plan</h4>
+          <p>Design Build Phase 1.1 architecture</p>
+        </div>
+      </div>
+
+      <h3>Build Phase Start (Week 2-3)</h3>
+      <div class="workflow-grid">
+        <div class="workflow-box">
+          <h4>1. /goal</h4>
+          <p>Set Build Phase goals (10 sprints)</p>
+        </div>
+        <div class="workflow-box">
+          <h4>2. /plan</h4>
+          <p>Design technical implementation (if needed)</p>
+        </div>
+        <div class="workflow-box">
+          <h4>3. /memory</h4>
+          <p>Load prior learnings</p>
+        </div>
+      </div>
+
+      <h3>Sprint Execution (Continuous, Sprints 1-9)</h3>
+      <div class="workflow-grid">
+        <div class="workflow-box">
+          <h4>1. /goal</h4>
+          <p>Set Sprint goals (optional, high-detail)</p>
+        </div>
+        <div class="workflow-box">
+          <h4>2. /execute-sprint-build</h4>
+          <p>Execute sprint plan automatically</p>
+        </div>
+        <div class="workflow-box">
+          <h4>3. /code-review</h4>
+          <p>Review PRs continuously</p>
+        </div>
+        <div class="workflow-box">
+          <h4>4. /fast</h4>
+          <p>Toggle for iterative feedback loops</p>
+        </div>
+      </div>
+
+      <h3>Sprint 10: Deployment Preparation</h3>
+      <div class="workflow-grid">
+        <div class="workflow-box">
+          <h4>1. /ultrareview</h4>
+          <p>Multi-agent comprehensive review (gate)</p>
+        </div>
+        <div class="workflow-box">
+          <h4>2. /execute-sprint-build</h4>
+          <p>Deploy + verify (Vercel + smoke tests)</p>
+        </div>
+        <div class="workflow-box">
+          <h4>3. /memory</h4>
+          <p>Save Sprint 10 learnings + patterns</p>
+        </div>
+      </div>
+
+      <h3>Wave Completion (Every 30 Sprints)</h3>
+      <div class="workflow-grid">
+        <div class="workflow-box">
+          <h4>1. /memory</h4>
+          <p>Load all Wave learnings</p>
+        </div>
+        <div class="workflow-box">
+          <h4>2. /plan</h4>
+          <p>Design next Wave strategy</p>
+        </div>
+        <div class="workflow-box">
+          <h4>3. /goal</h4>
+          <p>Set Wave 2 goals + success criteria</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: AUTO-SUGGESTION SYSTEM -->
+  <div id="auto-suggestion" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-brain"></i> Smart Skill Auto-Suggestion System</h2>
+      <p>How AISP automatically recommends and invokes skills based on context.</p>
+
+      <h3>Detection Triggers</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Context / Trigger</th>
+            <th>Detects</th>
+            <th>Auto-Suggests Skill</th>
+            <th>Confidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>"New project incoming"</td>
+            <td>CEO standup mentions new project</td>
+            <td>/launch-your-project</td>
+            <td>95%</td>
+          </tr>
+          <tr>
+            <td>"Complex recurring task"</td>
+            <td>Same task logged >3 times in a sprint</td>
+            <td>/launch-your-agent (or auto-create interactive agent)</td>
+            <td>85%</td>
+          </tr>
+          <tr>
+            <td>"Sprint start"</td>
+            <td>Monday standup or /sprint command</td>
+            <td>/goal (to set sprint objectives)</td>
+            <td>90%</td>
+          </tr>
+          <tr>
+            <td>"Major feature design"</td>
+            <td>Feature spec >500 words or architecture discussion</td>
+            <td>/plan (to design implementation)</td>
+            <td>80%</td>
+          </tr>
+          <tr>
+            <td>"Code change detected"</td>
+            <td>PR created on feature branch</td>
+            <td>/code-review (automatic)</td>
+            <td>100%</td>
+          </tr>
+          <tr>
+            <td>"Pre-deployment review"</td>
+            <td>PR targets main branch (Sprint 10)</td>
+            <td>/ultrareview (gate before merge)</td>
+            <td>95%</td>
+          </tr>
+          <tr>
+            <td>"Sprint execution"</td>
+            <td>Sprint plan document exists + goals set</td>
+            <td>/execute-sprint-build (optional automation)</td>
+            <td>70% (requires explicit authorization)</td>
+          </tr>
+          <tr>
+            <td>"Session start"</td>
+            <td>New session begins</td>
+            <td>/memory (auto-load project context)</td>
+            <td>100%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Auto-Invocation Decision Tree</h3>
+      <div style="background: #111827; border: 1px solid #374151; border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0; font-family: 'Courier New', monospace; font-size: 12px; color: #d1d5db; line-height: 1.8;">
+IS_NEW_PROJECT
+├─ YES → /launch-your-project (95% confidence)
+└─ NO ↓
+
+IS_SPRINT_START
+├─ YES → /goal (90% confidence)
+└─ NO ↓
+
+IS_CODE_CHANGE
+├─ YES → /code-review (100% auto-trigger)
+│      └─ Sprint 10? → /ultrareview (95% gate)
+└─ NO ↓
+
+IS_MAJOR_FEATURE
+├─ YES → /plan (80% suggestion)
+└─ NO ↓
+
+IS_RECURRING_TASK
+├─ YES & >3x/week → /launch-your-agent (85% suggestion)
+└─ NO ↓
+
+IS_SESSION_START
+├─ YES → /memory (100% auto-load)
+└─ NO: No suggestion
+      </div>
+
+      <h3>Confidence-Based Triggering</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Confidence</th>
+            <th>Action</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>95%+</strong></td>
+            <td>Auto-invoke (no user approval)</td>
+            <td>/code-review on PR creation, /ultrareview on main PR</td>
+          </tr>
+          <tr>
+            <td><strong>80-94%</strong></td>
+            <td>Suggest + wait for approval</td>
+            <td>"Sprint detected. Run /goal to set objectives?"</td>
+          </tr>
+          <tr>
+            <td><strong>70-79%</strong></td>
+            <td>Suggest but don't block</td>
+            <td>"Recurring task detected. Consider /launch-your-agent?"</td>
+          </tr>
+          <tr>
+            <td><strong><70%</strong></td>
+            <td>Don't suggest (too uncertain)</td>
+            <td>No suggestion shown</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 4: GOAL INTEGRATION -->
+  <div id="goal-integration" class="tab-content">
+    <div class="section">
+      <h2><i class="ti ti-target"></i> /goal Integration: Wave Planning & Execution</h2>
+      <p>How /goal integrates throughout the Wave lifecycle to set objectives and measure success.</p>
+
+      <h3>Wave 1: /goal at 3 Levels</h3>
+
+      <div class="skill-card">
+        <div class="skill-name">Level 1: Wave Goal (30 sprints)</div>
+        <div class="skill-purpose">Triggered: Week 1 of Wave | Set company-wide vision for 30 sprints</div>
+        <div style="background: rgba(16, 185, 129, 0.1); border-left: 2px solid #10b981; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+          <strong style="color: #10b981;">Command:</strong> /goal wave 1
+          <div style="margin-top: 0.75rem; font-size: 13px; color: #d1d5db;">
+            <strong>Questions:</strong><br>
+            ✓ What's the ultimate goal? (Deploy autonomous org)<br>
+            ✓ How do you measure success? (95% autonomy, 30% token savings)<br>
+            ✓ What are key milestones? (Build Phase 1.1 → 1.2 → 1.3)<br>
+            ✓ Success criteria? (All agents trained + live in production)<br>
+            <br>
+            <strong>Output:</strong> WAVE_1_PLAN.md with objectives, milestones, KPIs
+          </div>
+        </div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-name">Level 2: Build Phase Goal (10 sprints)</div>
+        <div class="skill-purpose">Triggered: Week 2 of each Build Phase | Set technical goals for 10 sprints</div>
+        <div style="background: rgba(16, 185, 129, 0.1); border-left: 2px solid #10b981; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+          <strong style="color: #10b981;">Command:</strong> /goal build-phase 1.1
+          <div style="margin-top: 0.75rem; font-size: 13px; color: #d1d5db;">
+            <strong>Questions:</strong><br>
+            ✓ Build Phase name? (Foundation & v1.0)<br>
+            ✓ What gets delivered? (Org structure, naming, initial agents)<br>
+            ✓ Tech stack? (Node, Next.js, PostgreSQL)<br>
+            ✓ Team composition? (Trinity, Tank, agent Neo)<br>
+            ✓ Success criteria? (Sprint 10: production deployment verified)<br>
+            <br>
+            <strong>Output:</strong> BUILD_PHASE_1.1_PLAN.md with deliverables, tech decisions, acceptance criteria
+          </div>
+        </div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-name">Level 3: Sprint Goal (1-2 weeks)</div>
+        <div class="skill-purpose">Triggered: Weekly (optional) | Set detailed objectives for 1-2 week sprint</div>
+        <div style="background: rgba(16, 185, 129, 0.1); border-left: 2px solid #10b981; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+          <strong style="color: #10b981;">Command:</strong> /goal sprint 1
+          <div style="margin-top: 0.75rem; font-size: 13px; color: #d1d5db;">
+            <strong>Questions:</strong><br>
+            ✓ Sprint name? (Sprint 1: Org Setup)<br>
+            ✓ What specific features/tasks? (2-3 list items)<br>
+            ✓ Team capacity? (Trinity 40h, Tank 30h, Neo auto)<br>
+            ✓ Success metrics? (Tests pass, coverage >85%, 0 critical bugs)<br>
+            ✓ Blockers? (Any known risks?)<br>
+            <br>
+            <strong>Output:</strong> SPRINT_1_PLAN.md with tasks, estimates, success criteria
+          </div>
+        </div>
+      </div>
+
+      <h3>Integration with /execute-sprint-build</h3>
+      <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%); border: 1px solid #374151; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+        <strong style="color: #3b82f6;">Workflow:</strong>
+        <ol style="margin-left: 1.5rem; margin-top: 0.75rem; color: #d1d5db; font-size: 13px; line-height: 1.8;">
+          <li><code>/goal sprint N</code> → generates SPRINT_N_PLAN.md</li>
+          <li>Plan file is created with tasks, estimates, success criteria</li>
+          <li><code>/execute-sprint-build N /path</code> → reads plan</li>
+          <li>System parses objectives from goal</li>
+          <li>System executes all tasks in parallel (within team capacity)</li>
+          <li>System verifies against success criteria</li>
+          <li>System reports: completed ✓, failed ✗, at risk ⚠️</li>
+        </ol>
+      </div>
+
+      <h3>Goal Templates (Auto-Generated by /goal)</h3>
+      <p style="font-size: 13px; color: #d1d5db; margin: 1rem 0;">When you run /goal, the skill generates a plan file with this structure:</p>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Output File</th>
+            <th>Sections</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Wave</strong></td>
+            <td>WAVE_1_PLAN.md</td>
+            <td>Vision, 3 build phases, success criteria, KPIs, timeline</td>
+          </tr>
+          <tr>
+            <td><strong>Build Phase</strong></td>
+            <td>BUILD_PHASE_1.1_PLAN.md</td>
+            <td>Deliverables, tech decisions, 10 sprints breakdown, acceptance criteria</td>
+          </tr>
+          <tr>
+            <td><strong>Sprint</strong></td>
+            <td>SPRINT_1_PLAN.md</td>
+            <td>Tasks, owner, estimates, dependencies, success metrics</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><a href="AISP_Master_Hub.html">← Back to Master Hub</a> | <a href="AISP_COMPANY_PLAYBOOK.html">Company Playbook</a></p>
+    <p>Last updated: June 20, 2026 | AISP Skills Inventory v1.0</p>
+  </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+  const tabs = document.querySelectorAll('.tab-content');
+  const buttons = document.querySelectorAll('.tab-button');
+
+  tabs.forEach(tab => tab.classList.remove('active'));
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById(tabName).classList.add('active');
+  const button = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+  if (button) button.classList.add('active');
+}
+</script>
+
+</body>
+</html>

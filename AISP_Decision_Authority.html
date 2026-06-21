@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Decision Authority Framework</title>
+<link rel="stylesheet" href="https://cdn.jsdelivic.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.tier-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.tier-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.tier-card.tier1 { border-color: #10b981; }
+.tier-card.tier2 { border-color: #f59e0b; }
+.tier-card.tier3 { border-color: #ef4444; }
+.tier-card.tier4 { border-color: #8b5cf6; }
+
+.tier-header {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-card.tier1 .tier-header { color: #10b981; }
+.tier-card.tier2 .tier-header { color: #f59e0b; }
+.tier-card.tier3 .tier-header { color: #ef4444; }
+.tier-card.tier4 .tier-header { color: #8b5cf6; }
+
+.tier-amount {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.tier-card.tier1 .tier-amount { color: #10b981; }
+.tier-card.tier2 .tier-amount { color: #f59e0b; }
+.tier-card.tier3 .tier-amount { color: #ef4444; }
+.tier-card.tier4 .tier-amount { color: #8b5cf6; }
+
+.tier-who {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.tier-decision {
+  font-size: 13px;
+  color: #d1d5db;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.tier-sla {
+  font-size: 11px;
+  color: #6b7280;
+  border-top: 1px solid #374151;
+  padding-top: 0.75rem;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #f3f4f6;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #374151;
+}
+
+.authority-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.authority-table th {
+  background: #0f172a;
+  color: #9ca3af;
+  padding: 1rem;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: 1px solid #374151;
+}
+
+.authority-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  font-size: 13px;
+}
+
+.authority-table tr:hover {
+  background: #1f2937;
+}
+
+.decision-type {
+  font-weight: 600;
+  color: #00c2ff;
+}
+
+.decision-examples {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.example-card {
+  background: #111827;
+  border-left: 3px solid;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.example-card.tier1 { border-left-color: #10b981; }
+.example-card.tier2 { border-left-color: #f59e0b; }
+.example-card.tier3 { border-left-color: #ef4444; }
+
+.example-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.example-card.tier1 .example-title { color: #10b981; }
+.example-card.tier2 .example-title { color: #f59e0b; }
+.example-card.tier3 .example-title { color: #ef4444; }
+
+.example-desc {
+  font-size: 12px;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.escalation-flow {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.flow-step {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: flex-start;
+}
+
+.flow-number {
+  background: #00c2ff;
+  color: #0b0f14;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.flow-content {
+  flex: 1;
+}
+
+.flow-content h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #e0e7ff;
+}
+
+.flow-content p {
+  font-size: 12px;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.special-cases {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.special-case {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.special-case:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.special-case h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e7ff;
+  margin-bottom: 0.5rem;
+}
+
+.special-case p {
+  font-size: 12px;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.director-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.director-matrix th {
+  background: #0f172a;
+  color: #9ca3af;
+  padding: 1rem;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: 1px solid #374151;
+}
+
+.director-matrix td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  font-size: 12px;
+}
+
+.director-matrix tr:hover {
+  background: #1f2937;
+}
+
+.director-name {
+  font-weight: 600;
+  color: #00c2ff;
+}
+
+.decision-threshold {
+  background: rgba(0, 194, 255, 0.1);
+  border-left: 3px solid #00c2ff;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.decision-threshold strong {
+  color: #00c2ff;
+}
+
+.warning-box {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.warning-box strong {
+  color: #ef4444;
+}
+
+.note-box {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.note-box strong {
+  color: #3b82f6;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="ti ti-gavel"></i> AISP Decision Authority Framework</h1>
+    <p>Clear thresholds, approval authority, and escalation paths. Optimized for startup velocity.</p>
+  </div>
+
+  <!-- Tier Overview -->
+  <div class="section">
+    <h2>Authority Tiers at a Glance</h2>
+
+    <div class="tier-overview">
+      <div class="tier-card tier1">
+        <div class="tier-header"><i class="ti ti-zap"></i> Tier 1</div>
+        <div class="tier-amount">&lt; $5K</div>
+        <div class="tier-who">Who Decides:</div>
+        <div class="tier-decision">Agent or Director (autonomous)</div>
+        <div class="tier-sla"><strong>SLA:</strong> Immediate (no approval needed)</div>
+      </div>
+
+      <div class="tier-card tier2">
+        <div class="tier-header"><i class="ti ti-user-check"></i> Tier 2</div>
+        <div class="tier-amount">$5K–$50K</div>
+        <div class="tier-who">Who Decides:</div>
+        <div class="tier-decision">Director (Anderson, Niobe, Persephone, Dozer)</div>
+        <div class="tier-sla"><strong>SLA:</strong> &lt; 5 min average</div>
+      </div>
+
+      <div class="tier-card tier3">
+        <div class="tier-header"><i class="ti ti-alert-triangle"></i> Tier 3</div>
+        <div class="tier-amount">$50K–$500K</div>
+        <div class="tier-who">Who Decides:</div>
+        <div class="tier-decision">You (BRANDON) + Director input</div>
+        <div class="tier-sla"><strong>SLA:</strong> &lt; 30 min</div>
+      </div>
+
+      <div class="tier-card tier4">
+        <div class="tier-header"><i class="ti ti-crown"></i> Tier 4</div>
+        <div class="tier-amount">&gt; $500K</div>
+        <div class="tier-who">Who Decides:</div>
+        <div class="tier-decision">Board + You + Directors</div>
+        <div class="tier-sla"><strong>SLA:</strong> &lt; 2 hours</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authority Matrix by Function -->
+  <div class="section">
+    <h2>Authority Matrix: Who Decides What</h2>
+
+    <table class="authority-table">
+      <thead>
+        <tr>
+          <th>Decision Type</th>
+          <th>Tier 1 (&lt;$5K)</th>
+          <th>Tier 2 ($5K–$50K)</th>
+          <th>Tier 3 ($50K–$500K)</th>
+          <th>Tier 4 (&gt;$500K)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="decision-type">Code Deploy / Bug Fix</td>
+          <td>Agent (auto-deploy)</td>
+          <td>Anderson approves</td>
+          <td>You approve</td>
+          <td>Board + You</td>
+        </tr>
+        <tr>
+          <td class="decision-type">New Feature / Release</td>
+          <td>Agent proposes</td>
+          <td>Niobe approves</td>
+          <td>You approve</td>
+          <td>Board + You</td>
+        </tr>
+        <tr>
+          <td class="decision-type">Infrastructure Change</td>
+          <td>Tank (auto &lt;$5K)</td>
+          <td>Anderson approves</td>
+          <td>You approve</td>
+          <td>Board + You</td>
+        </tr>
+        <tr>
+          <td class="decision-type">New Tool / Service</td>
+          <td>Agent research</td>
+          <td>Director approves</td>
+          <td>You approve</td>
+          <td>Board + You</td>
+        </tr>
+        <tr>
+          <td class="decision-type">Security Issue</td>
+          <td>Auto-block (severity gates escalation)</td>
+          <td>Anderson approves (critical: escalate)</td>
+          <td>You + Anderson</td>
+          <td>Board + Legal</td>
+        </tr>
+        <tr>
+          <td class="decision-type">Budget / Cost</td>
+          <td>The Architect tracks</td>
+          <td>Dozer approves</td>
+          <td>You approve</td>
+          <td>Board + You</td>
+        </tr>
+        <tr>
+          <td class="decision-type">Hiring / New Agent</td>
+          <td>Research</td>
+          <td>Director proposes</td>
+          <td>You approve</td>
+          <td>Board + You</td>
+        </tr>
+        <tr>
+          <td class="decision-type">Product Strategy</td>
+          <td>Ghost research</td>
+          <td>Niobe decides</td>
+          <td>You decide</td>
+          <td>Board + You</td>
+        </tr>
+        <tr>
+          <td class="decision-type">Customer Escalation</td>
+          <td>Cypher handles</td>
+          <td>Persephone decides</td>
+          <td>You involved</td>
+          <td>Board + You</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Decision Threshold -->
+  <div class="section">
+    <h2>The Core Decision Threshold</h2>
+
+    <div class="decision-threshold">
+      <strong>$5K threshold:</strong> This is the line between autonomy and oversight. Agents/directors execute anything that costs less than $5K without asking you. Anything $5K+ requires director or your approval, depending on scale. This keeps you in the loop on material decisions without micromanaging.
+    </div>
+
+    <div class="note-box">
+      <strong>Why $5K?</strong> At a startup, $5K is meaningful but not board-level. It covers most operational decisions (tools, deployments, travel, small hires). Forces escalation for things that matter, but doesn't bottleneck the org.
+    </div>
+  </div>
+
+  <!-- Examples -->
+  <div class="section">
+    <h2>Decision Examples (By Tier)</h2>
+
+    <div class="example-grid">
+      <div class="example-card tier1">
+        <div class="example-title">Deploy a bug fix ($200)</div>
+        <div class="example-desc">BLAKE tests, deploys. Auto-approve. No escalation.</div>
+      </div>
+
+      <div class="example-card tier1">
+        <div class="example-title">Add a new npm package ($0)</div>
+        <div class="example-desc">CASEY proposes, ALEX reviews, auto-approve. Documented in PR.</div>
+      </div>
+
+      <div class="example-card tier1">
+        <div class="example-title">Spin up test environment ($300)</div>
+        <div class="example-desc">BLAKE provisioning, auto-approve. Costs recorded by CAMERON.</div>
+      </div>
+
+      <div class="example-card tier2">
+        <div class="example-title">Subscribe to Datadog ($8K/yr = $667/mo)</div>
+        <div class="example-desc">Anderson proposes, Dozer approves. You're informed.</div>
+      </div>
+
+      <div class="example-card tier2">
+        <div class="example-title">Hire a specialized agent ($10K tokens)</div>
+        <div class="example-desc">Director proposes, Anderson/Niobe/Persephone approve. You're informed.</div>
+      </div>
+
+      <div class="example-card tier2">
+        <div class="example-title">Refactor codebase architecture ($6K effort)</div>
+        <div class="example-desc">Anderson approves after cost estimate. Niobe consulted on timeline impact.</div>
+      </div>
+
+      <div class="example-card tier3">
+        <div class="example-title">Migrate to new cloud provider ($100K/yr)</div>
+        <div class="example-desc">Anderson/Dozer propose. You decide with board input. 30-min SLA.</div>
+      </div>
+
+      <div class="example-card tier3">
+        <div class="example-title">Rebrand product and pivot messaging ($75K)</div>
+        <div class="example-desc">Niobe/Persephone propose. You decide. Legal + customers consulted.</div>
+      </div>
+
+      <div class="example-card tier3">
+        <div class="example-title">Launch in new market ($200K investment)</div>
+        <div class="example-desc">Persephone/Niobe/Dozer propose. You + board decide.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Director Authority Specifics -->
+  <div class="section">
+    <h2>Director Authority Specifics</h2>
+
+    <table class="director-matrix">
+      <thead>
+        <tr>
+          <th>Director</th>
+          <th>Tier 1 (&lt;$5K) Authority</th>
+          <th>Tier 2 ($5K–$50K) Authority</th>
+          <th>Tier 3 ($50K+) Process</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="director-name">Anderson (CTO)</td>
+          <td>Agents auto-execute. Anderson monitors & adjusts.</td>
+          <td>Auto-approve: tools, deployments, infra, hiring agents. SLA: <5 min</td>
+          <td>Escalate to you. Input on architecture/technical strategy.</td>
+        </tr>
+        <tr>
+          <td class="director-name">Niobe (CPO)</td>
+          <td>Agents auto-execute roadmap tasks. Niobe prioritizes.</td>
+          <td>Auto-approve: features, roadmap changes, product hires. SLA: <5 min</td>
+          <td>Escalate to you. Input on product strategy/pivots.</td>
+        </tr>
+        <tr>
+          <td class="director-name">Persephone (CSO)</td>
+          <td>Agents auto-execute campaigns & CRM. Persephone monitors.</td>
+          <td>Auto-approve: campaigns, partnerships, sales hires. SLA: <5 min</td>
+          <td>Escalate to you. Input on market strategy/expansion.</td>
+        </tr>
+        <tr>
+          <td class="director-name">Dozer (CFO)</td>
+          <td>The Architect auto-tracks budget. Dozer oversees.</td>
+          <td>Auto-approve: budget allocation, cost optimization, spend. SLA: <5 min</td>
+          <td>Escalate to you. Input on financial strategy/fundraising.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note-box">
+      <strong>Note:</strong> Directors are not human—they're AI agents with role specialization. They decide fast (<5 min SLA) because they're not context-limited like humans. But they escalate strategic decisions (Tier 3+) to you because those require human judgment.
+    </div>
+  </div>
+
+  <!-- Escalation Flow -->
+  <div class="section">
+    <h2>Escalation Flow</h2>
+
+    <div class="escalation-flow">
+      <div class="flow-step">
+        <div class="flow-number">1</div>
+        <div class="flow-content">
+          <h4>Task Arrives (Any Agent)</h4>
+          <p>An agent detects a decision point: "Should we deploy?" "Should we buy this tool?" "Should we pivot?"</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-number">2</div>
+        <div class="flow-content">
+          <h4>Assess Cost / Impact</h4>
+          <p>Agent estimates: "$2K deploy cost" or "$30K annual tool" or "$500K product rebrand"</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-number">3</div>
+        <div class="flow-content">
+          <h4>Route Based on Tier</h4>
+          <p><strong>&lt;$5K?</strong> Agent auto-executes (post to dashboard). <strong>$5K–$50K?</strong> Route to relevant director. <strong>&gt;$50K?</strong> Route to you.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-number">4</div>
+        <div class="flow-content">
+          <h4>Decision Made (SLA)</h4>
+          <p><strong>Tier 1:</strong> Immediate. <strong>Tier 2:</strong> &lt;5 min (director decides). <strong>Tier 3:</strong> &lt;30 min (you decide with input). <strong>Tier 4:</strong> &lt;2 hours (board + you).</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-number">5</div>
+        <div class="flow-content">
+          <h4>Execute & Log</h4>
+          <p>Decision executed, logged in audit trail with approval chain. Dashboard updated.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Special Cases -->
+  <div class="section">
+    <h2>Special Cases & Exceptions</h2>
+
+    <div class="special-cases">
+      <div class="special-case">
+        <h4>Security Issues (Auto-Escalate)</h4>
+        <p>ANY security issue escalates immediately to Anderson, regardless of cost. If critical → you're alerted. Critical = data breach, account compromise, vulnerability in prod. Process: Detect → isolate → escalate → patch → post-mortem.</p>
+      </div>
+
+      <div class="special-case">
+        <h4>Customer Escalations (Human Loop)</h4>
+        <p>Customer complaint or churn event → Cypher handles. If customer is at risk of leaving → Persephone decides. If contract at risk → you're involved.</p>
+      </div>
+
+      <div class="special-case">
+        <h4>Tie-Breaking (Director Consensus)</h4>
+        <p>If two directors disagree on a decision in their overlapping area (e.g., Niobe wants feature that costs more than Dozer's budget), they escalate to you for tie-break. SLA: <10 min.</p>
+      </div>
+
+      <div class="special-case">
+        <h4>Legal / Compliance Issues (Auto-Escalate)</h4>
+        <p>Any legal question or compliance question → you're looped in immediately. The Architect tracks (GDPR, taxes, contracts), but you make final call.</p>
+      </div>
+
+      <div class="special-case">
+        <h4>Emergency / Critical Incident (Bypass Authority)</h4>
+        <p>System down, data loss, severe security breach → agents execute emergency response without waiting for approvals. You're notified asynchronously. Example: Tank rolls back a bad deploy, logs it, tells you after it's fixed.</p>
+      </div>
+
+      <div class="special-case">
+        <h4>Parallel Execution (Don't Block)</h4>
+        <p>If multiple agents/directors are waiting on a decision, don't block others. Example: You're deciding on a $100K tool, but dev team keeps shipping features anyway (Tier 1). Don't cascade the wait.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warnings -->
+  <div class="section">
+    <h2>Important Notes & Guardrails</h2>
+
+    <div class="warning-box">
+      <strong>⚠️ No Threshold Abuse:</strong> Directors can't game the system by breaking a $10K decision into two $5K decisions. If the intent is one decision, treat it as one decision.
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ Escalation Fatigue:</strong> If you're approving >10 decisions per day, thresholds are too aggressive. Raise them. If <1 decision per week, they're too loose. Lower them.
+    </div>
+
+    <div class="note-box">
+      <strong>📌 Regular Review:</strong> Every Sprint 4, review authority logs. Are decisions being made fast enough? Are escalations happening at the right level? Adjust thresholds as needed.
+    </div>
+
+    <div class="note-box">
+      <strong>📌 Override Authority:</strong> You can override any director decision, but document why. This teaches the org and prevents future escalations on the same issue.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

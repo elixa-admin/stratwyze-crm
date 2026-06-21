@@ -41,3 +41,4 @@ migrations/versions/
 # Logs
 logs/
 *.log
+.vercel

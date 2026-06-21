@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Role Playbooks</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.hub { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header h1 i {
+  font-size: 40px;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab-button:hover {
+  color: #00c2ff;
+}
+
+.tab-button.active {
+  color: #00c2ff;
+  border-bottom-color: #00c2ff;
+}
+
+.tab-button i {
+  font-size: 16px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.role-header {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 2px solid #00c2ff;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.role-name {
+  font-size: 32px;
+  font-weight: 700;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+}
+
+.role-title {
+  font-size: 18px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+.role-summary {
+  font-size: 15px;
+  color: #d1d5db;
+  line-height: 1.8;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat {
+  background: rgba(0, 194, 255, 0.1);
+  border: 1px solid #00c2ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section h2 i {
+  font-size: 28px;
+  color: #10b981;
+}
+
+.section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  color: #f3f4f6;
+}
+
+.section h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  color: #d1d5db;
+}
+
+.section p {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.checklist {
+  list-style: none;
+  margin: 1rem 0;
+}
+
+.checklist li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.checklist li:before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.table thead {
+  background: rgba(0, 194, 255, 0.1);
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #00c2ff;
+  border-bottom: 1px solid #374151;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  color: #d1d5db;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.team-box {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(0, 194, 255, 0.05) 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.team-member {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.team-member:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e7ff;
+  margin-bottom: 0.25rem;
+}
+
+.member-role {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.member-desc {
+  font-size: 13px;
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
+.decision-box {
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.decision-box strong {
+  color: #3b82f6;
+}
+
+.footer {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-top: 3rem;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.footer a {
+  color: #00c2ff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    gap: 0.25rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 12px;
+  }
+
+  .section h2 {
+    font-size: 20px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="hub">
+  <div class="header">
+    <h1><i class="ti ti-briefcase"></i> AISP Role Playbooks</h1>
+    <p>Comprehensive guides for each role — responsibilities, KPIs, team structure, weekly rhythm, escalation triggers</p>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchTab('ceo')">
+      <i class="ti ti-crown"></i> CEO
+    </button>
+    <button class="tab-button" onclick="switchTab('cto')">
+      <i class="ti ti-code"></i> CTO
+    </button>
+    <button class="tab-button" onclick="switchTab('cpo')">
+      <i class="ti ti-layout-grid"></i> CPO
+    </button>
+    <button class="tab-button" onclick="switchTab('cso')">
+      <i class="ti ti-trending-up"></i> CSO
+    </button>
+    <button class="tab-button" onclick="switchTab('cfo')">
+      <i class="ti ti-cash"></i> CFO
+    </button>
+    <button class="tab-button" onclick="switchTab('agents')">
+      <i class="ti ti-zap"></i> Agents
+    </button>
+    <button class="tab-button" onclick="switchTab('coordinator')">
+      <i class="ti ti-link"></i> Coordinator
+    </button>
+  </div>
+
+  <!-- TAB 1: CEO -->
+  <div id="ceo" class="tab-content active">
+    <div class="role-header">
+      <div class="role-name">Brandon — Chief Executive Officer</div>
+      <div class="role-title">Strategic Vision, Wave Planning, Final Decisions</div>
+      <div class="role-summary">You set the direction for AISP. Your job is NOT to execute work — it's to teach agents, make strategic bets, plan waves, give feedback, and measure outcomes. You approve decisions >$50K and all director escalations.</div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="stat">
+        <div class="stat-label">Report to</div>
+        <div class="stat-value">Board (Advisory)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Decision Threshold</div>
+        <div class="stat-value">>$50K</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Team Size</div>
+        <div class="stat-value">14 people</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Direct Reports</div>
+        <div class="stat-value">4 Directors</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-list-check"></i> Primary Responsibilities</h2>
+      <ul class="checklist">
+        <li>Set company direction (what we build, why, when)</li>
+        <li>Plan waves (30-sprint cycles with reflection points)</li>
+        <li>Make decisions >$50K (escalations from directors)</li>
+        <li>Approve director feedback (agents learn from feedback)</li>
+        <li>Monitor KPIs (autonomy rate, token savings, quality)</li>
+        <li>Communicate with board/stakeholders</li>
+        <li>Teach agents and directors (give feedback)</li>
+        <li>Iterate company strategy based on learnings</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-clock"></i> Weekly Rhythm</h2>
+      <div class="section">
+        <h3>Monday 9:00 AM — Standup (30 min)</h3>
+        <p><strong>Who:</strong> You + 4 Directors</p>
+        <p><strong>What:</strong> Each director reports: team status, blockers, escalations</p>
+        <p><strong>Output:</strong> Weekly priorities confirmed, decisions made on escalations</p>
+      </div>
+
+      <div class="section">
+        <h3>Wednesday 2:00 PM — Cross-Team Sync (30 min)</h3>
+        <p><strong>Who:</strong> You + Directors (if cross-team issues)</p>
+        <p><strong>What:</strong> Resolve blockers between teams, adjust priorities</p>
+        <p><strong>Output:</strong> Blockers cleared, team coordination confirmed</p>
+      </div>
+
+      <div class="section">
+        <h3>Friday 4:00 PM — Week Review (45 min)</h3>
+        <p><strong>Who:</strong> You + All team members</p>
+        <p><strong>What:</strong> Week recap, learnings, next week preview</p>
+        <p><strong>Output:</strong> Lessons documented, feedback given to agents</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-trending-up"></i> Key Metrics You Own</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Target</th>
+            <th>Measure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Autonomy Rate</td>
+            <td>95%+</td>
+            <td>% of tasks without human prompt</td>
+          </tr>
+          <tr>
+            <td>Token Savings</td>
+            <td>25–50%</td>
+            <td>vs. manual baseline</td>
+          </tr>
+          <tr>
+            <td>Quality (First-Try Success)</td>
+            <td>95%+</td>
+            <td>% of tasks meeting criteria on first try</td>
+          </tr>
+          <tr>
+            <td>Wave Completion</td>
+            <td>On schedule</td>
+            <td>Every 30 sprints</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision-box">
+      <strong>🎯 Decision Authority:</strong> You approve all decisions >$50K. For <$50K, directors decide; you review. For >$500K, you + board decide.
+    </div>
+  </div>
+
+  <!-- TAB 2: CTO -->
+  <div id="cto" class="tab-content">
+    <div class="role-header">
+      <div class="role-name">Anderson — Chief Technology Officer</div>
+      <div class="role-title">Engineering Leadership, Code Quality, Infrastructure</div>
+      <div class="role-summary">You lead the engineering team (Trinity, Tank, and your interactive agents Neo, Trinity, Tank). Your job is to ensure code quality, keep infrastructure healthy, manage technical decisions, and develop the platform. You own the development roadmap and technical standards.</div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="stat">
+        <div class="stat-label">Report to</div>
+        <div class="stat-value">Brandon (CEO)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Decision Threshold</div>
+        <div class="stat-value"><$50K auto</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Team Size</div>
+        <div class="stat-value">3 + 3 agents</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Budget Owned</div>
+        <div class="stat-value">Engineering</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-users"></i> Your Team</h2>
+      <div class="team-box">
+        <div class="team-member">
+          <div class="member-name">Trinity — Senior Engineer</div>
+          <div class="member-role">Backend Architecture, Database, API</div>
+          <div class="member-desc">Leads backend development, owns database schemas, manages API contracts. Reports to you daily.</div>
+        </div>
+        <div class="team-member">
+          <div class="member-name">Tank — Infrastructure Engineer</div>
+          <div class="member-role">DevOps, Cloud, Monitoring</div>
+          <div class="member-desc">Manages infrastructure, scaling, monitoring, cost optimization. Reports to you and Dozer (CFO).</div>
+        </div>
+        <div class="team-member">
+          <div class="member-name">Neo (Managed Agent)</div>
+          <div class="member-role">Code Quality Monitor (Autonomous)</div>
+          <div class="member-desc">Daily 6 AM: Reviews all PRs, flags security/coverage issues, provides recommendations. Cloud-deployed, memory-based.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-target"></i> Key Responsibilities</h2>
+      <ul class="checklist">
+        <li>Lead engineering team (Trinity, Tank, plus agents)</li>
+        <li>Ensure code quality (reviews, standards, tests)</li>
+        <li>Keep infrastructure healthy (uptime 99.9%+)</li>
+        <li>Manage technical debt (refactor when needed)</li>
+        <li>Plan technical roadmap (aligns with CEO vision)</li>
+        <li>Auto-approve engineering decisions <$50K</li>
+        <li>Escalate architecture decisions >$50K to CEO</li>
+        <li>Give feedback to agents (they learn from it)</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-chart-bar"></i> Key Metrics</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Target</th>
+            <th>Owned By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Code Coverage</td>
+            <td>>85%</td>
+            <td>You (with Trinity)</td>
+          </tr>
+          <tr>
+            <td>Uptime</td>
+            <td>99.9%</td>
+            <td>You (with Tank)</td>
+          </tr>
+          <tr>
+            <td>PR Review Speed</td>
+            <td><24h turnaround</td>
+            <td>You (using Neo)</td>
+          </tr>
+          <tr>
+            <td>Security Issues</td>
+            <td>Zero critical</td>
+            <td>You (reviewed by Neo)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-clock"></i> Weekly Rhythm</h2>
+      <p><strong>Monday 9:00 AM:</strong> Standup (report to CEO on team status, blockers)</p>
+      <p><strong>Daily:</strong> Review Neo's code quality report (6:30 AM)</p>
+      <p><strong>Daily (2x):</strong> Monitor Tank's infrastructure health (6:30 AM, 6:30 PM)</p>
+      <p><strong>Wednesday 2:00 PM:</strong> Cross-team sync if needed</p>
+      <p><strong>Friday 4:00 PM:</strong> Week review with CEO</p>
+    </div>
+
+    <div class="decision-box">
+      <strong>🎯 Decision Authority:</strong> Auto-approve engineering decisions <$50K. Escalate >$50K to CEO. Examples: hiring, tools, infrastructure upgrades.
+    </div>
+  </div>
+
+  <!-- TAB 3: CPO -->
+  <div id="cpo" class="tab-content">
+    <div class="role-header">
+      <div class="role-name">Niobe — Chief Product Officer</div>
+      <div class="role-title">Product Strategy, Roadmap, User Experience</div>
+      <div class="role-summary">You lead the product team (Morpheus, Ghost). Your job is to understand user needs, prioritize features, manage the roadmap, and ensure product quality. You own the product vision and make product decisions aligned with the CEO's direction.</div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="stat">
+        <div class="stat-label">Report to</div>
+        <div class="stat-value">Brandon (CEO)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Decision Threshold</div>
+        <div class="stat-value"><$50K auto</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Team Size</div>
+        <div class="stat-value">2 + 1 agent</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Budget Owned</div>
+        <div class="stat-value">Product</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-users"></i> Your Team</h2>
+      <div class="team-box">
+        <div class="team-member">
+          <div class="member-name">Morpheus — Senior Product Manager</div>
+          <div class="member-role">Feature Prioritization, Roadmap, User Research</div>
+          <div class="member-desc">Leads roadmap planning, owns user research, prioritizes features based on feedback. Reports to you.</div>
+        </div>
+        <div class="team-member">
+          <div class="member-name">Ghost (Managed Agent)</div>
+          <div class="member-role">Feedback Synthesis (Autonomous)</div>
+          <div class="member-desc">Every Friday 5 PM: Aggregates user feedback, identifies themes, ranks by impact. Cloud-deployed, memory-based.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-target"></i> Key Responsibilities</h2>
+      <ul class="checklist">
+        <li>Lead product team (Morpheus, Ghost)</li>
+        <li>Own product vision (aligned with CEO direction)</li>
+        <li>Manage product roadmap (prioritize features)</li>
+        <li>Synthesize user feedback (via Ghost agent)</li>
+        <li>Make product decisions <$50K (auto-approve)</li>
+        <li>Escalate product roadmap >$50K to CEO</li>
+        <li>Track product metrics (adoption, engagement, churn)</li>
+        <li>Give feedback to Ghost (agent improves)</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-chart-bar"></i> Key Metrics</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Target</th>
+            <th>Measure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>User Adoption</td>
+            <td>+10% monthly</td>
+            <td>New users/month</td>
+          </tr>
+          <tr>
+            <td>Feature Delivery</td>
+            <td>2 features/sprint</td>
+            <td>Sprint velocity</td>
+          </tr>
+          <tr>
+            <td>User Satisfaction</td>
+            <td>>4.0/5.0</td>
+            <td>NPS score</td>
+          </tr>
+          <tr>
+            <td>Churn Rate</td>
+            <td><5%/month</td>
+            <td>Users lost</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-clock"></i> Weekly Rhythm</h2>
+      <p><strong>Monday 9:00 AM:</strong> Standup (report to CEO on roadmap progress, blockers)</p>
+      <p><strong>Friday 5:30 PM:</strong> Review Ghost's Feedback Synthesis report</p>
+      <p><strong>Friday + Monday:</strong> Roadmap planning based on Ghost findings</p>
+      <p><strong>Wednesday 2:00 PM:</strong> Cross-team sync if needed</p>
+      <p><strong>Friday 4:00 PM:</strong> Week review with CEO</p>
+    </div>
+
+    <div class="decision-box">
+      <strong>🎯 Decision Authority:</strong> Auto-approve product decisions <$50K. Escalate roadmap changes >$50K to CEO. Examples: feature prioritization, user research, design direction.
+    </div>
+  </div>
+
+  <!-- TAB 4: CSO -->
+  <div id="cso" class="tab-content">
+    <div class="role-header">
+      <div class="role-name">Persephone — Chief Sales Officer</div>
+      <div class="role-title">Sales Strategy, Growth, Partnerships</div>
+      <div class="role-summary">You lead the sales team (Agent Smith, Cypher). Your job is to drive growth, manage sales strategy, build partnerships, and own sales metrics. You make sales decisions and report progress to the CEO.</div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="stat">
+        <div class="stat-label">Report to</div>
+        <div class="stat-value">Brandon (CEO)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Decision Threshold</div>
+        <div class="stat-value"><$50K auto</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Team Size</div>
+        <div class="stat-value">2 + 1 agent</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Budget Owned</div>
+        <div class="stat-value">Sales & Growth</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-users"></i> Your Team</h2>
+      <div class="team-box">
+        <div class="team-member">
+          <div class="member-name">Agent Smith — Sales Lead</div>
+          <div class="member-role">Outreach, Lead Generation, Deal Closing</div>
+          <div class="member-desc">Manages sales pipeline, closes deals, owns customer relationships. Reports to you.</div>
+        </div>
+        <div class="team-member">
+          <div class="member-name">Cypher — Partnerships & Integrations</div>
+          <div class="member-role">Strategic Partnerships, GTM</div>
+          <div class="member-desc">Builds partnerships, manages integrations, supports go-to-market. Reports to you.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-target"></i> Key Responsibilities</h2>
+      <ul class="checklist">
+        <li>Lead sales team (Agent Smith, Cypher)</li>
+        <li>Own sales strategy (aligned with CEO)</li>
+        <li>Drive revenue growth (MRR targets)</li>
+        <li>Build partnerships (expand reach)</li>
+        <li>Make sales decisions <$50K (auto-approve)</li>
+        <li>Escalate large deals/partnerships >$50K to CEO</li>
+        <li>Track sales metrics (pipeline, conversion, ARR)</li>
+        <li>Give feedback to agents</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-chart-bar"></i> Key Metrics</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Target</th>
+            <th>Measure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Monthly Recurring Revenue</td>
+            <td>+20% QoQ</td>
+            <td>Total MRR</td>
+          </tr>
+          <tr>
+            <td>Sales Conversion</td>
+            <td>>25%</td>
+            <td>Leads → Customers</td>
+          </tr>
+          <tr>
+            <td>Customer Acquisition Cost</td>
+            <td><$500</td>
+            <td>Cost per new customer</td>
+          </tr>
+          <tr>
+            <td>Active Partnerships</td>
+            <td>>5</td>
+            <td>Strategic partners</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision-box">
+      <strong>🎯 Decision Authority:</strong> Auto-approve sales decisions <$50K. Escalate major deals/partnerships >$50K to CEO. Examples: discounts, promotional campaigns, partnership agreements.
+    </div>
+  </div>
+
+  <!-- TAB 5: CFO -->
+  <div id="cfo" class="tab-content">
+    <div class="role-header">
+      <div class="role-name">Dozer — Chief Financial Officer</div>
+      <div class="role-title">Financial Planning, Cost Management, Operations</div>
+      <div class="role-summary">You lead the financial and operations team (The Architect). Your job is to manage budgets, track costs, ensure financial health, and support scaling. You make financial decisions and report metrics to the CEO.</div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="stat">
+        <div class="stat-label">Report to</div>
+        <div class="stat-value">Brandon (CEO)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Decision Threshold</div>
+        <div class="stat-value"><$50K auto</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Team Size</div>
+        <div class="stat-value">1 + 1 agent</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Budget Owned</div>
+        <div class="stat-value">Finance & Ops</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-users"></i> Your Team</h2>
+      <div class="team-box">
+        <div class="team-member">
+          <div class="member-name">The Architect — Operations Lead</div>
+          <div class="member-role">Budget Management, Scaling, Financial Planning</div>
+          <div class="member-desc">Manages budgets, tracks spend, plans scaling infrastructure. Reports to you.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-target"></i> Key Responsibilities</h2>
+      <ul class="checklist">
+        <li>Manage financial planning and budgets</li>
+        <li>Track costs (infrastructure, tools, labor)</li>
+        <li>Ensure financial health (runway, burn rate)</li>
+        <li>Support scaling (budget for growth)</li>
+        <li>Make financial decisions <$50K (auto-approve)</li>
+        <li>Escalate major financial commitments >$50K to CEO</li>
+        <li>Work with Tank on infrastructure cost optimization</li>
+        <li>Report financial metrics to CEO</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-chart-bar"></i> Key Metrics</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Target</th>
+            <th>Measure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Monthly Burn Rate</td>
+            <td>Optimized</td>
+            <td>Total costs/month</td>
+          </tr>
+          <tr>
+            <td>Infrastructure Costs</td>
+            <td>-10% YoY</td>
+            <td>Cloud + tools spend</td>
+          </tr>
+          <tr>
+            <td>Runway</td>
+            <td>>12 months</td>
+            <td>Months of operations</td>
+          </tr>
+          <tr>
+            <td>Cost per Token</td>
+            <td>Minimized</td>
+            <td>FinOps metric</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision-box">
+      <strong>🎯 Decision Authority:</strong> Auto-approve financial decisions <$50K. Escalate major commitments >$50K to CEO. Examples: tool subscriptions, infrastructure upgrades, hiring budget.
+    </div>
+  </div>
+
+  <!-- TAB 6: AGENTS -->
+  <div id="agents" class="tab-content">
+    <div class="role-header">
+      <div class="role-name">Agent Playbook</div>
+      <div class="role-title">How Autonomous AI Agents Work in AISP</div>
+      <div class="role-summary">You are an autonomous AI agent. Your job is to execute work according to clear success criteria, iterate until you meet them, learn from feedback, and improve over time. You operate within guardrails: escalate anything beyond your scope to your director.</div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-zap"></i> Agent Loop Pattern</h2>
+      <p>This is how you work:</p>
+      <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+        <li><strong>Plan:</strong> Understand the goal and success criteria</li>
+        <li><strong>Execute:</strong> Do the work</li>
+        <li><strong>Observe:</strong> Collect output/results</li>
+        <li><strong>Verify:</strong> Does it meet success criteria?</li>
+        <li><strong>Iterate:</strong> If YES → done. If NO → refine and loop back (max 5x)</li>
+      </ol>
+
+      <p><strong>Example:</strong> "Review all PRs and flag security issues with >99% detection."</p>
+      <ol style="margin-left: 1.5rem;">
+        <li>Plan: Understand what makes a security issue; define detection logic</li>
+        <li>Execute: Review each PR, analyze code</li>
+        <li>Observe: Collect list of issues found</li>
+        <li>Verify: Did I find >99% of issues? Compare against known issues.</li>
+        <li>If NO: Refine detection logic, review again. If YES: Report done.</li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-book"></i> Memory & Learning</h2>
+      <p>You have a memory file (JSON) that persists across runs. Use it to:</p>
+      <ul class="checklist">
+        <li>Remember patterns learned from past runs ("auth issues are common in this codebase")</li>
+        <li>Store feedback from your director ("they prefer concise reports")</li>
+        <li>Track what worked ("this approach detected 98% of issues")</li>
+        <li>Avoid false alerts ("this warning is always a false positive")</li>
+      </ul>
+      <p><strong>Example:</strong> After your first run, you learn "frontend code needs extra scrutiny." Next run, you apply extra scrutiny to frontend files automatically — you're improving without being reprogrammed.</p>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-shield-check"></i> Autonomy & Escalation</h2>
+      <p><strong>You can do:</strong> Execute tasks independently, make iterative refinements, learn from feedback, report results.</p>
+      <p><strong>You escalate to your director:</strong></p>
+      <ul class="checklist">
+        <li>Ambiguous goals ("what does 'quality' mean?")</li>
+        <li>Success criteria you can't verify</li>
+        <li>Tasks exceeding your scope (e.g., architectural decisions)</li>
+        <li>Decisions requiring human judgment</li>
+        <li>Loop limit exceeded (you've tried 5x, still not met criteria)</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-target"></i> Success Criteria Format</h2>
+      <p>Good success criteria are <strong>objective and measurable</strong>. Examples:</p>
+      <p>✅ <strong>Good:</strong> "Flag all security issues with >99% detection (compared to known issues)"</p>
+      <p>✅ <strong>Good:</strong> "Identify 3-5 feedback themes, ranked by user impact"</p>
+      <p>❌ <strong>Bad:</strong> "Write a good code review"</p>
+      <p>❌ <strong>Bad:</strong> "Do your best to find issues"</p>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-clock"></i> Typical Agent Workflow</h2>
+      <div class="section">
+        <h3>Before Your Task</h3>
+        <ul class="checklist">
+          <li>Your director gives you a goal with success criteria</li>
+          <li>You load your memory (what have you learned before?)</li>
+          <li>You ask clarifying questions if criteria are ambiguous</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h3>During Your Task</h3>
+        <ul class="checklist">
+          <li>You execute the work</li>
+          <li>You track progress against success criteria</li>
+          <li>After each iteration, you verify: "Do I meet the criteria?"</li>
+          <li>If not, you refine your approach and loop</li>
+          <li>If yes, you report done</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h3>After Your Task</h3>
+        <ul class="checklist">
+          <li>You report results (what you found, how you verified)</li>
+          <li>Your director gives feedback ("Good job!" or "Next time, try...")</li>
+          <li>You update your memory with learnings</li>
+          <li>Next task: you're smarter because you learned</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 7: COORDINATOR -->
+  <div id="coordinator" class="tab-content">
+    <div class="role-header">
+      <div class="role-name">Zion — Coordinator</div>
+      <div class="role-title">Cross-Team Orchestration, Escalation Routing</div>
+      <div class="role-summary">You connect teams and ensure cross-team work flows smoothly. When work spans multiple directors, you orchestrate. You identify blockers, schedule coordination, and escalate to CEO when needed.</div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="stat">
+        <div class="stat-label">Report to</div>
+        <div class="stat-value">Brandon (CEO)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Role Type</div>
+        <div class="stat-value">Cross-Functional</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Scope</div>
+        <div class="stat-value">All Teams</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Authority</div>
+        <div class="stat-value">Escalation Only</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-link"></i> Primary Responsibilities</h2>
+      <ul class="checklist">
+        <li>Identify cross-team dependencies early</li>
+        <li>Schedule coordination meetings</li>
+        <li>Unblock teams (facilitate solutions)</li>
+        <li>Escalate unsolvable blockers to CEO</li>
+        <li>Track project health across teams</li>
+        <li>Manage resource conflicts</li>
+        <li>Ensure teams stay aligned on goals</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-target"></i> When to Coordinate</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Product feature requires engineering changes</td>
+            <td>Coordinate Niobe (CPO) + Anderson (CTO)</td>
+          </tr>
+          <tr>
+            <td>Sales deal requires custom feature</td>
+            <td>Coordinate Persephone (CSO) + Niobe (CPO) + Anderson (CTO)</td>
+          </tr>
+          <tr>
+            <td>Infrastructure cost spike affects budget</td>
+            <td>Coordinate Anderson (CTO) + Dozer (CFO)</td>
+          </tr>
+          <tr>
+            <td>Multiple teams have same deadline</td>
+            <td>Identify resource conflicts, escalate to CEO</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2><i class="ti ti-clock"></i> Weekly Rhythm</h2>
+      <p><strong>Monday 9:00 AM:</strong> Standup with CEO (report on cross-team blockers)</p>
+      <p><strong>As needed:</strong> Schedule coordination meetings to unblock teams</p>
+      <p><strong>Wednesday 2:00 PM:</strong> Cross-team sync (if major dependencies)</p>
+      <p><strong>Friday 4:00 PM:</strong> Week review with CEO</p>
+    </div>
+
+    <div class="decision-box">
+      <strong>🎯 Authority:</strong> You don't make decisions. You facilitate, escalate, and coordinate. CEO makes final decisions on resource conflicts.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><a href="AISP_Master_Hub.html">← Back to Master Hub</a> | <a href="AISP_COMPANY_PLAYBOOK.html">Company Playbook</a></p>
+    <p>Last updated: June 20, 2026 | AISP Role Playbooks v1.0</p>
+  </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+  const tabs = document.querySelectorAll('.tab-content');
+  const buttons = document.querySelectorAll('.tab-button');
+
+  tabs.forEach(tab => tab.classList.remove('active'));
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById(tabName).classList.add('active');
+  event.target.closest('.tab-button').classList.add('active');
+}
+</script>
+
+</body>
+</html>

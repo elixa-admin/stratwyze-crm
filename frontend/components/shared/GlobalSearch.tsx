@@ -30,9 +30,9 @@ const LOCAL_DATA: LocalResult[] = [
 ];
 
 const TYPE_ICONS: Record<string, string> = {
-  contact: '👤',
-  account: '🏛️',
-  deal: '💼',
+  contact: 'C',
+  account: 'A',
+  deal: 'D',
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -137,7 +137,9 @@ export default function GlobalSearch() {
   return (
     <div ref={containerRef} className="relative flex-1 max-w-md">
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">🔍</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+        </span>
         <input
           ref={inputRef}
           type="text"
@@ -172,7 +174,7 @@ export default function GlobalSearch() {
                     activeIndex === idx ? 'bg-blue-50' : ''
                   }`}
                 >
-                  <span className="text-lg">{TYPE_ICONS[result.type] ?? '📄'}</span>
+                  <span className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500 flex-shrink-0">{TYPE_ICONS[result.type] ?? 'X'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-500 text-slate-900 truncate">{result.title}</p>
                     <p className="text-xs text-slate-500 truncate">{result.subtitle}</p>
@@ -208,7 +210,9 @@ export default function GlobalSearch() {
                       activeIndex === globalIdx ? 'bg-blue-50' : ''
                     }`}
                   >
-                    <span className="text-lg mt-0.5">🌐</span>
+                    <span className="w-7 h-7 rounded-md bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-500 text-slate-900 truncate">{result.title}</p>
                       <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">{result.snippet}</p>

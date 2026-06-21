@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AISP Executive Dashboard — Project Operations & Approvals</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #b0b0b0;
+            --accent: #007AFF;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            --border: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            min-height: 100vh;
+            gap: 0;
+        }
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .logo {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+        }
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+        .nav-section-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.08em;
+        }
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .nav-link {
+            padding: 0.6rem;
+            border-radius: 0.4rem;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
+        .nav-link.active { color: var(--accent); background-color: rgba(0, 122, 255, 0.1); border-color: var(--accent); }
+        .content {
+            padding: 2.5rem;
+            overflow-y: auto;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary); letter-spacing: -0.02em; }
+        h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.8rem; margin-bottom: 1rem; color: var(--text-primary); }
+        h3 { font-size: 1rem; font-weight: 600; margin-top: 1.2rem; margin-bottom: 0.75rem; color: var(--text-primary); }
+        p { margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.8; }
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-primary); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+        th {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        tr:hover { background-color: rgba(0, 122, 255, 0.05); }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .badge-autonomous { background-color: rgba(52, 199, 89, 0.2); color: var(--success); }
+        .badge-hil { background-color: rgba(255, 149, 0, 0.2); color: var(--warning); }
+        .badge-senior { background-color: rgba(0, 122, 255, 0.2); color: var(--accent); }
+        .badge-board { background-color: rgba(255, 59, 48, 0.2); color: var(--danger); }
+        .badge-tier-a { background-color: rgba(52, 199, 89, 0.2); color: var(--success); }
+        .badge-tier-b { background-color: rgba(255, 149, 0, 0.2); color: var(--warning); }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-primary); font-size: 0.9rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 0.4rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        .button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 0.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .button:hover { background-color: #0051d5; transform: translateY(-1px); }
+        .button.success { background-color: var(--success); }
+        .button.danger { background-color: var(--danger); }
+        .workflow-box {
+            background-color: var(--bg-tertiary);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 0.4rem;
+            margin-bottom: 1.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+        .queue-item {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .queue-item:hover { background-color: var(--bg-tertiary); border-color: var(--accent); }
+        .queue-header { font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+        .queue-meta { display: flex; gap: 1.5rem; color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; flex-wrap: wrap; }
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-secondary); }
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { position: relative; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 1.5rem; }
+            .nav-section { display: inline-block; margin-right: 2rem; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">AISP</div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Start</div>
+                <div class="nav-links">
+                    <a class="nav-link active" onclick="switchSection('quick-start')">Dashboard</a>
+                    <a class="nav-link" onclick="switchSection('init-project')">New Project</a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Operations</div>
+                <div class="nav-links">
+                    <a class="nav-link" onclick="switchSection('task-routing')">Task Routing</a>
+                    <a class="nav-link" onclick="switchSection('deployment-tier')">Deployment Tiers</a>
+                    <a class="nav-link" onclick="switchSection('autonomy-framework')">Autonomy Levels</a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Approvals</div>
+                <div class="nav-links">
+                    <a class="nav-link" onclick="switchSection('task-queue')">Tasks Pending</a>
+                    <a class="nav-link" onclick="switchSection('deployments')">Deployments</a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Reference</div>
+                <div class="nav-links">
+                    <a class="nav-link" onclick="switchSection('architecture')">Architecture</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard -->
+            <div id="quick-start" class="section active">
+                <h1>Executive Dashboard</h1>
+                <p style="font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 2rem;">
+                    AI-native startup operating system. Route tasks and deployments by autonomy level and customer impact.
+                </p>
+
+                <h2>What You Need to Know</h2>
+                <div class="card">
+                    <p><strong>Two Dimensions Drive Every Decision:</strong></p>
+                    <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+                        <li><strong>Autonomy Level</strong> ($5K / $50K / $500K thresholds) — Who approves?</li>
+                        <li><strong>Deployment Tier</strong> (Dev-only / Dev+Prod) — Where does it go?</li>
+                    </ul>
+                </div>
+
+                <h2>Quick Reference</h2>
+                <table>
+                    <tr>
+                        <th>Autonomy Level</th>
+                        <th>Cost Threshold</th>
+                        <th>Approval</th>
+                        <th>Platform</th>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-autonomous">Autonomous</span></td>
+                        <td>&lt; $5K</td>
+                        <td>Webhook (auto)</td>
+                        <td>Codex Mini / Claude Haiku</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-hil">HiL</span></td>
+                        <td>$5K–$50K</td>
+                        <td>You (Dashboard)</td>
+                        <td>Claude Sonnet</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-senior">Senior</span></td>
+                        <td>$50K–$500K</td>
+                        <td>You (Dashboard)</td>
+                        <td>Claude Opus</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-board">Board</span></td>
+                        <td>&gt; $500K</td>
+                        <td>You (Dashboard)</td>
+                        <td>Claude Opus</td>
+                    </tr>
+                </table>
+
+                <h2>Sprint Deployment Flow</h2>
+                <div class="workflow-box">
+                    Sprints 1–9: Develop locally (no deployment)
+                    Sprint 10: Final sprint
+                      → Commit to dev branch
+                      → Click "Request Dev Deployment" (Dashboard)
+                      → GitHub Action runs tests + deploys to Vercel dev
+                      → You verify on staging URL
+                      → Click "Promote to Prod"
+                      → Auto-merge dev → main → Vercel prod deploys
+                </div>
+
+                <h2>Sample Tasks</h2>
+                <table>
+                    <tr>
+                        <th>Task</th>
+                        <th>Autonomy</th>
+                        <th>Tier</th>
+                        <th>Where It Goes</th>
+                    </tr>
+                    <tr>
+                        <td>Customer Email (renewal)</td>
+                        <td><span class="badge badge-hil">HiL</span></td>
+                        <td><span class="badge badge-tier-b">B</span></td>
+                        <td>You approve → Dev → Prod in sprint 10</td>
+                    </tr>
+                    <tr>
+                        <td>Feature Spec ($50K+)</td>
+                        <td><span class="badge badge-senior">Senior</span></td>
+                        <td><span class="badge badge-tier-b">B</span></td>
+                        <td>You approve strategy → Dev → Prod</td>
+                    </tr>
+                    <tr>
+                        <td>Bug fix (internal)</td>
+                        <td><span class="badge badge-autonomous">Auto</span></td>
+                        <td><span class="badge badge-tier-a">A</span></td>
+                        <td>Dev only (no prod)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- New Project Initialization -->
+            <div id="init-project" class="section">
+                <h1>Initialize New Project</h1>
+                <p>Fill in your project details. You'll get a Claude Code prompt to launch the project in a new context window.</p>
+
+                <div class="card">
+                    <div class="form-group">
+                        <label for="proj-name">Project Name (e.g., "Customer Portal")</label>
+                        <input type="text" id="proj-name" placeholder="Enter project name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proj-desc">Brief Description</label>
+                        <textarea id="proj-desc" rows="3" placeholder="What is this project building?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proj-stack">Tech Stack (e.g., "Next.js, TypeScript, Postgres")</label>
+                        <input type="text" id="proj-stack" placeholder="Enter tech stack">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proj-team">Team Size</label>
+                        <select id="proj-team">
+                            <option value="">— Select —</option>
+                            <option value="1">Solo (you only)</option>
+                            <option value="2-3">2–3 people</option>
+                            <option value="4-6">4–6 people</option>
+                            <option value="7+">7+ people</option>
+                        </select>
+                    </div>
+
+                    <button class="button" onclick="generateProjectPrompt()">Generate Launch Prompt</button>
+                </div>
+
+                <div id="prompt-result" style="display: none;">
+                    <h2>Your Project Launch Prompt</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Copy this prompt and use it in a new Claude Code context window to initialize your project:</p>
+                    <div class="workflow-box">
+                        <div id="generated-prompt" style="white-space: pre-wrap; word-break: break-word;"></div>
+                    </div>
+                    <button class="button" onclick="copyPromptToClipboard()">Copy to Clipboard</button>
+                </div>
+            </div>
+
+            <!-- Task Routing -->
+            <div id="task-routing" class="section">
+                <h1>Task Routing Matrix</h1>
+                <p>Select task type and autonomy level to see where it goes, who approves, and which platform handles it.</p>
+
+                <div class="card">
+                    <div class="form-group">
+                        <label for="task-type">Task Type</label>
+                        <select id="task-type" onchange="updateRouting()">
+                            <option value="">— Select —</option>
+                            <optgroup label="Execution">
+                                <option value="bug-fix">Bug fix</option>
+                                <option value="code-review">Code review</option>
+                                <option value="content-gen">Content generation</option>
+                            </optgroup>
+                            <optgroup label="Customer-Facing">
+                                <option value="customer-email">Customer email</option>
+                                <option value="sales-pitch">Sales pitch</option>
+                            </optgroup>
+                            <optgroup label="Strategic">
+                                <option value="feature-spec">Feature spec</option>
+                                <option value="architecture">Architecture design</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="autonomy-level">Autonomy Level</label>
+                        <select id="autonomy-level" onchange="updateRouting()">
+                            <option value="">— Select —</option>
+                            <option value="autonomous">Autonomous (&lt; $5K)</option>
+                            <option value="hil">Human-in-Loop ($5K–$50K)</option>
+                            <option value="senior">Senior ($50K–$500K)</option>
+                            <option value="board">Board (&gt; $500K)</option>
+                        </select>
+                    </div>
+
+                    <button class="button" onclick="updateRouting()">Get Routing</button>
+                </div>
+
+                <div id="routing-result" style="display: none;">
+                    <div class="card">
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <strong>Platform:</strong> <span id="result-platform" style="color: var(--accent); font-weight: 600;"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <strong>Deployment Tier:</strong> <span id="result-tier"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <strong>Approval Path:</strong> <span id="result-approval"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deployment Tiers -->
+            <div id="deployment-tier" class="section">
+                <h1>Deployment Tiers</h1>
+                <p>Tier determines which environments your change reaches: Dev-only vs. Dev+Prod.</p>
+
+                <h2>Tier A: Dev-Only</h2>
+                <div class="card">
+                    <p><strong>When:</strong> Internal changes. Customers won't see this.</p>
+                    <p><strong>Where:</strong> Vercel dev only. Does not merge to main.</p>
+                    <p><strong>Examples:</strong> Bug fixes, refactoring, tech debt, docs, internal tooling.</p>
+                </div>
+
+                <h2>Tier B: Dev+Prod</h2>
+                <div class="card">
+                    <p><strong>When:</strong> Customer-facing changes.</p>
+                    <p><strong>Where:</strong> Vercel dev → verification → merge to main → Vercel prod.</p>
+                    <p><strong>Examples:</strong> Features, APIs, customer emails, sales materials, security fixes.</p>
+                </div>
+
+                <h2>Auto-Detection</h2>
+                <table>
+                    <tr>
+                        <th>Task Type</th>
+                        <th>Tier</th>
+                    </tr>
+                    <tr>
+                        <td>bug-fix</td>
+                        <td><span class="badge badge-tier-a">A</span></td>
+                    </tr>
+                    <tr>
+                        <td>code-review</td>
+                        <td><span class="badge badge-tier-a">A</span></td>
+                    </tr>
+                    <tr>
+                        <td>customer-email</td>
+                        <td><span class="badge badge-tier-b">B</span></td>
+                    </tr>
+                    <tr>
+                        <td>feature-spec</td>
+                        <td><span class="badge badge-tier-b">B</span></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Autonomy Framework -->
+            <div id="autonomy-framework" class="section">
+                <h1>Autonomy Levels</h1>
+                <p>Autonomy determines who approves and what platform handles it. Thresholds: $5K / $50K / $500K.</p>
+
+                <h2>Autonomous (&lt; $5K)</h2>
+                <div class="card">
+                    <p><strong>Definition:</strong> Self-contained, low-risk, repeatable tasks.</p>
+                    <p><strong>Approval:</strong> None. Webhook executes automatically.</p>
+                    <p><strong>Platform:</strong> Codex Mini or Claude Haiku</p>
+                    <p style="margin-bottom: 0;"><strong>Examples:</strong> Routine bug fixes, template updates, data analysis.</p>
+                </div>
+
+                <h2>Human-in-Loop ($5K–$50K)</h2>
+                <div class="card">
+                    <p><strong>Definition:</strong> New patterns, customer-facing, moderate risk.</p>
+                    <p><strong>Approval:</strong> You (via Dashboard). Review, approve, or reject.</p>
+                    <p><strong>Platform:</strong> Claude Sonnet</p>
+                    <p style="margin-bottom: 0;"><strong>Examples:</strong> Customer emails, sales pitches, small features.</p>
+                </div>
+
+                <h2>Senior Review ($50K–$500K)</h2>
+                <div class="card">
+                    <p><strong>Definition:</strong> Strategic decisions affecting multiple projects.</p>
+                    <p><strong>Approval:</strong> You (Dashboard). Full strategy memo required.</p>
+                    <p><strong>Platform:</strong> Claude Opus</p>
+                    <p style="margin-bottom: 0;"><strong>Examples:</strong> Architecture, new features, major refactors.</p>
+                </div>
+
+                <h2>Board-Level (&gt; $500K)</h2>
+                <div class="card">
+                    <p><strong>Definition:</strong> Existential company decisions.</p>
+                    <p><strong>Approval:</strong> You (Dashboard). Formal memo + final approval.</p>
+                    <p><strong>Platform:</strong> Claude Opus</p>
+                    <p style="margin-bottom: 0;"><strong>Examples:</strong> Funding strategy, M&A, major pivots.</p>
+                </div>
+            </div>
+
+            <!-- Task Queue -->
+            <div id="task-queue" class="section">
+                <h1>Pending Task Approvals</h1>
+                <p style="margin-bottom: 2rem;">Tasks waiting for your approval appear here. Review, approve, or reject each one.</p>
+                <div id="task-queue-list" class="empty-state">No pending tasks.</div>
+            </div>
+
+            <!-- Deployments -->
+            <div id="deployments" class="section">
+                <h1>Pending Deployments</h1>
+                <p style="margin-bottom: 2rem;">Deployment requests ready for dev or prod. Verify on staging URLs before promoting.</p>
+                <div id="deployment-queue-list" class="empty-state">No pending deployments.</div>
+            </div>
+
+            <!-- Architecture -->
+            <div id="architecture" class="section">
+                <h1>Deployment Architecture</h1>
+
+                <h2>GitHub Branching</h2>
+                <div class="card">
+                    <p><strong>Per Project:</strong></p>
+                    <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+                        <li><code>main</code> = Production (Vercel prod project)</li>
+                        <li><code>dev</code> = Staging (Vercel dev project)</li>
+                    </ul>
+                </div>
+
+                <h2>Vercel Projects</h2>
+                <table>
+                    <tr>
+                        <th>Project</th>
+                        <th>Branch</th>
+                        <th>Environment</th>
+                        <th>Trigger</th>
+                    </tr>
+                    <tr>
+                        <td>[project]-dev</td>
+                        <td>dev</td>
+                        <td>Staging</td>
+                        <td>Sprint 10 + "Request Dev Deploy" button</td>
+                    </tr>
+                    <tr>
+                        <td>[project]-prod</td>
+                        <td>main</td>
+                        <td>Production</td>
+                        <td>Merge from dev + "Promote to Prod" button</td>
+                    </tr>
+                </table>
+
+                <h2>Sprint Deployment</h2>
+                <div class="card">
+                    <p><strong>Sprints 1–9:</strong> Develop locally. Auto-commit to dev branch. No deployment.</p>
+                    <p><strong>Sprint 10:</strong> Final sprint. Commit to dev → Dashboard "Request Dev Deployment" → GitHub Action → Vercel dev.</p>
+                    <p><strong>Verification:</strong> Run tests. You perform manual smoke test on staging URL.</p>
+                    <p style="margin-bottom: 0;"><strong>Promotion:</strong> Click "Promote to Prod" → Merge dev to main → Vercel prod deploys automatically.</p>
+                </div>
+
+                <h2>Rollback (Blue-Green)</h2>
+                <div class="card">
+                    <p>Each Vercel deployment keeps the previous version live. If prod breaks, revert the commit and re-deploy. Traffic switches back instantly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const routingRules = {
+            'bug-fix': {
+                autonomous: { platform: 'Codex Mini', tier: 'A', approval: 'Webhook (auto)' },
+                hil: { platform: 'Codex', tier: 'A', approval: 'Dashboard (2-5 min)' },
+                senior: { platform: 'Claude Opus', tier: 'A', approval: 'Dashboard (10+ min)' },
+                board: { platform: 'Claude Opus', tier: 'A', approval: 'Dashboard' }
+            },
+            'code-review': {
+                autonomous: { platform: 'Codex Mini', tier: 'A', approval: 'Webhook (auto)' },
+                hil: { platform: 'Codex', tier: 'A', approval: 'Dashboard' },
+                senior: { platform: 'Claude Opus', tier: 'A', approval: 'Dashboard' },
+                board: { platform: 'Claude Opus', tier: 'A', approval: 'Dashboard' }
+            },
+            'content-gen': {
+                autonomous: { platform: 'Claude Haiku', tier: 'A', approval: 'Webhook (auto)' },
+                hil: { platform: 'Claude Sonnet', tier: 'A', approval: 'Dashboard' },
+                senior: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard' },
+                board: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard' }
+            },
+            'customer-email': {
+                autonomous: { platform: 'Claude Haiku', tier: 'B', approval: 'Webhook (auto)' },
+                hil: { platform: 'Claude Sonnet', tier: 'B', approval: 'Dashboard (2-5 min)' },
+                senior: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard (10+ min)' },
+                board: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard' }
+            },
+            'sales-pitch': {
+                autonomous: { platform: 'Claude Haiku', tier: 'B', approval: 'Webhook (auto)' },
+                hil: { platform: 'Claude Sonnet', tier: 'B', approval: 'Dashboard (5-10 min)' },
+                senior: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard (15+ min)' },
+                board: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard' }
+            },
+            'feature-spec': {
+                autonomous: { platform: 'Codex', tier: 'B', approval: 'Webhook (auto)' },
+                hil: { platform: 'Claude Sonnet', tier: 'B', approval: 'Dashboard (10+ min)' },
+                senior: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard (20+ min)' },
+                board: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard' }
+            },
+            'architecture': {
+                autonomous: { platform: 'Codex', tier: 'A', approval: 'Webhook (auto)' },
+                hil: { platform: 'Claude Sonnet', tier: 'A', approval: 'Dashboard (15+ min)' },
+                senior: { platform: 'Claude Opus', tier: 'A', approval: 'Dashboard (30+ min)' },
+                board: { platform: 'Claude Opus', tier: 'B', approval: 'Dashboard' }
+            }
+        };
+
+        function switchSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelector(`[onclick="switchSection('${sectionId}')"]`).classList.add('active');
+            document.querySelector('.content').scrollTop = 0;
+        }
+
+        function updateRouting() {
+            const taskType = document.getElementById('task-type').value;
+            const autonomyLevel = document.getElementById('autonomy-level').value;
+            if (!taskType || !autonomyLevel) return;
+
+            const rules = routingRules[taskType]?.[autonomyLevel];
+            if (!rules) { alert('Routing not found.'); return; }
+
+            const tierLabel = rules.tier === 'A' ? 'Tier A (Dev-only)' : 'Tier B (Dev+Prod)';
+            document.getElementById('result-platform').textContent = rules.platform;
+            document.getElementById('result-tier').textContent = tierLabel;
+            document.getElementById('result-approval').textContent = rules.approval;
+            document.getElementById('routing-result').style.display = 'block';
+        }
+
+        function generateProjectPrompt() {
+            const name = document.getElementById('proj-name').value || 'MyProject';
+            const desc = document.getElementById('proj-desc').value || '[your description]';
+            const stack = document.getElementById('proj-stack').value || '[your tech stack]';
+            const team = document.getElementById('proj-team').value || '1';
+
+            const prompt = `You are launching a new project within the AISP framework.
+
+PROJECT: ${name}
+DESCRIPTION: ${desc}
+TECH STACK: ${stack}
+TEAM SIZE: ${team}
+
+INITIALIZATION CHECKLIST:
+1. Review AISP framework at /Users/brandondienar/Documents/Codex/Projects/AISP/CEO_DASHBOARD.html
+2. Create GitHub repository with main + dev branches
+3. Set up Vercel projects (dev + prod)
+4. Initialize project structure per tech stack
+5. Create .claude/settings.json with token budgets and model routing
+6. Create CLAUDE.md with project-specific instructions
+7. Generate initial sprint plan (3 sprints, 160k token budget)
+
+USE THESE COMMANDS:
+  - /branch [sprint-name] — Create traceable sprint branch
+  - /commit — Stage and create conventional commit
+  - /plan — Break down task into portable checklist
+  - /implement — Build per sprint plan
+  - /verify — Test in browser before shipping
+
+APPROVAL GATES:
+- Autonomous tasks: Auto-execute
+- HiL tasks: Dashboard approval required
+- Senior tasks: You must review strategy
+- Board tasks: Formal decision required
+
+Output your sprint 1–3 plan as SPRINTS_1-3_PLAN.md, then await your approval to proceed.`;
+
+            document.getElementById('generated-prompt').textContent = prompt;
+            document.getElementById('prompt-result').style.display = 'block';
+        }
+
+        function copyPromptToClipboard() {
+            const prompt = document.getElementById('generated-prompt').textContent;
+            navigator.clipboard.writeText(prompt).then(() => {
+                alert('Prompt copied to clipboard. Paste it in a new Claude Code context window.');
+            });
+        }
+    </script>
+</body>
+</html>

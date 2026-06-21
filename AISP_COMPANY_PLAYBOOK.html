@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Company Playbook</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.hub { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #00c2ff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header h1 i {
+  font-size: 40px;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1f2937;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab-button:hover {
+  color: #00c2ff;
+}
+
+.tab-button.active {
+  color: #00c2ff;
+  border-bottom-color: #00c2ff;
+}
+
+.tab-button i {
+  font-size: 16px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #00c2ff;
+}
+
+.section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  color: #f3f4f6;
+}
+
+.section h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  color: #d1d5db;
+}
+
+.section p {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.org-box {
+  background: rgba(0, 194, 255, 0.05);
+  border: 1px solid #00c2ff;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #10b981;
+}
+
+.role-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(0, 194, 255, 0.05) 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.role-card h4 {
+  color: #10b981;
+  margin-top: 0;
+}
+
+.role-card strong {
+  color: #f3f4f6;
+}
+
+.checklist {
+  list-style: none;
+  margin: 1rem 0;
+}
+
+.checklist li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.checklist li:before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.table thead {
+  background: rgba(0, 194, 255, 0.1);
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #00c2ff;
+  border-bottom: 1px solid #374151;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  color: #d1d5db;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.step-box {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.step-box strong {
+  color: #3b82f6;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.metric {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.metric .value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 0.5rem;
+}
+
+.metric .label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.faq {
+  margin: 1.5rem 0;
+}
+
+.faq-item {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.faq-question {
+  padding: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #00c2ff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.faq-question:hover {
+  background: #1f2937;
+}
+
+.faq-answer {
+  padding: 0 1rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s, padding 0.3s;
+  color: #d1d5db;
+}
+
+.faq-item.open .faq-answer {
+  max-height: 500px;
+  padding: 1rem;
+}
+
+.glossary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.glossary-item {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.glossary-item strong {
+  color: #00c2ff;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.glossary-item p {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.footer {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-top: 3rem;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.footer a {
+  color: #00c2ff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    gap: 0.25rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 12px;
+  }
+
+  .section h2 {
+    font-size: 20px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="hub">
+  <div class="header">
+    <h1><i class="ti ti-book"></i> AISP Company Playbook</h1>
+    <p>Comprehensive reference for how AISP works, what each role does, and how to get started</p>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchTab('overview')">
+      <i class="ti ti-home"></i> Overview
+    </button>
+    <button class="tab-button" onclick="switchTab('organization')">
+      <i class="ti ti-hierarchy-2"></i> Organization
+    </button>
+    <button class="tab-button" onclick="switchTab('roles')">
+      <i class="ti ti-briefcase"></i> Role Playbooks
+    </button>
+    <button class="tab-button" onclick="switchTab('workflow')">
+      <i class="ti ti-timeline"></i> Development
+    </button>
+    <button class="tab-button" onclick="switchTab('systems')">
+      <i class="ti ti-zap"></i> Autonomous Systems
+    </button>
+    <button class="tab-button" onclick="switchTab('getting-started')">
+      <i class="ti ti-rocket"></i> Getting Started
+    </button>
+    <button class="tab-button" onclick="switchTab('metrics')">
+      <i class="ti ti-chart-bar"></i> Success Metrics
+    </button>
+    <button class="tab-button" onclick="switchTab('glossary')">
+      <i class="ti ti-book-2"></i> Glossary
+    </button>
+  </div>
+
+  <!-- TAB 1: OVERVIEW -->
+  <div id="overview" class="tab-content active">
+    <div class="section">
+      <h2>AISP Overview</h2>
+      <p>AISP is an AI-native consulting agency built on <strong>autonomous agents guided by human strategic judgment</strong>. This playbook is your reference guide for how everything works.</p>
+
+      <h3>The 14-Person Structure</h3>
+      <div class="org-box">
+BRANDON (CEO)
+├─ ANDERSON (CTO) → Neo, Trinity, Tank
+├─ NIOBE (CPO) → Morpheus, Ghost
+├─ PERSEPHONE (CSO) → Agent Smith, Cypher
+├─ DOZER (CFO) → The Architect
+└─ ZION (Coordinator) - Cross-team
+      </div>
+
+      <h3>Core Principles</h3>
+      <ul class="checklist">
+        <li><strong>Autonomy:</strong> 95% of tasks complete without human prompting</li>
+        <li><strong>Learning:</strong> Agents improve over time via memory-based feedback</li>
+        <li><strong>Efficiency:</strong> 25-50% token savings vs. manual baseline</li>
+        <li><strong>Scaling:</strong> Same structure, infinite projects</li>
+        <li><strong>Quality:</strong> Self-correcting loops ensure consistency</li>
+      </ul>
+
+      <h3>Your Role (CEO)</h3>
+      <p>You don't execute work. You:</p>
+      <ul class="checklist">
+        <li>Make strategic decisions (approve features, set direction)</li>
+        <li>Plan waves (30-sprint cycles with reflection points)</li>
+        <li>Give feedback to agents (they learn from it)</li>
+        <li>Monitor KPIs (autonomy rate, token savings, quality)</li>
+        <li>Escalate exceptions (things that exceed director thresholds)</li>
+      </ul>
+
+      <h3>Quick Links</h3>
+      <p>Start here based on your role:</p>
+      <ul class="checklist">
+        <li><strong>I'm a Director:</strong> Read "Role Playbooks" tab, then "Development" tab</li>
+        <li><strong>I'm an Agent:</strong> Read "Autonomous Systems" tab, then "Development" tab</li>
+        <li><strong>I'm new to AISP:</strong> Read all tabs in order (Overview → Organization → Roles → Development → Systems)</li>
+        <li><strong>I need to deploy:</strong> Jump to "Integrations Guide" (separate doc)</li>
+        <li><strong>I want to understand the vision:</strong> Read "Vision Statement" (separate doc)</li>
+      </ul>
+
+      <h3>Essential Documents</h3>
+      <ul class="checklist">
+        <li><a href="AISP_VISION_STATEMENT.html" style="color: #00c2ff;">Vision Statement</a> — Why AISP exists and where we're headed</li>
+        <li><a href="AISP_INTEGRATIONS_GUIDE.html" style="color: #00c2ff;">Integrations Guide</a> — How to use GitHub, Vercel, Slack, Linear, Pattern Library</li>
+        <li><a href="AISP_Master_Hub.html" style="color: #00c2ff;">Master Hub</a> — Navigation center for all AISP docs</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 2: ORGANIZATION -->
+  <div id="organization" class="tab-content">
+    <div class="section">
+      <h2>Organization Structure</h2>
+
+      <h3>The 14-Person Model</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Name</th>
+            <th>Responsibilities</th>
+            <th>Team Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CEO</strong></td>
+            <td>Brandon</td>
+            <td>Vision, strategy, final decisions, wave planning</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td><strong>CTO</strong></td>
+            <td>Anderson</td>
+            <td>Engineering, infrastructure, code quality</td>
+            <td>4 (+ 3 agents)</td>
+          </tr>
+          <tr>
+            <td><strong>CPO</strong></td>
+            <td>Niobe</td>
+            <td>Product, features, user experience</td>
+            <td>4 (+ 2 agents)</td>
+          </tr>
+          <tr>
+            <td><strong>CSO</strong></td>
+            <td>Persephone</td>
+            <td>Sales, growth, partnerships</td>
+            <td>4 (+ 2 agents)</td>
+          </tr>
+          <tr>
+            <td><strong>CFO</strong></td>
+            <td>Dozer</td>
+            <td>Finance, budgets, operations</td>
+            <td>2 (+ 1 agent)</td>
+          </tr>
+          <tr>
+            <td><strong>Coordinator</strong></td>
+            <td>Zion</td>
+            <td>Cross-team orchestration, escalations</td>
+            <td>1</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Reporting Lines</h3>
+      <p><strong>Director hierarchy:</strong> All directors report to CEO</p>
+      <p><strong>Agent hierarchy:</strong> All agents report to their director</p>
+      <p><strong>Coordinator:</strong> Zion is cross-functional, escalates to CEO</p>
+
+      <h3>Decision Authority</h3>
+      <ul class="checklist">
+        <li><strong>&lt;$5K decisions:</strong> Directors auto-approve (within bounds)</li>
+        <li><strong>$5K–$50K decisions:</strong> Directors decide (with CTO/CPO input if cross-team)</li>
+        <li><strong>$50K–$500K decisions:</strong> CEO decides (with director input)</li>
+        <li><strong>&gt;$500K decisions:</strong> CEO + board (if applicable)</li>
+      </ul>
+
+      <h3>Weekly Rhythm</h3>
+      <p><strong>Monday 9 AM:</strong> Standup (all directors + CEO, 30 min)</p>
+      <p><strong>Wednesday 2 PM:</strong> Cross-team sync (directors only, 30 min)</p>
+      <p><strong>Friday 4 PM:</strong> Week review (all team + CEO, 45 min)</p>
+    </div>
+  </div>
+
+  <!-- TAB 3: ROLE PLAYBOOKS -->
+  <div id="roles" class="tab-content">
+    <div class="section">
+      <h2>Role Playbooks</h2>
+
+      <div class="role-card">
+        <h4><i class="ti ti-crown"></i> CEO (Brandon) — Command & Vision</h4>
+        <p><strong>Primary responsibilities:</strong></p>
+        <ul class="checklist">
+          <li>Set company direction (what we build, why)</li>
+          <li>Plan waves (30-sprint cycles with reflection)</li>
+          <li>Make decisions >$50K</li>
+          <li>Approve director feedback (agents learn from it)</li>
+          <li>Monitor KPIs (autonomy, token savings, quality)</li>
+          <li>Escalate exceptions (things directors can't handle)</li>
+        </ul>
+        <p><strong>Weekly rhythm:</strong> Standup Monday, sync Wednesday, review Friday + async</p>
+        <p><strong>Decision thresholds:</strong> Auto-approve <$5K via directors; decide $5K–$500K yourself; escalate >$500K</p>
+      </div>
+
+      <div class="role-card">
+        <h4><i class="ti ti-code"></i> Director — Team Leadership & Execution</h4>
+        <p><strong>You own:</strong> Team health, KPIs, quality gates, decisions within your domain</p>
+        <p><strong>Primary responsibilities:</strong></p>
+        <ul class="checklist">
+          <li>Lead your team (Anderson: 3 engineers + Neo/Trinity/Tank; Niobe: product team + Morpheus/Ghost; etc.)</li>
+          <li>Set team KPIs (code quality, delivery time, customer satisfaction)</li>
+          <li>Auto-approve <$5K decisions</li>
+          <li>Decide $5K–$50K decisions (escalate >$50K)</li>
+          <li>Give feedback to agents (they improve from it)</li>
+          <li>Weekly rhythm: standup, sync, review</li>
+          <li>First-responder for escalations from your team</li>
+        </ul>
+      </div>
+
+      <div class="role-card">
+        <h4><i class="ti ti-zap"></i> Agent — Autonomous Execution</h4>
+        <p><strong>You execute work.</strong> Not strategize, not approve, not plan. Execute.</p>
+        <p><strong>How agent autonomy works:</strong></p>
+        <ul class="checklist">
+          <li>You get a goal with success criteria (objective, measurable)</li>
+          <li>You plan your approach</li>
+          <li>You execute</li>
+          <li>You observe: does it meet criteria?</li>
+          <li>If YES: done, report result</li>
+          <li>If NO: refine approach, loop back to step 2</li>
+          <li>Loop max 5 times; escalate to director if still not done</li>
+        </ul>
+        <p><strong>Remember:</strong> You have memory. You learn from feedback. You improve over time.</p>
+      </div>
+
+      <div class="role-card">
+        <h4><i class="ti ti-link"></i> Coordinator (Zion) — Cross-Team Orchestration</h4>
+        <p><strong>You connect teams.</strong> When work spans multiple directors, you orchestrate.</p>
+        <ul class="checklist">
+          <li>Identify cross-team dependencies</li>
+          <li>Schedule coordination meetings</li>
+          <li>Escalate blockers to CEO</li>
+          <li>Keep projects on track across team boundaries</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: DEVELOPMENT WORKFLOW -->
+  <div id="workflow" class="tab-content">
+    <div class="section">
+      <h2>Development Workflow: Sprints, Builds & Waves</h2>
+
+      <h3>Nomenclature</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Term</th>
+            <th>Duration</th>
+            <th>What Happens</th>
+            <th>Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Sprint</strong></td>
+            <td>1–2 weeks</td>
+            <td>Focused feature/fix work. Sprints 1-9: dev. Sprint 10: commit → deploy → verify</td>
+            <td>Code, tests, merged to branch</td>
+          </tr>
+          <tr>
+            <td><strong>Build Phase</strong></td>
+            <td>10 sprints (10–20 weeks)</td>
+            <td>Cohesive feature set (e.g., "org setup"). Sprint 10 = deployment sprint. Always ends with production deploy.</td>
+            <td>v1.0, v1.1, v1.2 (tagged release)</td>
+          </tr>
+          <tr>
+            <td><strong>Wave</strong></td>
+            <td>3 build phases (30 sprints, ~60 weeks)</td>
+            <td>Major milestone. Wave end = reflection point: major changes, lessons learned, next wave plan.</td>
+            <td>Wave completion doc + next wave plan</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Sprint Anatomy (Sprints 1–9)</h3>
+      <p><strong>Monday 9 AM: Sprint starts</strong></p>
+      <ul class="checklist">
+        <li>Plan: sprint goals, assign tasks, estimate work</li>
+        <li>Load tools: available skills, patterns in library, integrations</li>
+      </ul>
+      <p><strong>Tue–Fri: Development</strong></p>
+      <ul class="checklist">
+        <li>Code implementation (dev branch)</li>
+        <li>Unit tests</li>
+        <li>Code review</li>
+        <li>Merge to dev (auto-deploy to staging)</li>
+      </ul>
+      <p><strong>Friday 5 PM: Sprint ends</strong></p>
+      <ul class="checklist">
+        <li>Document sprint summary (what got done, token usage, learnings)</li>
+        <li>Prepare for next sprint</li>
+      </ul>
+
+      <h3>Sprint 10 (Deployment Sprint) — Mandatory</h3>
+      <p><strong>Mon–Wed: Integration & Testing</strong></p>
+      <ul class="checklist">
+        <li>Run full test suite</li>
+        <li>User acceptance testing (UAT)</li>
+        <li>Code freeze (bug fixes only)</li>
+      </ul>
+      <p><strong>Thursday: Commit & Deploy</strong></p>
+      <ul class="checklist">
+        <li>Merge dev → main (GitHub)</li>
+        <li>Tag release (v1.0, v1.1, etc.)</li>
+        <li>Vercel auto-deploys to production</li>
+      </ul>
+      <p><strong>Friday: Verify & Test</strong></p>
+      <ul class="checklist">
+        <li>Automated smoke tests</li>
+        <li>Monitor production metrics</li>
+        <li>User feedback (if applicable)</li>
+      </ul>
+
+      <h3>Wave Completion (Every 30 Sprints)</h3>
+      <p><strong>What gets documented:</strong></p>
+      <ul class="checklist">
+        <li>Major changes (3 build phases, what shipped)</li>
+        <li>Lessons learned (what worked, what didn't)</li>
+        <li>Metrics (token savings, autonomy %, quality)</li>
+        <li>Next wave plan (goals, timeline, success criteria)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 5: AUTONOMOUS SYSTEMS -->
+  <div id="systems" class="tab-content">
+    <div class="section">
+      <h2>AISP's Autonomous Systems</h2>
+      <p>Four interlocking systems enable agents to run autonomously, improve over time, and stay reliable.</p>
+
+      <h3>1. Smart Toolkit (Pattern Library)</h3>
+      <p><strong>What it does:</strong> Detects problems you've solved before. Auto-suggests or auto-runs fixes.</p>
+      <ul class="checklist">
+        <li>Stores bug fixes, solutions, learned patterns</li>
+        <li>Confidence scoring (90%+ = auto-run, 85%–89% = suggest, <85% = history only)</li>
+        <li>Shared across all projects (cross-project learning)</li>
+        <li>Syncs weekly to GitHub (persistent, auditable)</li>
+      </ul>
+      <p><strong>Example:</strong> "Token expiry" fix had 95% confidence. Next time you encounter "401 Unauthorized", the pattern auto-suggests the fix with 95% confidence. Try it. Works? Remember. Doesn't work? Refine and re-run.</p>
+
+      <h3>2. Automated Agent Creation</h3>
+      <p><strong>What it does:</strong> When you notice a recurring task, the system detects it and suggests creating an agent.</p>
+      <ul class="checklist">
+        <li>Triggers: standup mention ("I reviewed 50 PRs manually"), sprint repeat, time logging (>5h/week on same task)</li>
+        <li>2-minute questionnaire → agent spec auto-generated → deployed</li>
+        <li>Zero CLI commands needed (system detects and prompts)</li>
+      </ul>
+      <p><strong>Example:</strong> If you say "I synthesized feedback all week" every Friday, the system flags it: "Create agent?" You say yes. Ghost (feedback agent) is born and runs every Friday automatically.</p>
+
+      <h3>3. Agent Loops (Self-Correcting Execution)</h3>
+      <p><strong>What it does:</strong> Agents don't guess when they're done. They iterate until objective success criteria are met.</p>
+      <p><strong>The loop:</strong></p>
+      <ol style="margin-left: 1.5rem;">
+        <li><strong>Plan:</strong> What approach will hit the criteria?</li>
+        <li><strong>Execute:</strong> Do the work</li>
+        <li><strong>Observe:</strong> Collect output</li>
+        <li><strong>Verify:</strong> Does it meet success criteria?</li>
+        <li><strong>Iterate:</strong> If YES → done. If NO → refine and loop back (max 5 times)</li>
+      </ol>
+      <p><strong>Example:</strong> "Review all PRs until: zero critical issues found + 85%+ coverage + recommendations ready." Agent loops, reviews, checks. Missed a critical issue? Loop back, deeper review. Coverage still 82%? Loop back, flag authors. Criteria met? Done.</p>
+
+      <h3>4. Managed Agents (Cloud-Deployed, 24/7)</h3>
+      <p><strong>What they are:</strong> Agent loops running on Anthropic's cloud, scheduled, autonomous.</p>
+      <ul class="checklist">
+        <li><strong>Neo:</strong> Daily 6 AM — reviews all PRs from past 24h</li>
+        <li><strong>Ghost:</strong> Friday 5 PM — synthesizes weekly feedback</li>
+        <li><strong>Tank:</strong> 2x daily (6 AM, 6 PM) — infrastructure health check</li>
+        <li>Memory enabled: learns from feedback, improves each run</li>
+        <li>Results auto-delivered (email, Slack, dashboard)</li>
+      </ul>
+
+      <h3>How They Work Together</h3>
+      <p><strong>The flow:</strong> Problem occurs → Smart Toolkit suggests fix (or auto-runs) → If routine, Automated Agent Creation flags it → Agent created runs via Managed Agents on schedule → Uses Agent Loops to verify success → Stores learnings in pattern library → Next time, higher confidence</p>
+    </div>
+  </div>
+
+  <!-- TAB 6: GETTING STARTED -->
+  <div id="getting-started" class="tab-content">
+    <div class="section">
+      <h2>Getting Started</h2>
+
+      <h3>If You're New to AISP</h3>
+      <div class="step-box">
+        <strong>1. Read this playbook (you're doing it)</strong> — 15 min for all tabs
+      </div>
+      <div class="step-box">
+        <strong>2. Read Vision Statement</strong> — Understand why AISP exists, where it's headed
+      </div>
+      <div class="step-box">
+        <strong>3. Read Integrations Guide</strong> — Learn GitHub, Vercel, Slack, Linear, Pattern Library
+      </div>
+      <div class="step-box">
+        <strong>4. Run your first task</strong> — See Agent Loops in action
+      </div>
+
+      <h3>If You're a New Director</h3>
+      <p>Start with "Role Playbooks" (above) then:</p>
+      <ol style="margin-left: 1.5rem;">
+        <li>Read your onboarding guide (AISP_Director_Onboarding.html, your tab)</li>
+        <li>Attend Monday standup (meet your team, see current tasks)</li>
+        <li>Set team KPIs with CEO (what success looks like for your team)</li>
+        <li>Review 3 sprints to understand your team's rhythm</li>
+      </ol>
+
+      <h3>If You're a New Agent</h3>
+      <p>Start with this playbook, then:</p>
+      <ol style="margin-left: 1.5rem;">
+        <li>Get your first goal from your director (objective, measurable criteria)</li>
+        <li>Use Agent Loop pattern: Plan → Execute → Observe → Verify → Iterate</li>
+        <li>Ask for feedback (helps you learn via memory)</li>
+        <li>For help, check Pattern Library or ask director</li>
+      </ol>
+
+      <h3>Common Questions</h3>
+      <div class="faq">
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            How do I know if my task is done?
+            <span>▼</span>
+          </div>
+          <div class="faq-answer">
+            Your director or task spec includes success criteria (objective, measurable). You've completed the task when all criteria are met. Use the Agent Loop: verify against criteria each iteration. If criteria aren't clear, ask your director before starting.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            What do I do if I'm stuck?
+            <span>▼</span>
+          </div>
+          <div class="faq-answer">
+            1. Check Pattern Library (solved it before?). 2. Ask your director (that's their job). 3. If it needs cross-team help, Zion (coordinator) handles it.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            How do agents improve over time?
+            <span>▼</span>
+          </div>
+          <div class="faq-answer">
+            Memory + Feedback. Each agent has a memory file (persisted learnings from past runs). When you give feedback ("this approach worked better" or "I preferred the concise version"), the agent stores that. Next task: remembers what worked before.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            What's the token budget?
+            <span>▼</span>
+          </div>
+          <div class="faq-answer">
+            Per sprint: 10K–15K tokens (Sprints 1–9), ~12K (Sprint 10). Total per Wave: ~300–450K tokens. Smart Toolkit and Pattern Library reuse save 25–50% vs. manual approach.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 7: SUCCESS METRICS -->
+  <div id="metrics" class="tab-content">
+    <div class="section">
+      <h2>Success Metrics by Wave</h2>
+
+      <h3>Wave 1: Foundation (Now → Feb 2027)</h3>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="label">Autonomy Target</div>
+          <div class="value">95%</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Tasks complete without human prompt</p>
+        </div>
+        <div class="metric">
+          <div class="label">Token Savings</div>
+          <div class="value">30%</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">vs. manual baseline</p>
+        </div>
+        <div class="metric">
+          <div class="label">Team Size</div>
+          <div class="value">14</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">1 CEO + 4 Directors + 8 Agents + 1 Coordinator</p>
+        </div>
+        <div class="metric">
+          <div class="label">Deployed Orgs</div>
+          <div class="value">1</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">AISP Portal live</p>
+        </div>
+      </div>
+
+      <h3>Wave 2: Multi-Project (Feb → Oct 2027)</h3>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="label">Autonomy Target</div>
+          <div class="value">98%</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Only strategic needs humans</p>
+        </div>
+        <div class="metric">
+          <div class="label">Token Savings</div>
+          <div class="value">40%</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">vs. baseline</p>
+        </div>
+        <div class="metric">
+          <div class="label">Projects</div>
+          <div class="value">3–5</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Parallel org structure</p>
+        </div>
+        <div class="metric">
+          <div class="label">Model Status</div>
+          <div class="value">Proven</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Pattern validated</p>
+        </div>
+      </div>
+
+      <h3>Wave 3+: Scale (Oct 2027+)</h3>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="label">Autonomy Target</div>
+          <div class="value">99%+</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Only CEO involvement on strategy</p>
+        </div>
+        <div class="metric">
+          <div class="label">Token Savings</div>
+          <div class="value">50%+</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Peak efficiency</p>
+        </div>
+        <div class="metric">
+          <div class="label">Business Model</div>
+          <div class="value">∞ Projects</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Infinitely scalable</p>
+        </div>
+        <div class="metric">
+          <div class="label">Status</div>
+          <div class="value">Market-Ready</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 0.5rem;">Ready to license/sell</p>
+        </div>
+      </div>
+
+      <h3>Key Performance Indicators (Ongoing)</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>KPI</th>
+            <th>Measured How</th>
+            <th>Healthy Target</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Autonomy Rate</strong></td>
+            <td>% of tasks completed without human prompt</td>
+            <td>95%+</td>
+          </tr>
+          <tr>
+            <td><strong>Token Efficiency</strong></td>
+            <td>Tokens used vs. manual baseline</td>
+            <td>25–50% reduction</td>
+          </tr>
+          <tr>
+            <td><strong>Task Quality</strong></td>
+            <td>Successful completion rate (meets criteria)</td>
+            <td>95%+ first-time</td>
+          </tr>
+          <tr>
+            <td><strong>Agent Learning</strong></td>
+            <td>Confidence score improvement over time</td>
+            <td>+5% per week</td>
+          </tr>
+          <tr>
+            <td><strong>Sprint Velocity</strong></td>
+            <td>Sprints on schedule, no delays</td>
+            <td>100% on-time delivery</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 8: GLOSSARY -->
+  <div id="glossary" class="tab-content">
+    <div class="section">
+      <h2>Glossary & Quick Reference</h2>
+
+      <div class="glossary">
+        <div class="glossary-item">
+          <strong>Agent</strong>
+          <p>AI specialist that executes tasks autonomously. Runs via Agent Loops. Has memory; improves over time.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Agent Loop</strong>
+          <p>Plan → Execute → Observe → Verify → Iterate. Agents repeat until success criteria are met (max 5x).</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Autonomy Rate</strong>
+          <p>% of tasks completed without human intervention. Wave 1: 95%, Wave 2: 98%, Wave 3+: 99%+.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Build Phase</strong>
+          <p>10 sprints (10–20 weeks). Ends with production deploy. Always 3 per Wave.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>CEO</strong>
+          <p>Brandon. Sets vision, plans waves, makes >$50K decisions, approves director feedback.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>CTO, CPO, CSO, CFO</strong>
+          <p>Anderson, Niobe, Persephone, Dozer. Directors. Auto-approve <$5K, decide $5K–$50K within domain.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Coordinator</strong>
+          <p>Zion. Cross-team orchestration, escalation routing, dependency management.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Memory</strong>
+          <p>Agent's persistent learnings from past tasks. Updated via feedback. Improves future performance.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Pattern Library</strong>
+          <p>Shared SQLite DB of bug fixes, solutions, patterns. Confidence scored. Cross-project accessible.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Smart Toolkit</strong>
+          <p>System for pattern detection and auto-suggestion. Suggests or auto-runs fixes based on confidence score.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Sprint</strong>
+          <p>1–2 week focused work cycle. Sprints 1–9: development. Sprint 10: deploy + verify.</p>
+        </div>
+        <div class="glossary-item">
+          <strong>Wave</strong>
+          <p>3 build phases (30 sprints, ~60 weeks). Ends with reflection: major changes, lessons, next wave plan.</p>
+        </div>
+      </div>
+
+      <h3>Decision Thresholds</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Budget</th>
+            <th>Who Decides</th>
+            <th>Approval Flow</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>&lt;$5K</strong></td>
+            <td>Directors (auto-approve)</td>
+            <td>No escalation needed</td>
+          </tr>
+          <tr>
+            <td><strong>$5K–$50K</strong></td>
+            <td>Directors (with cross-team input)</td>
+            <td>Director decides, informs CEO</td>
+          </tr>
+          <tr>
+            <td><strong>$50K–$500K</strong></td>
+            <td>CEO (with director input)</td>
+            <td>CEO decides, informs board</td>
+          </tr>
+          <tr>
+            <td><strong>&gt;$500K</strong></td>
+            <td>CEO + Board</td>
+            <td>Board votes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><a href="AISP_Master_Hub.html">← Back to Master Hub</a> | <a href="AISP_VISION_STATEMENT.html">Vision Statement</a> | <a href="AISP_INTEGRATIONS_GUIDE.html">Integrations Guide</a></p>
+    <p>Last updated: June 20, 2026 | AISP Company Playbook v1.0</p>
+  </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+  const tabs = document.querySelectorAll('.tab-content');
+  const buttons = document.querySelectorAll('.tab-button');
+
+  tabs.forEach(tab => tab.classList.remove('active'));
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById(tabName).classList.add('active');
+  event.target.closest('.tab-button').classList.add('active');
+}
+
+function toggleFAQ(element) {
+  const item = element.closest('.faq-item');
+  item.classList.toggle('open');
+}
+</script>
+
+</body>
+</html>

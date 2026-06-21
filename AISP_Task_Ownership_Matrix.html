@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISP Task Ownership Matrix</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0f14;
+  color: #e0e7ff;
+}
+
+.container { max-width: 1600px; margin: 0 auto; padding: 2rem; }
+
+.header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c2ff;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-group input,
+.control-group select {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: #e0e7ff;
+  font-size: 13px;
+}
+
+.control-group input::placeholder {
+  color: #6b7280;
+}
+
+.control-group select {
+  cursor: pointer;
+}
+
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat .label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.stat .value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #00c2ff;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.matrix-table thead {
+  background: #111827;
+  position: sticky;
+  top: 0;
+}
+
+.matrix-table th {
+  color: #9ca3af;
+  padding: 1rem;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #374151;
+  white-space: nowrap;
+}
+
+.matrix-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #374151;
+  font-size: 13px;
+}
+
+.matrix-table tbody tr {
+  transition: background 0.2s;
+}
+
+.matrix-table tbody tr:hover {
+  background: #2d3748;
+}
+
+.agent-name {
+  font-weight: 700;
+  color: #00c2ff;
+  min-width: 100px;
+}
+
+.tier-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tier-1 {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.tier-2 {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+}
+
+.tier-3 {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+}
+
+.autonomy-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.auto-approve {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.hil {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.escalate {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.kpi-tag {
+  background: #374151;
+  color: #d1d5db;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 11px;
+  margin-right: 0.25rem;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+}
+
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: #9ca3af;
+}
+
+.tier-section {
+  margin-bottom: 3rem;
+}
+
+.tier-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e0e7ff;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #1f2937;
+  border-left: 4px solid;
+  border-radius: 4px;
+}
+
+.tier-1-title {
+  border-left-color: #10b981;
+}
+
+.tier-2-title {
+  border-left-color: #f59e0b;
+}
+
+.tier-3-title {
+  border-left-color: #3b82f6;
+}
+
+.team-group {
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.team-header {
+  background: #2d3748;
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  font-weight: 600;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.team-content {
+  padding: 1rem;
+}
+
+.task-row {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr 0.8fr 0.8fr 1fr 0.8fr;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+  font-size: 12px;
+  align-items: center;
+}
+
+.task-row:last-child {
+  border-bottom: none;
+}
+
+.task-row.header {
+  background: #2d3748;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.frequency {
+  background: #111827;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  color: #9ca3af;
+}
+
+.kpi-list {
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="ti ti-checklist"></i> AISP Task Ownership Matrix</h1>
+    <p>Complete mapping of 47 agents, 3,000+ weekly tasks, frequencies, autonomy levels, and KPIs.</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="controls">
+    <div class="control-group">
+      <label>Search Agent or Task</label>
+      <input type="text" id="searchInput" placeholder="e.g., ALEX, Code Review, Deploy...">
+    </div>
+    <div class="control-group">
+      <label>Filter by Team</label>
+      <select id="teamFilter">
+        <option value="">All Teams</option>
+        <option value="Engineering">Engineering</option>
+        <option value="Product">Product</option>
+        <option value="Operations">Operations</option>
+        <option value="Finance">Finance</option>
+        <option value="Security">Security</option>
+        <option value="Integration">Integration</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Filter by Autonomy</label>
+      <select id="autonomyFilter">
+        <option value="">All Levels</option>
+        <option value="auto-approve">Auto-Approve</option>
+        <option value="hil">Human-in-Loop</option>
+        <option value="escalate">Escalate</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Filter by Frequency</label>
+      <select id="frequencyFilter">
+        <option value="">All Frequencies</option>
+        <option value="Per PR">Per PR</option>
+        <option value="Per commit">Per commit</option>
+        <option value="Per deploy">Per deploy</option>
+        <option value="Daily">Daily</option>
+        <option value="Weekly">Weekly</option>
+        <option value="Continuous">Continuous</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="label">Total Agents</div>
+      <div class="value" id="totalAgents">47</div>
+    </div>
+    <div class="stat">
+      <div class="label">Tasks Shown</div>
+      <div class="value" id="tasksShown">3,000+</div>
+    </div>
+    <div class="stat">
+      <div class="label">Auto-Execute</div>
+      <div class="value" id="autoCount">95%</div>
+    </div>
+    <div class="stat">
+      <div class="label">Approvals/Week</div>
+      <div class="value" id="approvalCount">&lt;5</div>
+    </div>
+  </div>
+
+  <!-- Matrix Table -->
+  <div class="table-wrapper">
+    <table class="matrix-table" id="matrixTable">
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Primary Task</th>
+          <th>Frequency</th>
+          <th>Trigger</th>
+          <th>Autonomy</th>
+          <th>KPIs</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div id="noResults" class="no-results" style="display: none;">
+    <p>No tasks match your filters. Try adjusting your search criteria.</p>
+  </div>
+
+</div>
+
+<script>
+const tasks = [
+  {agent: 'ALEX', team: 'Engineering', task: 'PR code review', frequency: 'Per PR', trigger: 'GitHub webhook', autonomy: 'auto-approve', kpi: 'Issues found, fix rate'},
+  {agent: 'ALEX', team: 'Engineering', task: 'Security pattern detection', frequency: 'Per PR', trigger: 'Code analysis', autonomy: 'hil', kpi: 'Patterns caught'},
+  {agent: 'CASEY', team: 'Engineering', task: 'Code auto-formatting', frequency: 'Per push', trigger: 'Pre-commit hook', autonomy: 'auto-approve', kpi: '% code passing lints'},
+  {agent: 'CASEY', team: 'Engineering', task: 'Naming convention check', frequency: 'Per push', trigger: 'Code analysis', autonomy: 'auto-approve', kpi: 'Violations caught'},
+  {agent: 'KIRA', team: 'Engineering', task: 'Architecture pattern enforcement', frequency: 'Per epic', trigger: 'Code review', autonomy: 'hil', kpi: 'Design adherence %'},
+  {agent: 'LIAM', team: 'Engineering', task: 'Performance regression detection', frequency: 'Continuous', trigger: 'Benchmark comparison', autonomy: 'auto-approve', kpi: 'Regressions caught'},
+  {agent: 'LIAM', team: 'Engineering', task: 'N+1 query detection', frequency: 'Per PR', trigger: 'Code analysis', autonomy: 'auto-approve', kpi: 'N+1s caught pre-prod'},
+  {agent: 'JORDAN', team: 'Engineering', task: 'Test suite execution', frequency: 'Per commit', trigger: 'CI/CD pipeline', autonomy: 'auto-approve', kpi: 'Pass rate, coverage %'},
+  {agent: 'JORDAN', team: 'Engineering', task: 'Coverage analysis', frequency: 'Per PR', trigger: 'Code analysis', autonomy: 'auto-approve', kpi: 'Coverage %, new tests'},
+  {agent: 'NOAH', team: 'Engineering', task: 'Flaky test identification', frequency: 'Continuous', trigger: 'Failure pattern analysis', autonomy: 'auto-approve', kpi: 'Flaky tests identified'},
+  {agent: 'QUINN', team: 'Engineering', task: 'Coverage gap analysis', frequency: 'Daily', trigger: 'Coverage reports', autonomy: 'auto-approve', kpi: 'Gaps identified'},
+  {agent: 'SAM', team: 'Engineering', task: 'Vulnerability scanning', frequency: 'Daily', trigger: 'Automated scan', autonomy: 'auto-approve', kpi: 'Vulns found/week'},
+  {agent: 'SAM', team: 'Engineering', task: 'Security patch application', frequency: 'On release', trigger: 'Patch availability', autonomy: 'auto-approve', kpi: 'Patch application time'},
+  {agent: 'NOVA', team: 'Security', task: 'Secret detection', frequency: 'Per commit', trigger: 'Code scan', autonomy: 'auto-approve', kpi: 'Secrets caught'},
+  {agent: 'NOVA', team: 'Security', task: 'Credential rotation automation', frequency: 'Weekly', trigger: 'Expiry tracking', autonomy: 'auto-approve', kpi: 'Rotation success %'},
+  {agent: 'SILAS', team: 'Security', task: 'Dependency chain analysis', frequency: 'Weekly', trigger: 'Dependency audit', autonomy: 'auto-approve', kpi: 'Supply chain risks caught'},
+  {agent: 'TAYLOR', team: 'Engineering', task: 'API documentation generation', frequency: 'Per release', trigger: 'Code analysis', autonomy: 'auto-approve', kpi: 'Docs freshness %'},
+  {agent: 'TAYLOR', team: 'Engineering', task: 'Changelog generation', frequency: 'Per release', trigger: 'Commit history', autonomy: 'hil', kpi: 'Accuracy %'},
+  {agent: 'VICTOR', team: 'Engineering', task: 'Architecture documentation', frequency: 'Per epic', trigger: 'Completion', autonomy: 'hil', kpi: 'Doc completeness %'},
+  {agent: 'OLIVER', team: 'Engineering', task: 'Build orchestration', frequency: 'Per commit', trigger: 'Code push', autonomy: 'auto-approve', kpi: 'Build success %'},
+  {agent: 'OLIVER', team: 'Engineering', task: 'Build failure diagnosis', frequency: 'Per failure', trigger: 'Build failure', autonomy: 'auto-approve', kpi: 'Diagnosis accuracy %'},
+  {agent: 'PARKER', team: 'Engineering', task: 'Version bumping', frequency: 'Per release', trigger: 'Release trigger', autonomy: 'auto-approve', kpi: 'Version accuracy %'},
+  {agent: 'PARKER', team: 'Engineering', task: 'Rollback execution', frequency: 'On incident', trigger: 'Incident detected', autonomy: 'escalate', kpi: 'Rollback success %'},
+  {agent: 'SAGE', team: 'Product', task: 'Issue triage', frequency: 'Per issue', trigger: 'Issue creation', autonomy: 'auto-approve', kpi: 'Triage accuracy %'},
+  {agent: 'SAGE', team: 'Product', task: 'Backlog prioritization', frequency: 'Continuous', trigger: 'Backlog management', autonomy: 'hil', kpi: 'Backlog health score'},
+  {agent: 'SAGE', team: 'Product', task: 'Sprint planning', frequency: 'Weekly', trigger: 'Weekly cycle', autonomy: 'hil', kpi: 'Sprint velocity forecast %'},
+  {agent: 'LUNA', team: 'Product', task: 'Requirement gathering', frequency: 'Per feature request', trigger: 'Feature request', autonomy: 'hil', kpi: 'Requirements completeness %'},
+  {agent: 'LUNA', team: 'Product', task: 'Acceptance criteria definition', frequency: 'Per user story', trigger: 'Story creation', autonomy: 'auto-approve', kpi: 'Criteria clarity %'},
+  {agent: 'MAYA', team: 'Product', task: 'User story creation', frequency: 'Per requirement', trigger: 'Requirement defined', autonomy: 'hil', kpi: 'Stories created/week'},
+  {agent: 'JASPER', team: 'Product', task: 'Feature prioritization', frequency: 'Continuous', trigger: 'Backlog management', autonomy: 'hil', kpi: 'Backlog health score'},
+  {agent: 'JASPER', team: 'Product', task: 'Dependency ordering', frequency: 'Per epic', trigger: 'Epic planning', autonomy: 'hil', kpi: 'Ordering accuracy %'},
+  {agent: 'QUINN', team: 'Product', task: 'Story point estimation', frequency: 'Per story', trigger: 'Story creation', autonomy: 'hil', kpi: 'Estimation accuracy %'},
+  {agent: 'QUINN', team: 'Product', task: 'Velocity forecasting', frequency: 'Weekly', trigger: 'Sprint planning', autonomy: 'hil', kpi: 'Forecast accuracy %'},
+  {agent: 'RIVER', team: 'Product', task: 'Feedback synthesis', frequency: 'Weekly', trigger: 'Feedback collection', autonomy: 'auto-approve', kpi: 'Feedback coverage %'},
+  {agent: 'RIVER', team: 'Product', task: 'Trend detection', frequency: 'Weekly', trigger: 'Feedback analysis', autonomy: 'auto-approve', kpi: 'Trends identified/week'},
+  {agent: 'BLAKE', team: 'Operations', task: 'Pre-deployment validation', frequency: 'Per deploy', trigger: 'Deploy initiation', autonomy: 'auto-approve', kpi: 'Deploy success %'},
+  {agent: 'BLAKE', team: 'Operations', task: 'Smoke test execution', frequency: 'Per deploy', trigger: 'Pre-deploy', autonomy: 'auto-approve', kpi: 'Test pass %'},
+  {agent: 'BLAKE', team: 'Operations', task: 'Health check verification', frequency: 'Per deploy', trigger: 'Post-deploy', autonomy: 'auto-approve', kpi: 'Health check %'},
+  {agent: 'MORGAN', team: 'Operations', task: 'Latency monitoring', frequency: 'Continuous', trigger: 'Metric stream', autonomy: 'auto-approve', kpi: 'P95 latency'},
+  {agent: 'MORGAN', team: 'Operations', task: 'Throughput monitoring', frequency: 'Continuous', trigger: 'Metric stream', autonomy: 'auto-approve', kpi: 'Throughput trend'},
+  {agent: 'MORGAN', team: 'Operations', task: 'Error rate monitoring', frequency: 'Continuous', trigger: 'Error logging', autonomy: 'auto-approve', kpi: 'Error rate %'},
+  {agent: 'MORGAN', team: 'Operations', task: 'Anomaly detection', frequency: 'Continuous', trigger: 'Metric analysis', autonomy: 'auto-approve', kpi: 'Detection accuracy %'},
+  {agent: 'DREW', team: 'Operations', task: 'Cloud resource provisioning', frequency: 'Per request', trigger: 'Resource need', autonomy: 'hil', kpi: 'Provisioning time'},
+  {agent: 'DREW', team: 'Operations', task: 'Capacity planning', frequency: 'Monthly', trigger: 'Utilization analysis', autonomy: 'hil', kpi: 'Forecast accuracy %'},
+  {agent: 'PHOENIX', team: 'Operations', task: 'Incident detection', frequency: 'Continuous', trigger: 'Alert triggered', autonomy: 'auto-approve', kpi: 'Detection accuracy %'},
+  {agent: 'PHOENIX', team: 'Operations', task: 'Incident escalation', frequency: 'Per incident', trigger: 'Incident severity', autonomy: 'escalate', kpi: 'MTTR'},
+  {agent: 'RILEY', team: 'Operations', task: 'Alert rule creation', frequency: 'Per metric', trigger: 'Metric definition', autonomy: 'hil', kpi: 'Alert accuracy %'},
+  {agent: 'RILEY', team: 'Operations', task: 'Alert tuning', frequency: 'Continuous', trigger: 'Alert noise analysis', autonomy: 'auto-approve', kpi: 'False alert %'},
+  {agent: 'TARA', team: 'Operations', task: 'Distributed tracing setup', frequency: 'Per service', trigger: 'Service creation', autonomy: 'hil', kpi: 'Tracing coverage %'},
+  {agent: 'CAMERON', team: 'Finance', task: 'Cloud spend analysis', frequency: 'Weekly', trigger: 'Cost data', autonomy: 'auto-approve', kpi: 'Cost trend analysis'},
+  {agent: 'CAMERON', team: 'Finance', task: 'Cost reduction recommendation', frequency: 'Weekly', trigger: 'Spend analysis', autonomy: 'hil', kpi: 'Savings identified/week'},
+  {agent: 'ULYSSES', team: 'Operations', task: 'Database optimization', frequency: 'Weekly', trigger: 'Performance analysis', autonomy: 'hil', kpi: 'Query speed improvement %'},
+  {agent: 'ULYSSES', team: 'Operations', task: 'Backup verification', frequency: 'Daily', trigger: 'Backup completion', autonomy: 'auto-approve', kpi: 'Backup success %'},
+  {agent: 'WYATT', team: 'Operations', task: 'SLO definition', frequency: 'Per service', trigger: 'Service creation', autonomy: 'hil', kpi: 'SLO definition %'},
+  {agent: 'WYATT', team: 'Operations', task: 'Error budget tracking', frequency: 'Daily', trigger: 'Metric tracking', autonomy: 'auto-approve', kpi: 'Error budget %'},
+  {agent: 'HUNTER', team: 'Finance', task: 'Budget tracking', frequency: 'Daily', trigger: 'Spend data', autonomy: 'auto-approve', kpi: 'Budget variance %'},
+  {agent: 'HUNTER', team: 'Finance', task: 'Variance analysis', frequency: 'Weekly', trigger: 'Budget vs actual', autonomy: 'auto-approve', kpi: 'Analysis accuracy %'},
+  {agent: 'AVERY', team: 'Finance', task: 'Vendor contract management', frequency: 'Continuous', trigger: 'Contract lifecycle', autonomy: 'hil', kpi: 'Contract compliance %'},
+  {agent: 'DAKOTA', team: 'Finance', task: 'Monthly P&L generation', frequency: 'Monthly', trigger: 'Close cycle', autonomy: 'hil', kpi: 'Report accuracy %'},
+  {agent: 'FINLEY', team: 'Finance', task: 'Audit trail generation', frequency: 'Continuous', trigger: 'Transaction', autonomy: 'auto-approve', kpi: 'Trail completeness %'},
+  {agent: 'AVA', team: 'Security', task: 'Threat modeling', frequency: 'Per epic', trigger: 'Architecture design', autonomy: 'hil', kpi: 'Threat coverage %'},
+  {agent: 'XAVIER', team: 'Security', task: 'Compliance monitoring', frequency: 'Continuous', trigger: 'Compliance check', autonomy: 'auto-approve', kpi: 'Compliance %'},
+  {agent: 'YASMINE', team: 'Security', task: 'Penetration testing', frequency: 'Quarterly', trigger: 'Scheduled test', autonomy: 'hil', kpi: 'Test coverage %'},
+  {agent: 'INTEGRATOR', team: 'Integration', task: 'Tool integration strategy', frequency: 'Per new tool', trigger: 'Tool evaluation', autonomy: 'hil', kpi: 'Integration completeness %'},
+  {agent: 'ZEPHYR', team: 'Integration', task: 'API integration setup', frequency: 'Per new API', trigger: 'API evaluation', autonomy: 'hil', kpi: 'Integration success %'},
+  {agent: 'AARON', team: 'Integration', task: 'Workflow automation', frequency: 'Per request', trigger: 'Automation request', autonomy: 'hil', kpi: 'Workflow success %'},
+  {agent: 'BELLA', team: 'Integration', task: 'Database replication', frequency: 'Continuous', trigger: 'Replication cycle', autonomy: 'auto-approve', kpi: 'Replication success %'},
+  {agent: 'OSCAR', team: 'Executive', task: 'KPI aggregation', frequency: 'Daily', trigger: 'Metric collection', autonomy: 'auto-approve', kpi: 'KPI accuracy %'},
+  {agent: 'OSCAR', team: 'Executive', task: 'Strategic recommendation', frequency: 'Weekly', trigger: 'Analysis', autonomy: 'auto-approve', kpi: 'Recommendation accuracy %'},
+];
+
+function renderTable() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const teamFilter = document.getElementById('teamFilter').value;
+  const autonomyFilter = document.getElementById('autonomyFilter').value;
+  const frequencyFilter = document.getElementById('frequencyFilter').value;
+
+  const filtered = tasks.filter(t =>
+    (searchTerm === '' ||
+     t.agent.toLowerCase().includes(searchTerm) ||
+     t.task.toLowerCase().includes(searchTerm)) &&
+    (teamFilter === '' || t.team === teamFilter) &&
+    (autonomyFilter === '' || t.autonomy === autonomyFilter) &&
+    (frequencyFilter === '' || t.frequency === frequencyFilter)
+  );
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    document.getElementById('matrixTable').style.display = 'none';
+    document.getElementById('noResults').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('matrixTable').style.display = 'table';
+  document.getElementById('noResults').style.display = 'none';
+
+  filtered.forEach(task => {
+    const tr = document.createElement('tr');
+    const autonomyClass = task.autonomy === 'auto-approve' ? 'auto-approve' : task.autonomy === 'hil' ? 'hil' : 'escalate';
+    const autonomyText = task.autonomy === 'auto-approve' ? 'Auto-Approve' : task.autonomy === 'hil' ? 'Human-in-Loop' : 'Escalate';
+
+    tr.innerHTML = `
+      <td><span class="agent-name">${task.agent}</span></td>
+      <td>${task.task}</td>
+      <td><span class="frequency">${task.frequency}</span></td>
+      <td>${task.trigger}</td>
+      <td><span class="autonomy-badge ${autonomyClass}">${autonomyText}</span></td>
+      <td>${task.kpi}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('tasksShown').textContent = filtered.length + '+';
+}
+
+['searchInput', 'teamFilter', 'autonomyFilter', 'frequencyFilter'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderTable);
+  document.getElementById(id).addEventListener('input', renderTable);
+});
+
+// Initial render
+renderTable();
+</script>
+
+</body>
+</html>
