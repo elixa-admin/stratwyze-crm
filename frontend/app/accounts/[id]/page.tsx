@@ -1,5 +1,7 @@
 'use client';
 
+import CompanyResearch from '@/components/research/CompanyResearch';
+
 export default function AccountDetailPage() {
   const account = {
     name: 'Acme Corporation',
@@ -89,6 +91,9 @@ export default function AccountDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* SerpAPI Research Panel */}
+          <CompanyResearch companyName={account.name} />
         </div>
 
         {/* Right Column - Stats */}
