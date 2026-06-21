@@ -12,10 +12,20 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const DEMO_EMAIL = 'demo@stratwyze.com';
+  const DEMO_PASSWORD = 'demo1234';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Demo mode — bypass backend
+    if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
+      localStorage.setItem('token', 'demo-token-stratwyze');
+      router.push('/dashboard');
+      return;
+    }
 
     try {
       const response = await auth.login(email, password);
@@ -24,7 +34,7 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please try again.');
+      setError(err.response?.data?.detail || 'Login failed. Use demo credentials below.');
     } finally {
       setLoading(false);
     }
@@ -74,6 +84,24 @@ export default function LoginPage() {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h2>
             <p className="text-gray-600 mb-8">Access your sales pipeline and insights</p>
+
+            {/* Demo credentials banner */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-2">Demo Access</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-blue-800 space-y-0.5">
+                  <p>Email: <span className="font-mono font-semibold">demo@stratwyze.com</span></p>
+                  <p>Password: <span className="font-mono font-semibold">demo1234</span></p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('demo@stratwyze.com'); setPassword('demo1234'); }}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-white border border-blue-300 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition"
+                >
+                  Auto-fill
+                </button>
+              </div>
+            </div>
 
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">

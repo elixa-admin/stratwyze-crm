@@ -120,6 +120,13 @@ export default function SignupPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h2>
             <p className="text-gray-600 mb-8">Join your sales team and start closing deals</p>
 
+            {/* Demo notice */}
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+              <strong>Demo mode:</strong> Account creation requires the backend. Use the{' '}
+              <Link href="/login" className="font-semibold underline">Sign In page</Link>{' '}
+              with <span className="font-mono">demo@stratwyze.com</span> / <span className="font-mono">demo1234</span>
+            </div>
+
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                 <strong>Error:</strong> {error}
