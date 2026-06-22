@@ -52,10 +52,14 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       return;
     }
 
-    // Allow creating deal with or without research - both paths now work
+    // If no competitor/provider selected, create deal directly without research
     if (!competitorId && !saPartnerId) {
-      // Skip research and go straight to deal creation
-      await handleConfirmDeal(e);
+      setLoading(true);
+      try {
+        await handleConfirmDeal(e);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -142,6 +146,16 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       const data = await response.json();
       success(`Deal "${title}" created successfully! 🎉`);
 
+      // Reset form
+      setTitle('');
+      setValue('');
+      setAccountId('');
+      setStageName('Prospecting');
+      setCompetitorId('');
+      setSaPartnerId('');
+      setBriefData(null);
+      setEnrichmentData(null);
+
       // Call original callback for any additional handling
       onSubmit({
         title,
@@ -152,14 +166,10 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         saPartnerId: saPartnerId || undefined,
       });
 
-      // Reset form
-      setTitle('');
-      setValue('');
-      setAccountId('');
-      setStageName('Prospecting');
-      setCompetitorId('');
-      setSaPartnerId('');
-      setBriefData(null);
+      // Close modal after successful creation
+      setTimeout(() => {
+        onClose();
+      }, 500);
       setEnrichmentData(null);
       setResearchLog('');
       setErrors({});
@@ -314,8 +324,6 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                   ))}
                 </select>
               </div>
-
-              {errors.research && <p className="error-message">{errors.research}</p>}
             </div>
 
             {/* Action Buttons */}
