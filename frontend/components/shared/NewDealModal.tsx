@@ -120,12 +120,8 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       <div className="bg-white rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-slate-200 sticky top-0 bg-white flex items-start justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              {step === 'basic' ? 'Create New Deal' : 'Research Results'}
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              {step === 'basic' ? 'Step 1 of 2' : 'Step 2 of 2'}
-            </p>
+            <h2 className="text-lg font-semibold text-slate-900">Create New Deal</h2>
+            <p className="text-xs text-slate-500 mt-1">Fill in the details below to add to your pipeline</p>
           </div>
           <button
             onClick={onClose}
@@ -287,7 +283,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-600 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-150 disabled:bg-slate-400 disabled:cursor-not-allowed"
               >
                 {loading && <div className="spinner" />}
-                {loading ? 'Researching...' : (competitorId || saPartnerId ? 'Generate Brief' : 'Create Deal')}
+                {loading ? 'Creating...' : 'Create Deal'}
               </button>
             </div>
           </form>

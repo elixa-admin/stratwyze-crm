@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id            String   @id @default(cuid())
+  name          String
+  website       String?
+  industry      String?
+  employees     Int?
+  annualRevenue Float?
+  headquarters  String?
+  legalEntity   String?
+  contacts      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deals         Deal[]
+}
+
+model Deal {
+  id                String     @id @default(cuid())
+  title             String
+  value             Float
+  currency          String     @default("ZAR")
+  stage             String     @default("Prospecting")
+  notes             String?
+  accountId         String?
+  account           Account?   @relation(fields: [accountId], references: [id])
+  incumbentPlatform String?
+  incumbentProvider String?
+  enrichmentData    Json?
+  activities        Activity[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  dealId    String
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  type      String
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}

@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { store } from '@/lib/server/store';
+import { prisma } from '@/lib/db';
 
 export async function GET(_req: NextRequest) {
   try {
-    const accounts = store.listAccounts();
+    const accounts = await prisma.account.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
     return NextResponse.json({ accounts });
   } catch (err: any) {
     console.error('GET /api/accounts error:', err);
-    return NextResponse.json(
-      { error: err?.message || 'Failed to fetch accounts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err?.message || 'Failed to fetch accounts' }, { status: 500 });
   }
 }
 
@@ -20,21 +19,20 @@ export async function POST(req: NextRequest) {
     const { name, website, industry, employees, annualRevenue, headquarters, legalEntity, contacts } = body;
 
     if (!name) {
-      return NextResponse.json(
-        { error: 'Account name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Account name is required' }, { status: 400 });
     }
 
-    const account = store.createAccount({
-      name,
-      website,
-      industry,
-      employees: employees ? parseInt(employees) : undefined,
-      annualRevenue: annualRevenue ? parseFloat(annualRevenue) : undefined,
-      headquarters,
-      legalEntity,
-      contacts,
+    const account = await prisma.account.create({
+      data: {
+        name,
+        website:       website       || null,
+        industry:      industry      || null,
+        employees:     employees     ? parseInt(employees)      : null,
+        annualRevenue: annualRevenue ? parseFloat(annualRevenue) : null,
+        headquarters:  headquarters  || null,
+        legalEntity:   legalEntity   || null,
+        contacts:      contacts      ?? null,
+      },
     });
 
     return NextResponse.json(
@@ -43,9 +41,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (err: any) {
     console.error('POST /api/accounts error:', err);
-    return NextResponse.json(
-      { error: err?.message || 'Failed to create account' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err?.message || 'Failed to create account' }, { status: 500 });
   }
 }

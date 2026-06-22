@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import DealPursuitModal, { DealContext } from '@/components/pipeline/DealPursuitModal';
+import { formatCurrency } from '@/lib/format';
 
 interface Opportunity {
   id: string;
@@ -44,16 +45,39 @@ function getProbabilityColor(probability: number): string {
   return 'bg-red-100 text-red-700';
 }
 
-function formatCurrency(value: number): string {
-  return `R${(value / 1000).toFixed(0)}K`;
-}
-
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' });
 }
 
+function KanbanSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 pb-4 animate-pulse">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex flex-col bg-slate-50 rounded-xl border border-slate-200 p-3">
+          <div className="mb-3 pb-3 border-b border-slate-200">
+            <div className="h-3.5 bg-slate-200 rounded w-24 mb-1.5" />
+            <div className="h-2.5 bg-slate-100 rounded w-16" />
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {Array.from({ length: i === 0 ? 3 : i === 1 ? 2 : 1 }).map((_, j) => (
+              <div key={j} className="bg-white rounded-lg border border-slate-200 p-3">
+                <div className="h-3 bg-slate-200 rounded w-full mb-3" />
+                <div className="flex justify-between">
+                  <div className="h-3 bg-slate-200 rounded w-14" />
+                  <div className="h-3 bg-slate-100 rounded w-8" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function KanbanBoard() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [loading, setLoading] = useState(true);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<DealContext | null>(null);
 
@@ -77,7 +101,8 @@ export default function KanbanBoard() {
           })));
         }
       })
-      .catch(() => { /* silently fail — board starts empty */ });
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -139,6 +164,8 @@ export default function KanbanBoard() {
   };
 
   const hasCompetitiveContext = (opp: Opportunity) => !!(opp.competitorId || opp.saPartnerId);
+
+  if (loading) return <KanbanSkeleton />;
 
   return (
     <div className="w-full">

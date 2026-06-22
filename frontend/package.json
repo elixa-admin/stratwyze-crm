@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
@@ -12,6 +12,9 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.85",
     "@ai-sdk/openai": "^3.0.73",
+    "@neondatabase/serverless": "^1.1.0",
+    "@prisma/adapter-neon": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-table": "^8.0.0",
     "ai": "^6.0.208",
@@ -28,6 +31,7 @@
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
+    "prisma": "^7.8.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.3.0"
   }
