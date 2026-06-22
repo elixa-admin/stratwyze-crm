@@ -22,6 +22,8 @@ interface FormErrors {
 }
 
 export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModalProps) {
+  // CRITICAL FIX: Deal creation without competitor/provider required
+  // Deployed: 2026-06-22 - Remove validation blocking deal creation
   const { toasts, success, error } = useToast();
   const [step, setStep] = useState<'basic' | 'research'>('basic');
   const [title, setTitle] = useState('');
