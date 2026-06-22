@@ -815,6 +815,149 @@ export const COMPETITORS: Competitor[] = [
   },
 
   {
+    id: 'cherwell',
+    name: 'Cherwell Service Management',
+    tagline: 'Legacy Platform in Transition',
+    avatar: 'CW',
+    riskLevel: 'High',
+    ownership: 'PE-owned (KKR + Bain) - BMC Software (acquired 2017)',
+    founded: 2004,
+    headquarters: 'Denver, Colorado (BMC)',
+    employees: 'Part of BMC (7,000+)',
+    revenue: 'Legacy product (declining)',
+    website: 'https://www.cherwell.com',
+    deployment: 'Cloud / On-Premises (increasingly cloud-only)',
+    architecture: 'Legacy Transitioning',
+    securityCertifications: ['ISO 27001', 'SOC 2'],
+    pricing: {
+      type: 'Complex Hybrid',
+      basePrice: 'Licensing complexity; per-incident + agents',
+      additionalCosts: ['CloudNow migration fees', 'Support tiers', 'Customization'],
+    },
+    tco3Year: {
+      competitor: { min: 280000, max: 480000, currency: 'ZAR' },
+      haloITSM: { min: 80000, max: 150000, currency: 'ZAR' },
+    },
+    implementationCost: 'R350K - R1.5M',
+    complexity: {
+      implementation: 'Extended (10-16m)',
+      adminComplexity: 'Very Complex',
+      customization: 'SI-Dependent',
+      supportQuality: 'Inconsistent (in transition)',
+    },
+    functionality: [
+      {
+        category: 'Licensing & Pricing Confusion',
+        gap: 'Complex per-incident + per-agent licensing; frequent license disputes',
+        severity: 'Critical',
+        halITSMAdvantage: 'Transparent, simple pricing model with predictable costs',
+      },
+      {
+        category: 'Scalability Challenges',
+        gap: 'Performance degradation at scale; reported issues with large datasets',
+        severity: 'High',
+        halITSMAdvantage: 'Built for scale from ground up; handles 10K+ agents efficiently',
+      },
+      {
+        category: 'Uncertain Product Direction',
+        gap: 'BMC consolidating Cherwell/Helix; customers unsure about future',
+        severity: 'High',
+        halITSMAdvantage: 'Clear product roadmap; dedicated team focused on innovation',
+      },
+      {
+        category: 'Migration Path Complexity',
+        gap: 'CloudNow (cloud migration) requires significant re-platforming; costly',
+        severity: 'High',
+        halITSMAdvantage: 'Start modern; no legacy migration burden or re-platforming risk',
+      },
+    ],
+    marketPosition: {
+      gartnerQuadrant: 'Niche',
+      marketShare: '~1-2% of ITSM market (declining)',
+      targetSegment: 'Mid-Market with legacy investments',
+    },
+    salesRebuttal: {
+      title: 'Cherwell: Declining Platform With Licensing & Scalability Headaches',
+      keyMessage:
+        'Cherwell is in a difficult transition phase. BMC is consolidating it with Helix, leading to licensing complexity, scalability issues, and uncertain future. HaloITSM offers a modern, cost-effective alternative with transparent pricing and proven scalability.',
+      weaknesses: [
+        'Complex dual licensing (per-incident + per-agent) leads to budget surprises',
+        'Scalability problems reported at 5K+ agents; performance degradation',
+        'Uncertain product direction; BMC consolidating with Helix platform',
+        'CloudNow migration is expensive, disruptive, and re-platforming effort',
+        'Support quality inconsistent due to organizational transition',
+        'Declining market share as customers migrate to modern solutions',
+      ],
+      winningPoints: [
+        'Simple, transparent pricing with predictable total cost',
+        'Built for scale from day one; proven with 10K+ agent deployments',
+        'Clear product vision and roadmap; single-vendor focus',
+        'No forced re-platforming; cloud deployment ready day one',
+        'Local SA support team vs remote/consolidating BMC support',
+        '3-4x lower TCO over 3 years vs Cherwell',
+      ],
+    },
+    keyWeaknesses: [
+      {
+        title: 'Confusing Licensing Model',
+        description:
+          'Dual per-incident + per-agent licensing creates calculation complexity; customers report billing disputes and unexpected costs',
+      },
+      {
+        title: 'Scalability Issues at Scale',
+        description:
+          'Performance degradation reported with 5K+ agents; database query timeouts and slowness in large deployments',
+      },
+      {
+        title: 'Uncertain Product Strategy',
+        description:
+          'BMC consolidating Cherwell and Helix platforms; customers unclear on long-term vision and investment',
+      },
+      {
+        title: 'Expensive Cloud Migration Path',
+        description:
+          'CloudNow migration requires significant re-platforming effort, downtime, and professional services costs',
+      },
+      {
+        title: 'Support Organization in Transition',
+        description:
+          'BMC consolidating support teams; response times and resolution quality inconsistent',
+      },
+    ],
+    recentNews: [
+      {
+        title: 'BMC Consolidating Cherwell and Helix; Customers Face Migration Uncertainty',
+        source: 'Industry Analysis',
+        date: '2025-09-15',
+      },
+      {
+        title: 'Cherwell Customers Report Scalability Issues with 5K+ Agent Deployments',
+        source: 'Customer Reviews',
+        date: '2025-08-20',
+      },
+      {
+        title: 'CloudNow Migration Costs Exceed Expectations; Some Customers Abandoning Platform',
+        source: 'Gartner Research',
+        date: '2025-07-10',
+      },
+      {
+        title: 'Cherwell Licensing Disputes Increase as Dual Model Creates Complexity',
+        source: 'Customer Support Forums',
+        date: '2025-06-05',
+      },
+    ],
+    maActivity: [
+      {
+        type: 'Strategic',
+        description: 'BMC acquisition (2017) now consolidating with Helix; platform uncertain',
+        date: '2025-01-01',
+      },
+    ],
+    lastUpdated: '2026-06-22',
+    dataQuality: 'High',
+  },
+
+  {
     id: 'solarwinds-itsm',
     name: 'SolarWinds ITSM',
     tagline: 'Network & IT Operations Platform',
