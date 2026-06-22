@@ -827,7 +827,7 @@ export const COMPETITORS: Competitor[] = [
     revenue: 'Legacy product (declining)',
     website: 'https://www.cherwell.com',
     deployment: 'Cloud / On-Premises (increasingly cloud-only)',
-    architecture: 'Legacy Transitioning',
+    architecture: 'Legacy',
     securityCertifications: ['ISO 27001', 'SOC 2'],
     pricing: {
       type: 'Complex Hybrid',
