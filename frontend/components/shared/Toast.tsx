@@ -11,8 +11,18 @@ interface ToastProps {
   onClose?: () => void;
 }
 
-const IconCheck = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+const IconCheck = ({ animated }: { animated?: boolean }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={animated ? 'animate-checkmark' : ''}
+  >
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
@@ -61,16 +71,18 @@ export function Toast({ message, type = 'info', duration = 4000, onClose }: Toas
   const Icon = type === 'success' ? IconCheck : type === 'error' ? IconX : type === 'warning' ? IconAlert : IconInfo;
 
   return (
-    <div className={`fixed bottom-6 right-6 flex items-center gap-3 px-4 py-3 rounded-lg border ${config.bg} ${config.textColor} shadow-lg animate-in slide-in-from-bottom-4 fade-in duration-300 z-50 max-w-sm`}>
+    <div className={`fixed bottom-6 right-6 flex items-center gap-3 px-4 py-3 rounded-lg border ${config.bg} ${config.textColor} shadow-lg animate-slide-up z-50 max-w-sm`}>
       <div className={`flex-shrink-0 ${config.icon}`}>
-        <Icon />
+        {type === 'success' ? <IconCheck animated /> : <Icon />}
       </div>
       <p className="text-sm font-medium">{message}</p>
       <button
         onClick={() => setIsVisible(false)}
         className="flex-shrink-0 ml-2 text-current opacity-70 hover:opacity-100 transition-opacity"
       >
-        <IconX />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
       </button>
     </div>
   );
