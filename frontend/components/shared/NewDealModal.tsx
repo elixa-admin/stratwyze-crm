@@ -1,0 +1,409 @@
+'use client';
+
+import { useState } from 'react';
+import ExpandableSection from './ExpandableSection';
+import Tooltip from './Tooltip';
+import { Toast, useToast } from './Toast';
+
+interface NewDealModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: { title: string; value: number; accountId: string; stageName: string; competitorId?: string; saPartnerId?: string }) => void;
+}
+
+interface FormErrors {
+  title?: string;
+  value?: string;
+  research?: string;
+}
+
+export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModalProps) {
+  const { toasts, success, error } = useToast();
+  const [step, setStep] = useState<'basic' | 'research'>('basic');
+  const [title, setTitle] = useState('');
+  const [value, setValue] = useState('');
+  const [accountId, setAccountId] = useState('');
+  const [stageName, setStageName] = useState('Prospecting');
+  const [competitorId, setCompetitorId] = useState('');
+  const [saPartnerId, setSaPartnerId] = useState('');
+  const [briefData, setBriefData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [researchLog, setResearchLog] = useState<string>('');
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    if (!title.trim()) newErrors.title = 'Deal title is required';
+    if (!value || parseFloat(value) <= 0) newErrors.value = 'Deal value must be greater than 0';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleGenerateBrief = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      error('Please fill in all required fields');
+      return;
+    }
+
+    if (!competitorId && !saPartnerId) {
+      setErrors({ research: 'Select at least a competitor or SI partner' });
+      error('Select competitor or SI partner to generate brief');
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+    setResearchLog('🔍 Starting research...\n⏳ Searching for competitive intelligence...\n⏳ Generating AI analysis...');
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const res = await fetch('/api/competitive/brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          competitorId: competitorId || undefined,
+          saPartnerId: saPartnerId || undefined,
+          dealContext: {
+            accountName: title,
+            dealValue: value ? parseFloat(value) : undefined,
+          },
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      const data = await res.json();
+      if (data?.researchLog) {
+        setResearchLog(data.researchLog);
+      }
+      if (res.ok) {
+        setBriefData(data);
+        setStep('research');
+      } else {
+        const errorMsg = data?.error || `API error: ${res.status}`;
+        error(errorMsg);
+        console.error('Brief API error:', { status: res.status, data });
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        error('Request timed out. AI services may be busy. Please try again.');
+      } else {
+        error(err?.message || 'Failed to generate brief');
+        console.error('Brief generation error:', err);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmDeal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !value) {
+      error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      onSubmit({
+        title,
+        value: parseFloat(value),
+        accountId,
+        stageName,
+        competitorId: competitorId || undefined,
+        saPartnerId: saPartnerId || undefined,
+      });
+
+      success(`Deal "${title}" created successfully! 🎉`);
+
+      setTitle('');
+      setValue('');
+      setAccountId('');
+      setStageName('Prospecting');
+      setCompetitorId('');
+      setSaPartnerId('');
+      setBriefData(null);
+      setResearchLog('');
+      setErrors({});
+      setStep('basic');
+      onClose();
+    } catch (err) {
+      error('Failed to create deal');
+      console.error('Deal creation error:', err);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-slate-200 sticky top-0 bg-white">
+          <h2 className="text-lg font-semibold text-slate-900">
+            {step === 'basic' ? 'Create New Deal' : 'Research Results'}
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            {step === 'basic' ? 'Step 1 of 2' : 'Step 2 of 2'}
+          </p>
+        </div>
+
+        {step === 'basic' ? (
+          <form onSubmit={handleGenerateBrief} className="p-6 space-y-5">
+            {/* Deal Title */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Deal Title <span className="required-indicator">*</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (errors.title) setErrors({ ...errors, title: undefined });
+                }}
+                placeholder="e.g. Acme Corp Implementation"
+                className={`input-field ${errors.title ? 'error' : ''}`}
+              />
+              {errors.title && <p className="error-message">{errors.title}</p>}
+            </div>
+
+            {/* Deal Value */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Deal Value (R) <span className="required-indicator">*</span>
+              </label>
+              <input
+                type="number"
+                value={value}
+                onChange={(e) => {
+                  setValue(e.target.value);
+                  if (errors.value) setErrors({ ...errors, value: undefined });
+                }}
+                placeholder="e.g. 250000"
+                className={`input-field ${errors.value ? 'error' : ''}`}
+              />
+              {errors.value && <p className="error-message">{errors.value}</p>}
+            </div>
+
+            {/* Account */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Account</label>
+              <select
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+                className="input-field"
+              >
+                <option value="">Select account (optional)</option>
+                <option value="acme">Acme Corp</option>
+                <option value="global">Global Inc</option>
+              </select>
+            </div>
+
+            {/* Stage */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Stage</label>
+              <select
+                value={stageName}
+                onChange={(e) => setStageName(e.target.value)}
+                className="input-field"
+              >
+                <option value="Prospecting">Prospecting</option>
+                <option value="Qualification">Qualification</option>
+                <option value="Proposal">Proposal</option>
+                <option value="Negotiation">Negotiation</option>
+                <option value="Closed Won">Closed Won</option>
+              </select>
+            </div>
+
+            {/* AI Research Section */}
+            <div className="border-t border-slate-200 pt-5">
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="text-sm font-semibold text-slate-900">AI Research</h3>
+                <Tooltip content="Generate competitive intelligence and battle cards using AI">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                </Tooltip>
+              </div>
+              <p className="text-xs text-slate-600 mb-4">Select competitor and/or SI partner to generate AI competitive intelligence</p>
+
+              {/* Incumbent Platform */}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center gap-2">
+                  Incumbent Platform
+                  <Tooltip content="Current platform in use by the prospect">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                  </Tooltip>
+                </label>
+                <select
+                  value={competitorId}
+                  onChange={(e) => setCompetitorId(e.target.value)}
+                  className="input-field"
+                >
+                  <option value="">No competitor selected</option>
+                  <option value="servicenow">ServiceNow</option>
+                </select>
+              </div>
+
+              {/* Incumbent SI / Consultancy */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center gap-2">
+                  Incumbent SI / Consultancy
+                  <Tooltip content="SI partner or consultancy implementing the current platform">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                  </Tooltip>
+                </label>
+                <select
+                  value={saPartnerId}
+                  onChange={(e) => setSaPartnerId(e.target.value)}
+                  className="input-field"
+                >
+                  <option value="">No SI partner selected</option>
+                  <option value="pink-elephant-sa">Pink Elephant SA</option>
+                  <option value="think-tank-software">Think Tank Software Solutions</option>
+                  <option value="nexio-sa">Nexio South Africa</option>
+                  <option value="ipt-managed-services">IPT Managed Services</option>
+                  <option value="cyanxt">CyanXT</option>
+                </select>
+              </div>
+
+              {errors.research && <p className="error-message">{errors.research}</p>}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-ghost flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-600 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-150 disabled:bg-slate-400 disabled:cursor-not-allowed"
+              >
+                {loading && <div className="spinner" />}
+                {loading ? 'Researching...' : (competitorId || saPartnerId ? 'Generate Brief' : 'Create Deal')}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="p-6 space-y-4">
+            {briefData && (
+              <>
+                {/* Phase 1: Opening Impact */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">🎯</span>
+                    <div>
+                      <h4 className="font-semibold text-blue-900 mb-1">Opening</h4>
+                      <p className="text-sm text-blue-800 leading-relaxed">{briefData.brief?.openingStatement}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phase 2: Win Statement (Primary CTA) */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">💪</span>
+                    <div>
+                      <h4 className="font-semibold text-green-900 mb-1">Your Win</h4>
+                      <p className="text-sm text-green-800 font-medium italic">{briefData.brief?.winStatement}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phase 3: Key Risks (Expandable) */}
+                <ExpandableSection title="🚨 Key Risks" defaultOpen={true}>
+                  <ul className="space-y-2">
+                    {briefData.brief?.platformRisks?.map((risk: string, i: number) => (
+                      <li key={i} className="text-sm text-slate-600 flex gap-2">
+                        <span className="text-red-500 font-bold">•</span>
+                        <span>{risk}</span>
+                      </li>
+                    ))}
+                    {briefData.brief?.siRisks?.map((risk: string, i: number) => (
+                      <li key={`si-${i}`} className="text-sm text-slate-600 flex gap-2">
+                        <span className="text-orange-500 font-bold">•</span>
+                        <span>{risk}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </ExpandableSection>
+
+                {/* Phase 4: Strategic Angles (Expandable) */}
+                {(briefData.brief?.cioAngle || briefData.brief?.itManagerAngle) && (
+                  <ExpandableSection title="📊 Strategic Angles" defaultOpen={false}>
+                    <div className="space-y-3">
+                      {briefData.brief?.cioAngle && (
+                        <div className="bg-slate-50 rounded p-3 border-l-2 border-blue-500">
+                          <h5 className="font-semibold text-sm text-slate-900 mb-1">CIO Perspective</h5>
+                          <p className="text-xs text-slate-600">{briefData.brief.cioAngle}</p>
+                        </div>
+                      )}
+                      {briefData.brief?.itManagerAngle && (
+                        <div className="bg-slate-50 rounded p-3 border-l-2 border-indigo-500">
+                          <h5 className="font-semibold text-sm text-slate-900 mb-1">IT Manager Perspective</h5>
+                          <p className="text-xs text-slate-600">{briefData.brief.itManagerAngle}</p>
+                        </div>
+                      )}
+                    </div>
+                  </ExpandableSection>
+                )}
+
+                {/* Phase 5: Research Details (Expandable) */}
+                <ExpandableSection title="🔍 Research Details" defaultOpen={false}>
+                  <div className="space-y-2">
+                    {researchLog && (
+                      <div className="bg-slate-900 text-slate-100 rounded p-2 font-mono text-xs overflow-auto max-h-32">
+                        <div className="whitespace-pre-wrap text-slate-400">{researchLog}</div>
+                      </div>
+                    )}
+                    <div className="text-xs text-slate-500 flex gap-4">
+                      <span>⏱️ {briefData.totalDuration}ms</span>
+                      <span>💰 R{briefData.costEstimate?.toFixed(2)}</span>
+                      <span>🤖 {briefData.aiTier}</span>
+                    </div>
+                  </div>
+                </ExpandableSection>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setStep('basic')}
+                    className="btn-ghost flex-1"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmDeal}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-600 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-150"
+                  >
+                    ✓ Create Deal
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Toast Notifications */}
+      {toasts.map((toast, idx) => (
+        <Toast key={idx} message={toast.message} type={toast.type} duration={4000} />
+      ))}
+    </div>
+  );
+}

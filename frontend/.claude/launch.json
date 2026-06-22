@@ -5,8 +5,8 @@
       "name": "stratwyze-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "cwd": "/Users/brandondienar/Documents/Codex/Projects/AISP/stratwyze-crm/frontend",
-      "port": 3000
+      "cwd": ".",
+      "port": 3001
     }
   ]
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { PipelineIcon, AIIcon, AnalyticsIcon, ContactsIcon, AccountsIcon, CalendarIcon, DocumentsIcon, SettingsIcon, SearchIcon } from '@/components/icons/FeatureIcons';
 
 export default function Home() {
   return (
@@ -9,7 +10,12 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold">⚡</div>
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center text-white font-bold shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2 L20 8 L20 16 C20 21.5 12 22 12 22 C12 22 4 21.5 4 16 L4 8 Z" fill="white" stroke="currentColor" strokeWidth="0.5"/>
+                <path d="M12 8 L14 12 L12 16 L10 12 Z" fill="white"/>
+              </svg>
+            </div>
             <span className="text-lg font-bold text-slate-900">Stratwyze</span>
           </div>
           <div className="flex gap-3">
@@ -52,24 +58,30 @@ export default function Home() {
 
         {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-6 mt-20">
-          <div className="bg-white rounded-lg border border-slate-200 p-8 shadow-xs hover:shadow-sm transition-all">
-            <p className="text-3xl mb-4">📊</p>
+          <div className="bg-white rounded-lg border border-slate-200 p-8 shadow-xs hover:shadow-md hover:border-blue-200 transition-all group">
+            <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+              <PipelineIcon />
+            </div>
             <h3 className="text-lg font-bold text-slate-900 mb-3">Beautiful Pipeline</h3>
             <p className="text-slate-600 leading-relaxed">
               Drag-and-drop Kanban board across 5 pipeline stages. Real-time deal updates with beautiful cards and progress bars.
             </p>
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 p-8 shadow-xs hover:shadow-sm transition-all">
-            <p className="text-3xl mb-4">🤖</p>
+          <div className="bg-white rounded-lg border border-slate-200 p-8 shadow-xs hover:shadow-md hover:border-blue-200 transition-all group">
+            <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+              <AIIcon />
+            </div>
             <h3 className="text-lg font-bold text-slate-900 mb-3">AI Insights</h3>
             <p className="text-slate-600 leading-relaxed">
               AI-powered deal risk scoring, win probability, executive summaries, and next best action recommendations.
             </p>
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 p-8 shadow-xs hover:shadow-sm transition-all">
-            <p className="text-3xl mb-4">📈</p>
+          <div className="bg-white rounded-lg border border-slate-200 p-8 shadow-xs hover:shadow-md hover:border-blue-200 transition-all group">
+            <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+              <AnalyticsIcon />
+            </div>
             <h3 className="text-lg font-bold text-slate-900 mb-3">Advanced Analytics</h3>
             <p className="text-slate-600 leading-relaxed">
               Revenue forecasts, pipeline health metrics, deal velocity tracking, and win rate analysis — all executive-ready.
@@ -104,15 +116,17 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-8">
             {[
-              { icon: '👥', title: 'Contact Management', desc: 'Organize contacts by account with activity timelines' },
-              { icon: '🏢', title: 'Account Workspaces', desc: 'Track accounts with ARR, employees, and health scores' },
-              { icon: '📅', title: 'Calendar & Activities', desc: 'Schedule calls, meetings, and track all interactions' },
-              { icon: '📄', title: 'Document Management', desc: 'Store and share proposals, contracts, and materials' },
-              { icon: '⚙️', title: 'Settings & Team', desc: 'Manage team members, roles, and workspace preferences' },
-              { icon: '🔍', title: 'Advanced Search', desc: 'Find prospects, deals, and documents instantly' },
+              { Icon: ContactsIcon, title: 'Contact Management', desc: 'Organize contacts by account with activity timelines' },
+              { Icon: AccountsIcon, title: 'Account Workspaces', desc: 'Track accounts with ARR, employees, and health scores' },
+              { Icon: CalendarIcon, title: 'Calendar & Activities', desc: 'Schedule calls, meetings, and track all interactions' },
+              { Icon: DocumentsIcon, title: 'Document Management', desc: 'Store and share proposals, contracts, and materials' },
+              { Icon: SettingsIcon, title: 'Settings & Team', desc: 'Manage team members, roles, and workspace preferences' },
+              { Icon: SearchIcon, title: 'Advanced Search', desc: 'Find prospects, deals, and documents instantly' },
             ].map((feature, idx) => (
-              <div key={idx} className="flex gap-4">
-                <div className="text-3xl mt-1">{feature.icon}</div>
+              <div key={idx} className="flex gap-4 p-4 rounded-lg hover:bg-slate-50 transition-colors">
+                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
+                  <feature.Icon />
+                </div>
                 <div>
                   <h3 className="font-bold text-slate-900 mb-1">{feature.title}</h3>
                   <p className="text-slate-600 text-sm">{feature.desc}</p>

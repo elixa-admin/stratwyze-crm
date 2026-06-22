@@ -108,6 +108,18 @@
            transition-all duration-150;
   }
 
+  .input-field:disabled {
+    @apply bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed;
+  }
+
+  .input-field.error {
+    @apply border-red-500 focus:ring-red-500 focus:border-red-500;
+  }
+
+  .input-field.error:focus {
+    @apply ring-red-500;
+  }
+
   /* Badges & Tags */
   .badge {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-600;
@@ -138,6 +150,36 @@
   .page-subheader {
     @apply text-base font-500 text-slate-600;
   }
+
+  /* Required Field Indicator */
+  .required-indicator {
+    @apply text-red-500 font-semibold;
+  }
+
+  /* Error Message */
+  .error-message {
+    @apply text-xs text-red-600 mt-1.5 font-medium;
+  }
+
+  /* Success Message */
+  .success-message {
+    @apply text-xs text-emerald-600 mt-1.5 font-medium;
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+}
+
+/* ─── Print / Export ─────────────────────────────────────────────────────── */
+@media print {
+  body { background: white !important; font-size: 12px; }
+  nav, aside, header, [data-sidebar], [data-nav], .no-print { display: none !important; }
+  .print-full { width: 100% !important; max-width: 100% !important; }
+  .print-break { page-break-before: always; }
+  a[href]::after { content: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 /* Recharts Styling */
