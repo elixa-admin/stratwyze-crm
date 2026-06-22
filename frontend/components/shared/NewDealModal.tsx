@@ -6,8 +6,6 @@ import Tooltip from './Tooltip';
 import { Toast, useToast } from './Toast';
 import { COMPETITORS } from '@/lib/data/competitors';
 import { SA_PARTNERS } from '@/lib/data/sa-partners';
-import { BriefParser } from '@/lib/utils/brief-parser';
-import type { DealEnrichmentData } from '@/lib/types/deal-enrichment';
 
 interface NewDealModalProps {
   isOpen: boolean;
