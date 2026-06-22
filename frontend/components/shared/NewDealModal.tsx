@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import ExpandableSection from './ExpandableSection';
 import Tooltip from './Tooltip';
-import { Toast, useToast } from './Toast';
+import { toast } from '@/lib/toast';
 import { COMPETITORS } from '@/lib/data/competitors';
 import { SA_PARTNERS } from '@/lib/data/sa-partners';
 
@@ -20,7 +20,6 @@ interface FormErrors {
 }
 
 export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModalProps) {
-  const { toasts, success, error } = useToast();
   const [step, setStep] = useState<'basic' | 'research'>('basic');
   const [title, setTitle] = useState('');
   const [value, setValue] = useState('');
@@ -39,7 +38,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const handleConfirmDeal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !value) {
-      error('Please fill in all required fields');
+      toast('Please fill in all required fields', 'error');
       return;
     }
 
@@ -65,7 +64,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         throw new Error(responseData.error || `Failed to create deal (${response.status})`);
       }
 
-      success(`Deal "${title}" created successfully! 🎉`);
+      toast(`Deal "${title}" created`, 'success');
 
       // Reset form
       setTitle('');
@@ -98,7 +97,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       setStep('basic');
       onClose();
     } catch (err: any) {
-      error(err?.message || 'Failed to create deal');
+      toast(err?.message || 'Failed to create deal', 'error');
       console.error('Deal creation error:', err);
     } finally {
       setLoading(false);
@@ -135,7 +134,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
           <form onSubmit={(e) => {
             e.preventDefault();
             if (!title || !value) {
-              error('Deal title and value are required');
+              toast('Deal title and value are required', 'error');
               return;
             }
             handleConfirmDeal(e);
@@ -453,10 +452,6 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         )}
       </div>
 
-      {/* Toast Notifications */}
-      {toasts.map((toast, idx) => (
-        <Toast key={idx} message={toast.message} type={toast.type} duration={4000} />
-      ))}
     </div>
   );
 }

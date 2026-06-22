@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import GlobalSearch from '@/components/shared/GlobalSearch';
 import NewDealModal from '@/components/shared/NewDealModal';
+import { Toast, useToast, ToastType } from '@/components/shared/Toast';
 
 const IconDashboard = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -51,9 +52,7 @@ const IconDocuments = () => (
 );
 const IconCompetitive = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="8" cy="8" r="6" />
-    <circle cx="16" cy="16" r="6" />
-    <line x1="11" y1="11" x2="13" y2="13" />
+    <circle cx="8" cy="8" r="6" /><circle cx="16" cy="16" r="6" /><line x1="11" y1="11" x2="13" y2="13" />
   </svg>
 );
 const IconSettings = () => (
@@ -74,9 +73,14 @@ const IconBell = () => (
     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
   </svg>
 );
-const IconMenu = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+const IconChevronsLeft = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="11 17 6 12 11 7" /><polyline points="18 17 13 12 18 7" />
+  </svg>
+);
+const IconChevronsRight = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="13 17 18 12 13 7" /><polyline points="6 17 11 12 6 7" />
   </svg>
 );
 const IconPlus = () => (
@@ -87,19 +91,19 @@ const IconPlus = () => (
 
 const NAV = [
   { group: 'Main', items: [
-    { href: '/dashboard', label: 'Dashboard', Icon: IconDashboard },
-    { href: '/pipeline', label: 'Pipeline', Icon: IconPipeline },
-    { href: '/contacts', label: 'Contacts', Icon: IconContacts },
-    { href: '/accounts', label: 'Accounts', Icon: IconAccounts },
+    { href: '/dashboard',       label: 'Dashboard',       Icon: IconDashboard },
+    { href: '/pipeline',        label: 'Pipeline',        Icon: IconPipeline },
+    { href: '/contacts',        label: 'Contacts',        Icon: IconContacts },
+    { href: '/accounts',        label: 'Accounts',        Icon: IconAccounts },
   ]},
   { group: 'Insights', items: [
-    { href: '/analytics', label: 'Reports', Icon: IconReports },
+    { href: '/analytics',       label: 'Reports',         Icon: IconReports },
     { href: '/competitive-intel', label: 'Competitive Intel', Icon: IconCompetitive },
   ]},
   { group: 'Workspace', items: [
-    { href: '/calendar', label: 'Calendar', Icon: IconCalendar },
-    { href: '/documents', label: 'Documents', Icon: IconDocuments },
-    { href: '/settings', label: 'Settings', Icon: IconSettings },
+    { href: '/calendar',        label: 'Calendar',        Icon: IconCalendar },
+    { href: '/documents',       label: 'Documents',       Icon: IconDocuments },
+    { href: '/settings',        label: 'Settings',        Icon: IconSettings },
   ]},
 ];
 
@@ -107,17 +111,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [authenticated, setAuthenticated] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [showNewDealModal, setShowNewDealModal] = useState(false);
+  const { toasts, show } = useToast();
+  const showRef = useRef(show);
+  showRef.current = show;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/login');
-    } else {
-      setAuthenticated(true);
-    }
+    if (!token) router.push('/login');
+    else setAuthenticated(true);
   }, [router]);
+
+  // Global toast event bus
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { message, type } = (e as CustomEvent<{ message: string; type: ToastType }>).detail;
+      showRef.current(message, type);
+    };
+    window.addEventListener('toast', handler);
+    return () => window.removeEventListener('toast', handler);
+  }, []);
 
   useEffect(() => {
     const handleOpenModal = () => setShowNewDealModal(true);
@@ -131,8 +145,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   const handleNewDealSubmit = (data: { title: string; value: number; accountId: string; stageName: string; dealId?: string }) => {
-    const event = new CustomEvent('dealCreated', { detail: data });
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent('dealCreated', { detail: data }));
     setShowNewDealModal(false);
   };
 
@@ -147,35 +160,40 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-screen bg-slate-900 z-40 flex flex-col transition-all duration-300 ${
-        sidebarOpen ? 'w-64' : 'w-0'
-      } overflow-hidden md:relative md:flex-shrink-0`}>
+      <aside className={`flex-shrink-0 h-screen bg-slate-900 flex flex-col sticky top-0 transition-all duration-200 overflow-hidden ${
+        collapsed ? 'w-[60px]' : 'w-64'
+      }`}>
 
         {/* Logo */}
-        <div className="flex items-center gap-3 h-16 px-5 border-b border-slate-800 flex-shrink-0">
+        <div className={`flex items-center h-16 border-b border-slate-800 flex-shrink-0 ${collapsed ? 'justify-center px-0' : 'gap-3 px-5'}`}>
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
             <span className="text-white text-sm font-bold tracking-tight">S</span>
           </div>
-          <span className="text-sm font-semibold text-white tracking-tight">Stratwyze</span>
+          {!collapsed && <span className="text-sm font-semibold text-white tracking-tight">Stratwyze</span>}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
+        <nav className="flex-1 px-2 py-4 overflow-y-auto space-y-5">
           {NAV.map(({ group, items }) => (
             <div key={group}>
-              <p className="px-2 mb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{group}</p>
+              {!collapsed && (
+                <p className="px-2 mb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{group}</p>
+              )}
               <div className="space-y-0.5">
                 {items.map(({ href, label, Icon }) => {
                   const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
                   return (
-                    <Link key={href} href={href}>
-                      <div className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all duration-150 ${
+                    <Link key={href} href={href} title={collapsed ? label : undefined}>
+                      <div className={`flex items-center rounded-lg text-sm transition-all duration-150 ${
+                        collapsed ? 'justify-center w-10 h-10 mx-auto' : 'gap-2.5 px-2.5 py-2'
+                      } ${
                         active
-                          ? 'bg-slate-800 text-white font-medium border-l-2 border-blue-500 pl-[9px]'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-normal'
+                          ? 'bg-blue-600/20 text-white'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                       }`}>
-                        <Icon />
-                        <span>{label}</span>
+                        <span className={active ? 'text-blue-400' : ''}><Icon /></span>
+                        {!collapsed && <span className={active ? 'font-medium' : ''}>{label}</span>}
+                        {!collapsed && active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />}
                       </div>
                     </Link>
                   );
@@ -185,23 +203,29 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        {/* User / Logout */}
-        <div className="flex-shrink-0 border-t border-slate-800 p-3">
-          <div className="flex items-center gap-2.5 px-2 py-2 rounded-md mb-1">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-              B
+        {/* Collapse toggle */}
+        <div className={`flex-shrink-0 border-t border-slate-800 p-2 ${collapsed ? 'flex justify-center' : ''}`}>
+          {!collapsed && (
+            <div className="flex items-center gap-2.5 px-2 py-2 rounded-md mb-1">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">B</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-slate-200 truncate">Brandon</p>
+                <p className="text-[11px] text-slate-500 truncate">Admin</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-slate-200 truncate">Brandon</p>
-              <p className="text-[11px] text-slate-500 truncate">Admin</p>
-            </div>
-          </div>
+          )}
+          {collapsed && (
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white mb-2 mx-auto">B</div>
+          )}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-slate-500 hover:text-slate-300 hover:bg-slate-800/60 transition-all duration-150"
+            title={collapsed ? 'Sign out' : undefined}
+            className={`flex items-center gap-2.5 rounded-md text-sm text-slate-500 hover:text-slate-300 hover:bg-slate-800/60 transition-all duration-150 ${
+              collapsed ? 'justify-center w-10 h-9 mx-auto' : 'w-full px-2.5 py-2'
+            }`}
           >
             <IconLogout />
-            <span>Sign out</span>
+            {!collapsed && <span>Sign out</span>}
           </button>
         </div>
       </aside>
@@ -212,10 +236,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-30 bg-white border-b border-slate-200 h-16 flex-shrink-0">
           <div className="flex items-center h-full px-6 gap-4">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => setCollapsed(c => !c)}
               className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <IconMenu />
+              {collapsed ? <IconChevronsRight /> : <IconChevronsLeft />}
             </button>
 
             <GlobalSearch />
@@ -225,7 +250,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <IconBell />
                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
               </button>
-              <button onClick={() => setShowNewDealModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm">
+              <button
+                onClick={() => setShowNewDealModal(true)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm"
+              >
                 <IconPlus />
                 <span>New</span>
               </button>
@@ -240,6 +268,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       <NewDealModal isOpen={showNewDealModal} onClose={() => setShowNewDealModal(false)} onSubmit={handleNewDealSubmit} />
+
+      {/* Global toast stack */}
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none">
+        {toasts.map(t => (
+          <div key={t.id} className="pointer-events-auto">
+            <Toast message={t.message} type={t.type} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

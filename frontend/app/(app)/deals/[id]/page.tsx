@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/format';
+import { toast } from '@/lib/toast';
 
 interface Activity {
   id: string;
@@ -127,7 +128,7 @@ export default function DealDetailPage() {
         body: JSON.stringify({ title: editTitle, value: parseFloat(editValue), stage: editStage }),
       });
       const data = await res.json();
-      if (data.deal) { setDeal(data.deal); setDirty(false); }
+      if (data.deal) { setDeal(data.deal); setDirty(false); toast('Changes saved', 'success'); }
     } finally {
       setSaving(false);
     }
@@ -136,8 +137,6 @@ export default function DealDetailPage() {
   const handleStageChange = async (newStage: Deal['stage']) => {
     if (!deal || newStage === editStage) return;
     setEditStage(newStage);
-    setDirty(true);
-    // Immediately persist stage change + auto-log activity
     setSaving(true);
     try {
       const res = await fetch(`/api/deals/${id}`, {
@@ -146,7 +145,7 @@ export default function DealDetailPage() {
         body: JSON.stringify({ stage: newStage }),
       });
       const data = await res.json();
-      if (data.deal) { setDeal(data.deal); setDirty(false); }
+      if (data.deal) { setDeal(data.deal); setDirty(false); toast(`Stage → ${newStage}`, 'success'); }
     } finally {
       setSaving(false);
     }
@@ -166,6 +165,7 @@ export default function DealDetailPage() {
         setDeal(data.deal);
         setNoteInput('');
         if (noteRef.current) noteRef.current.style.height = 'auto';
+        toast('Note added', 'success');
       }
     } finally {
       setPostingNote(false);

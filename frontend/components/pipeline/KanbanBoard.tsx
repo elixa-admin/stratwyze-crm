@@ -9,7 +9,7 @@ interface Opportunity {
   id: string;
   title: string;
   value: number;
-  closeDate: string;
+  createdAt: string;
   probability: number;
   owner: string;
   stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won';
@@ -28,25 +28,45 @@ const STAGES = [
   { id: 'closed-won',    label: 'Closed Won' },
 ];
 
+const STAGE_PROBABILITY: Record<string, number> = {
+  'prospecting':   10,
+  'qualification': 25,
+  'proposal':      50,
+  'negotiation':   75,
+  'closed-won':    100,
+};
+
 function stageToLocal(stage: string): Opportunity['stage'] {
   const map: Record<string, Opportunity['stage']> = {
-    'Prospecting': 'prospecting',
+    'Prospecting':   'prospecting',
     'Qualification': 'qualification',
-    'Proposal': 'proposal',
-    'Negotiation': 'negotiation',
-    'Closed Won': 'closed-won',
+    'Proposal':      'proposal',
+    'Negotiation':   'negotiation',
+    'Closed Won':    'closed-won',
   };
   return map[stage] ?? 'prospecting';
 }
 
-function getProbabilityColor(probability: number): string {
-  if (probability >= 80) return 'bg-green-100 text-green-700';
-  if (probability >= 50) return 'bg-amber-100 text-amber-700';
-  return 'bg-red-100 text-red-700';
+function getProbabilityColor(p: number): string {
+  if (p >= 75) return 'bg-emerald-50 text-emerald-700';
+  if (p >= 50) return 'bg-amber-50 text-amber-700';
+  if (p >= 25) return 'bg-blue-50 text-blue-700';
+  return 'bg-slate-100 text-slate-500';
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' });
+function dealAgeLabel(createdAt: string): string {
+  const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return '1d';
+  if (days < 30) return `${days}d`;
+  return `${Math.floor(days / 30)}mo`;
+}
+
+function dealAgeColor(createdAt: string): string {
+  const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000);
+  if (days > 60) return 'bg-red-50 text-red-600';
+  if (days > 30) return 'bg-amber-50 text-amber-600';
+  return 'bg-slate-100 text-slate-500';
 }
 
 function KanbanSkeleton() {
@@ -87,17 +107,15 @@ export default function KanbanBoard() {
       .then(data => {
         if (data.deals) {
           setOpportunities(data.deals.map((d: any): Opportunity => ({
-            id: d.id,
-            title: d.title,
-            value: d.value,
-            closeDate: d.createdAt
-              ? new Date(new Date(d.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-              : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            probability: 50,
-            owner: 'You',
-            stage: stageToLocal(d.stage),
+            id:              d.id,
+            title:           d.title,
+            value:           d.value,
+            createdAt:       d.createdAt,
+            probability:     STAGE_PROBABILITY[stageToLocal(d.stage)] ?? 50,
+            owner:           'You',
+            stage:           stageToLocal(d.stage),
             incumbentPlatform: d.incumbentPlatform,
-            incumbentSI: d.incumbentProvider,
+            incumbentSI:     d.incumbentProvider,
           })));
         }
       })
@@ -107,51 +125,49 @@ export default function KanbanBoard() {
 
   useEffect(() => {
     const handleDealCreated = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      const data = customEvent.detail as { title: string; value: number; accountId: string; stageName: string; dealId?: string };
+      const data = (event as CustomEvent).detail as { title: string; value: number; accountId: string; stageName: string; dealId?: string };
+      const stageKey = stageToLocal(data.stageName);
       const newDeal: Opportunity = {
-        id: data.dealId ?? Date.now().toString(),
-        title: data.title,
-        value: data.value,
-        closeDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        probability: 50,
-        owner: 'You',
-        stage: data.stageName.toLowerCase().replace(' ', '-') as Opportunity['stage'],
+        id:          data.dealId ?? Date.now().toString(),
+        title:       data.title,
+        value:       data.value,
+        createdAt:   new Date().toISOString(),
+        probability: STAGE_PROBABILITY[stageKey] ?? 50,
+        owner:       'You',
+        stage:       stageKey,
       };
       setOpportunities(prev => [newDeal, ...prev]);
     };
-
     window.addEventListener('dealCreated', handleDealCreated);
     return () => window.removeEventListener('dealCreated', handleDealCreated);
   }, []);
-
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    setDraggedId(id);
-    e.dataTransfer.effectAllowed = 'move';
-  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, stage: string) => {
+  const handleDrop = (e: React.DragEvent, stageId: string) => {
     e.preventDefault();
     if (!draggedId) return;
-    setOpportunities(prev => prev.map(opp => opp.id === draggedId ? { ...opp, stage: stage as Opportunity['stage'] } : opp));
+    const newStage = stageId as Opportunity['stage'];
+    setOpportunities(prev => prev.map(opp => opp.id === draggedId
+      ? { ...opp, stage: newStage, probability: STAGE_PROBABILITY[newStage] ?? opp.probability }
+      : opp
+    ));
+    // Persist stage change to DB
+    fetch(`/api/deals/${draggedId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stage: STAGES.find(s => s.id === stageId)?.label ?? stageId }),
+    }).catch(() => {});
     setDraggedId(null);
   };
 
   const openPursuitModal = (opp: Opportunity) => {
     setActiveModal({
-      id: opp.id,
-      title: opp.title,
-      value: opp.value,
-      stage: opp.stage,
-      owner: opp.owner,
-      competitorId: opp.competitorId,
-      saPartnerId: opp.saPartnerId,
-      competitiveNotes: opp.competitiveNotes,
+      id: opp.id, title: opp.title, value: opp.value, stage: opp.stage,
+      owner: opp.owner, competitorId: opp.competitorId, saPartnerId: opp.saPartnerId, competitiveNotes: opp.competitiveNotes,
     });
   };
 
@@ -171,7 +187,7 @@ export default function KanbanBoard() {
     <div className="w-full">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 pb-4">
         {STAGES.map((stage) => {
-          const stageOpps = opportunities.filter((opp) => opp.stage === stage.id);
+          const stageOpps = opportunities.filter(opp => opp.stage === stage.id);
           const stageValue = stageOpps.reduce((sum, opp) => sum + opp.value, 0);
 
           return (
@@ -179,45 +195,61 @@ export default function KanbanBoard() {
               key={stage.id}
               className="flex flex-col bg-slate-50 rounded-xl border border-slate-200 p-3"
               onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, stage.id)}
+              onDrop={e => handleDrop(e, stage.id)}
             >
               <div className="mb-3 pb-3 border-b border-slate-200">
-                <h2 className="text-sm font-semibold text-slate-900">{stage.label}</h2>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  {stageOpps.length} deal{stageOpps.length !== 1 ? 's' : ''} · {formatCurrency(stageValue)}
-                </p>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-slate-900">{stage.label}</h2>
+                  <span className="text-[10px] font-semibold text-slate-400 bg-slate-200 px-1.5 py-0.5 rounded-full">
+                    {stageOpps.length}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">{formatCurrency(stageValue)}</p>
               </div>
 
               <div className="flex flex-col gap-2.5 flex-1 min-h-80">
-                {stageOpps.map((opp) => (
+                {stageOpps.map(opp => (
                   <div
                     key={opp.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, opp.id)}
-                    className="bg-white rounded-lg border border-slate-200 p-3 shadow-xs hover:shadow-sm transition-all cursor-grab active:cursor-grabbing group"
+                    className={`bg-white rounded-lg border border-slate-200 p-3 shadow-xs hover:shadow-sm transition-all group ${draggedId === opp.id ? 'opacity-50 ring-2 ring-blue-300' : ''}`}
                   >
-                    <Link href={`/deals/${opp.id}`} className="block" onClick={e => e.stopPropagation()}>
-                      <p className="text-sm font-medium text-slate-900 mb-2 leading-snug group-hover:text-blue-600 transition-colors">{opp.title}</p>
+                    {/* Title — plain Link, no draggable interference */}
+                    <Link
+                      href={`/deals/${opp.id}`}
+                      className="block text-sm font-medium text-slate-900 leading-snug hover:text-blue-600 transition-colors mb-2"
+                    >
+                      {opp.title}
                     </Link>
 
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-slate-900">{formatCurrency(opp.value)}</span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${getProbabilityColor(opp.probability)}`}>
-                          {opp.probability}%
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${dealAgeColor(opp.createdAt)}`}>
+                            {dealAgeLabel(opp.createdAt)}
+                          </span>
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${getProbabilityColor(opp.probability)}`}>
+                            {opp.probability}%
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="flex justify-between items-center text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
+                      {/* Drag handle (only this element is draggable) + owner */}
+                      <div className="flex justify-between items-center text-slate-400">
+                        <div
+                          draggable
+                          onDragStart={e => { e.stopPropagation(); setDraggedId(opp.id); e.dataTransfer.effectAllowed = 'move'; }}
+                          onDragEnd={() => setDraggedId(null)}
+                          className="flex items-center gap-1 cursor-grab active:cursor-grabbing select-none hover:text-slate-600 transition-colors"
+                          title="Drag to move stage"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="7" cy="4" r="1.5"/><circle cx="13" cy="4" r="1.5"/>
+                            <circle cx="7" cy="10" r="1.5"/><circle cx="13" cy="10" r="1.5"/>
+                            <circle cx="7" cy="16" r="1.5"/><circle cx="13" cy="16" r="1.5"/>
                           </svg>
-                          {formatDate(opp.closeDate)}
-                        </span>
+                          <span className="text-[10px]">drag</span>
+                        </div>
                         <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[9px] font-bold text-white">
                           {opp.owner.slice(0, 2).toUpperCase()}
                         </div>
@@ -236,7 +268,7 @@ export default function KanbanBoard() {
                             </div>
                             {hasCompetitiveContext(opp) && (
                               <button
-                                onClick={(e) => { e.stopPropagation(); openPursuitModal(opp); }}
+                                onClick={e => { e.stopPropagation(); openPursuitModal(opp); }}
                                 className="text-[9px] font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-1.5 py-0.5 rounded transition-all flex-shrink-0"
                               >
                                 Brief
@@ -266,6 +298,7 @@ export default function KanbanBoard() {
         })}
       </div>
 
+      {/* Summary stats */}
       <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-5">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
           <p className="text-[11px] font-semibold uppercase text-slate-400 tracking-wide mb-2">Total Pipeline</p>
@@ -281,7 +314,7 @@ export default function KanbanBoard() {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
           <p className="text-[11px] font-semibold uppercase text-slate-400 tracking-wide mb-2">Closed Won</p>
-          <div className="text-2xl font-bold text-green-600">
+          <div className="text-2xl font-bold text-emerald-600">
             {formatCurrency(opportunities.filter(o => o.stage === 'closed-won').reduce((sum, opp) => sum + opp.value, 0))}
           </div>
         </div>
@@ -295,11 +328,7 @@ export default function KanbanBoard() {
       </div>
 
       {activeModal && (
-        <DealPursuitModal
-          deal={activeModal}
-          onClose={() => setActiveModal(null)}
-          onSave={handleModalSave}
-        />
+        <DealPursuitModal deal={activeModal} onClose={() => setActiveModal(null)} onSave={handleModalSave} />
       )}
     </div>
   );
