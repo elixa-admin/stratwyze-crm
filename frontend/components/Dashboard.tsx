@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 const MOCK = {
   totalPipeline: 2340000,
@@ -71,19 +71,53 @@ const fmt = (n: number) => n >= 1000000 ? `$${(n / 1000000).toFixed(1)}M` : `$${
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
-  const total = MOCK.stages.reduce((s, st) => s + st.value, 0);
+  const [deals, setDeals] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        const response = await fetch('/api/deals');
+        const data = await response.json();
+        setDeals(data.deals || []);
+        setStats(data.stats || {});
+      } catch (err) {
+        console.error('Failed to fetch deals:', err);
+        // Fallback to mock data if API fails
+        setDeals(MOCK.recentDeals);
+        setStats({
+          totalPipeline: MOCK.totalPipeline,
+          winRate: MOCK.winRate,
+          byStage: MOCK.stages.reduce((acc: any, s) => {
+            acc[s.label] = s.count;
+            return acc;
+          }, {}),
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeals();
+  }, []);
+
+  const total = stats?.totalPipeline || MOCK.totalPipeline;
 
   const filteredDeals = useMemo(() => {
-    return MOCK.recentDeals.filter(deal =>
-      deal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      deal.company.toLowerCase().includes(searchQuery.toLowerCase())
+    return deals.filter(deal =>
+      deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      deal.account?.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, deals]);
+
+  const closedWon = deals.filter(d => d.stage === 'Closed Won').reduce((sum: number, d: any) => sum + d.value, 0);
+  const winRate = deals.length > 0 ? ((stats?.byStage?.['Closed Won'] || 0) / deals.length) * 100 : 0;
 
   const kpis = [
     {
       label: 'Total Pipeline',
-      value: fmt(MOCK.totalPipeline),
+      value: fmt(stats?.totalPipeline || MOCK.totalPipeline),
       change: MOCK.pipelineChange,
       Icon: IconTrend,
       accent: 'text-blue-600 bg-blue-50',
@@ -92,7 +126,7 @@ export default function Dashboard() {
     },
     {
       label: 'Win Rate',
-      value: `${MOCK.winRate}%`,
+      value: `${winRate.toFixed(0)}%`,
       change: MOCK.winRateChange,
       Icon: IconTarget,
       accent: 'text-emerald-600 bg-emerald-50',
@@ -101,7 +135,7 @@ export default function Dashboard() {
     },
     {
       label: 'Forecast',
-      value: fmt(MOCK.forecast),
+      value: fmt(closedWon || MOCK.forecast),
       change: MOCK.forecastChange,
       Icon: IconForecast,
       accent: 'text-amber-600 bg-amber-50',
@@ -110,7 +144,7 @@ export default function Dashboard() {
     },
     {
       label: 'Deals This Month',
-      value: `${MOCK.dealsThisMonth}`,
+      value: `${deals.length}`,
       change: null,
       Icon: IconDeals,
       accent: 'text-purple-600 bg-purple-50',
@@ -151,31 +185,38 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
           <h2 className="text-sm font-semibold text-slate-900 mb-5">Pipeline by Stage</h2>
           <div className="space-y-4">
-            {MOCK.stages.map((stage) => (
-              <div key={stage.label}>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-sm text-slate-700">{stage.label}</span>
-                  <span className="text-xs text-slate-500">{stage.count} deals</span>
+            {(['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won'] as const).map((stageName) => {
+              const count = stats?.byStage?.[stageName] || 0;
+              const value = deals
+                .filter(d => d.stage === stageName)
+                .reduce((sum: number, d: any) => sum + d.value, 0);
+
+              return (
+                <div key={stageName}>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-sm text-slate-700">{stageName}</span>
+                    <span className="text-xs text-slate-500">{count} deals</span>
+                  </div>
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-blue-500 transition-all"
+                      style={{ width: `${total > 0 ? (value / total) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-slate-500 mt-0.5">{fmt(value)}</div>
                 </div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-blue-500 transition-all"
-                    style={{ width: `${(stage.value / total) * 100}%` }}
-                  />
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">{fmt(stage.value)}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-6 pt-4 border-t border-slate-100">
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
                 <p className="text-slate-500">Total</p>
-                <p className="font-semibold text-slate-900 text-sm">{fmt(MOCK.totalPipeline)}</p>
+                <p className="font-semibold text-slate-900 text-sm">{fmt(stats?.totalPipeline || 0)}</p>
               </div>
               <div>
                 <p className="text-slate-500">Avg deal</p>
-                <p className="font-semibold text-slate-900 text-sm">{fmt(MOCK.totalPipeline / 34)}</p>
+                <p className="font-semibold text-slate-900 text-sm">{fmt(deals.length > 0 ? (stats?.totalPipeline || 0) / deals.length : 0)}</p>
               </div>
             </div>
           </div>
@@ -205,24 +246,27 @@ export default function Dashboard() {
           {/* Deals List */}
           <div className="divide-y divide-slate-100 flex-1 overflow-y-auto">
             {filteredDeals.length > 0 ? (
-              filteredDeals.map((deal) => (
-                <div key={deal.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-slate-50 transition-colors cursor-pointer">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                    {deal.owner}
+              filteredDeals.slice(0, 5).map((deal) => {
+                const initials = (deal.account?.name || 'XX').split(' ').map((n: string) => n[0]).join('').toUpperCase();
+                return (
+                  <div key={deal.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-slate-50 transition-colors cursor-pointer">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                      {initials.substring(0, 2)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{deal.title}</p>
+                      <p className="text-xs text-slate-500 truncate">{deal.account?.name || 'Unassigned'}</p>
+                    </div>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap ${STAGE_COLORS[deal.stage] ?? 'bg-slate-100 text-slate-600'}`}>
+                      {deal.stage}
+                    </span>
+                    <div className="text-right flex-shrink-0 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900">{fmt(deal.value)}</p>
+                      <p className="text-xs font-medium text-slate-500">New</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">{deal.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{deal.company}</p>
-                  </div>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap ${STAGE_COLORS[deal.stage] ?? 'bg-slate-100 text-slate-600'}`}>
-                    {deal.stage}
-                  </span>
-                  <div className="text-right flex-shrink-0 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{fmt(deal.value)}</p>
-                    <p className={`text-xs font-medium ${deal.delta === 'New' ? 'text-blue-600' : 'text-emerald-600'}`}>{deal.delta}</p>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="flex items-center justify-center h-24 text-sm text-slate-500">
                 No deals found

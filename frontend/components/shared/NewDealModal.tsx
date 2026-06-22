@@ -109,14 +109,39 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
     }
   };
 
-  const handleConfirmDeal = (e: React.FormEvent) => {
+  const handleConfirmDeal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !value) {
       error('Please fill in all required fields');
       return;
     }
 
+    setLoading(true);
+
     try {
+      const response = await fetch('/api/deals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          value: parseFloat(value),
+          accountId,
+          stageName,
+          competitorId: competitorId || undefined,
+          saPartnerId: saPartnerId || undefined,
+          enrichmentData,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `Failed to create deal (${response.status})`);
+      }
+
+      const data = await response.json();
+      success(`Deal "${title}" created successfully! 🎉`);
+
+      // Call original callback for any additional handling
       onSubmit({
         title,
         value: parseFloat(value),
@@ -126,8 +151,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         saPartnerId: saPartnerId || undefined,
       });
 
-      success(`Deal "${title}" created successfully! 🎉`);
-
+      // Reset form
       setTitle('');
       setValue('');
       setAccountId('');
@@ -135,13 +159,16 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       setCompetitorId('');
       setSaPartnerId('');
       setBriefData(null);
+      setEnrichmentData(null);
       setResearchLog('');
       setErrors({});
       setStep('basic');
       onClose();
-    } catch (err) {
-      error('Failed to create deal');
+    } catch (err: any) {
+      error(err?.message || 'Failed to create deal');
       console.error('Deal creation error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
