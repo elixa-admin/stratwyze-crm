@@ -200,7 +200,14 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         </div>
 
         {step === 'basic' ? (
-          <form onSubmit={handleGenerateBrief} className="p-6 space-y-5">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (!title || !value) {
+              error('Deal title and value are required');
+              return;
+            }
+            handleConfirmDeal(e);
+          }} className="p-6 space-y-5">
             {/* Deal Title */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
