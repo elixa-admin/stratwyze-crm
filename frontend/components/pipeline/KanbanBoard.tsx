@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import DealPursuitModal, { DealContext } from '@/components/pipeline/DealPursuitModal';
 import { formatCurrency } from '@/lib/format';
 
@@ -18,6 +17,7 @@ interface Opportunity {
   competitorId?: string;
   saPartnerId?: string;
   competitiveNotes?: string;
+  accountId?: string;
 }
 
 const STAGES = [
@@ -100,6 +100,12 @@ export default function KanbanBoard() {
   const [loading, setLoading] = useState(true);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<DealContext | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editValue, setEditValue] = useState('');
+  const [filterStage, setFilterStage] = useState<string>('');
+  const [filterMinValue, setFilterMinValue] = useState('');
+  const [filterMaxValue, setFilterMaxValue] = useState('');
 
   useEffect(() => {
     fetch('/api/deals')
@@ -116,6 +122,7 @@ export default function KanbanBoard() {
             stage:           stageToLocal(d.stage),
             incumbentPlatform: d.incumbentPlatform,
             incumbentSI:     d.incumbentProvider,
+            accountId:       d.accountId,
           })));
         }
       })
@@ -181,13 +188,98 @@ export default function KanbanBoard() {
 
   const hasCompetitiveContext = (opp: Opportunity) => !!(opp.competitorId || opp.saPartnerId);
 
+  const handleStartEdit = (opp: Opportunity) => {
+    setEditingId(opp.id);
+    setEditTitle(opp.title);
+    setEditValue(String(opp.value));
+  };
+
+  const handleSaveEdit = async (oppId: string) => {
+    const opp = opportunities.find(o => o.id === oppId);
+    if (!opp) return;
+
+    const newValue = parseFloat(editValue);
+    if (isNaN(newValue)) {
+      setEditingId(null);
+      return;
+    }
+
+    setOpportunities(prev => prev.map(o => o.id === oppId
+      ? { ...o, title: editTitle, value: newValue }
+      : o
+    ));
+
+    await fetch(`/api/deals/${oppId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: editTitle, value: newValue }),
+    }).catch(() => {});
+
+    setEditingId(null);
+  };
+
+  const filteredOpps = opportunities.filter(opp => {
+    if (filterStage && opp.stage !== filterStage) return false;
+    if (filterMinValue && opp.value < parseFloat(filterMinValue)) return false;
+    if (filterMaxValue && opp.value > parseFloat(filterMaxValue)) return false;
+    return true;
+  });
+
   if (loading) return <KanbanSkeleton />;
 
   return (
     <div className="w-full">
+      {/* Filter controls */}
+      <div className="mb-4 flex flex-wrap gap-3 items-end">
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Stage</label>
+          <select
+            value={filterStage}
+            onChange={e => setFilterStage(e.target.value)}
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All stages</option>
+            {STAGES.map(s => (
+              <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Min value</label>
+          <input
+            type="number"
+            value={filterMinValue}
+            onChange={e => setFilterMinValue(e.target.value)}
+            placeholder="R 0"
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Max value</label>
+          <input
+            type="number"
+            value={filterMaxValue}
+            onChange={e => setFilterMaxValue(e.target.value)}
+            placeholder="R ∞"
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        {(filterStage || filterMinValue || filterMaxValue) && (
+          <button
+            onClick={() => { setFilterStage(''); setFilterMinValue(''); setFilterMaxValue(''); }}
+            className="text-xs text-slate-500 hover:text-slate-700 font-medium underline"
+          >
+            Clear filters
+          </button>
+        )}
+        <div className="ml-auto text-xs text-slate-400">
+          {filteredOpps.length} of {opportunities.length} deals
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 pb-4">
         {STAGES.map((stage) => {
-          const stageOpps = opportunities.filter(opp => opp.stage === stage.id);
+          const stageOpps = filteredOpps.filter(opp => opp.stage === stage.id);
           const stageValue = stageOpps.reduce((sum, opp) => sum + opp.value, 0);
 
           return (
@@ -213,17 +305,47 @@ export default function KanbanBoard() {
                     key={opp.id}
                     className={`bg-white rounded-lg border border-slate-200 p-3 shadow-xs hover:shadow-sm transition-all group ${draggedId === opp.id ? 'opacity-50 ring-2 ring-blue-300' : ''}`}
                   >
-                    {/* Title — plain Link, no draggable interference */}
-                    <Link
-                      href={`/deals/${opp.id}`}
-                      className="block text-sm font-medium text-slate-900 leading-snug hover:text-blue-600 transition-colors mb-2"
-                    >
-                      {opp.title}
-                    </Link>
+                    {/* Title — inline edit or link */}
+                    {editingId === opp.id ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editTitle}
+                        onChange={e => setEditTitle(e.target.value)}
+                        onBlur={() => handleSaveEdit(opp.id)}
+                        onKeyDown={e => e.key === 'Enter' && handleSaveEdit(opp.id)}
+                        className="w-full text-sm font-medium text-slate-900 border border-blue-400 rounded px-2 py-1 mb-2"
+                      />
+                    ) : (
+                      <div
+                        onClick={e => { e.preventDefault(); handleStartEdit(opp); }}
+                        className="block text-sm font-medium text-slate-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors mb-2"
+                        title="Click to edit"
+                      >
+                        {opp.title}
+                      </div>
+                    )}
 
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-slate-900">{formatCurrency(opp.value)}</span>
+                        {editingId === opp.id ? (
+                          <input
+                            type="number"
+                            value={editValue}
+                            onChange={e => setEditValue(e.target.value)}
+                            onBlur={() => handleSaveEdit(opp.id)}
+                            onKeyDown={e => e.key === 'Enter' && handleSaveEdit(opp.id)}
+                            className="text-sm font-semibold text-slate-900 border border-blue-400 rounded px-2 py-1 w-28"
+                          />
+                        ) : (
+                          <span
+                            onClick={() => handleStartEdit(opp)}
+                            className="font-semibold text-slate-900 cursor-pointer hover:text-blue-600 transition-colors"
+                            title="Click to edit"
+                          >
+                            {formatCurrency(opp.value)}
+                          </span>
+                        )}
                         <div className="flex items-center gap-1.5">
                           <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${dealAgeColor(opp.createdAt)}`}>
                             {dealAgeLabel(opp.createdAt)}
