@@ -830,7 +830,7 @@ export const COMPETITORS: Competitor[] = [
     architecture: 'Legacy',
     securityCertifications: ['ISO 27001', 'SOC 2'],
     pricing: {
-      type: 'Complex Hybrid',
+      type: 'Hybrid',
       basePrice: 'Licensing complexity; per-incident + agents',
       additionalCosts: ['CloudNow migration fees', 'Support tiers', 'Customization'],
     },
@@ -840,10 +840,10 @@ export const COMPETITORS: Competitor[] = [
     },
     implementationCost: 'R350K - R1.5M',
     complexity: {
-      implementation: 'Extended (10-16m)',
+      implementation: 'Extended (12-18m)',
       adminComplexity: 'Very Complex',
       customization: 'SI-Dependent',
-      supportQuality: 'Inconsistent (in transition)',
+      supportQuality: 'Limited',
     },
     functionality: [
       {
@@ -948,7 +948,7 @@ export const COMPETITORS: Competitor[] = [
     ],
     maActivity: [
       {
-        type: 'Strategic',
+        type: 'Acquisition',
         description: 'BMC acquisition (2017) now consolidating with Helix; platform uncertain',
         date: '2025-01-01',
       },
@@ -1274,7 +1274,7 @@ export const COMPETITORS: Competitor[] = [
     name: 'Unknown Platform',
     tagline: 'Incumbent platform not yet identified',
     avatar: '?',
-    riskLevel: 'Unknown',
+    riskLevel: 'Low',
     ownership: 'Unknown',
     founded: 0,
     headquarters: 'Unknown',
@@ -1282,10 +1282,10 @@ export const COMPETITORS: Competitor[] = [
     revenue: 'Unknown',
     website: '',
     deployment: 'Unknown',
-    architecture: 'Unknown',
+    architecture: 'Hybrid',
     securityCertifications: [],
     pricing: {
-      type: 'Unknown',
+      type: 'Hybrid',
       basePrice: 'Unknown',
       additionalCosts: [],
     },
@@ -1295,10 +1295,10 @@ export const COMPETITORS: Competitor[] = [
     },
     implementationCost: 'Unknown',
     complexity: {
-      implementation: 'Unknown',
-      adminComplexity: 'Unknown',
-      customization: 'Unknown',
-      supportQuality: 'Unknown',
+      implementation: 'Moderate (8-12w)',
+      adminComplexity: 'Moderate',
+      customization: 'Native',
+      supportQuality: 'Standard',
     },
     functionality: [],
     marketPosition: {

@@ -220,7 +220,10 @@ class DataStore {
 
     [...acmeDeals, ...globalDeals, ...otherDeals].forEach(d => {
       this.createDeal({
-        ...d,
+        title: d.title,
+        value: d.value,
+        stage: d.stage as Deal['stage'],
+        accountId: d.accountId,
         currency: 'ZAR',
         incumbentPlatform: 'servicenow',
         incumbentProvider: 'pink-elephant-sa',
