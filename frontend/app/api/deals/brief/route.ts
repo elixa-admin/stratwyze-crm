@@ -36,7 +36,7 @@ Return this exact JSON structure (all fields required, use empty string if N/A):
     const startTime = Date.now();
 
     const message = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     });
