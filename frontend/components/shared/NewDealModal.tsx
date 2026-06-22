@@ -342,7 +342,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                         <div className="mt-3 pt-2 border-t border-slate-200">
                           <span className="text-slate-600 font-medium">CxO Contacts:</span>
                           <div className="space-y-1 mt-2">
-                            {enrichmentData.cxoDetails.map((cxo, i) => (
+                            {enrichmentData.cxoDetails.map((cxo: any, i) => (
                               <div key={i} className="text-xs bg-slate-50 p-2 rounded">
                                 <div className="font-medium text-slate-900">{cxo.name} — {cxo.title}</div>
                                 {cxo.email && <div className="text-slate-600">{cxo.email}</div>}
