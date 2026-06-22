@@ -31,7 +31,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const [competitorId, setCompetitorId] = useState('');
   const [saPartnerId, setSaPartnerId] = useState('');
   const [briefData, setBriefData] = useState<any>(null);
-  const [enrichmentData, setEnrichmentData] = useState<DealEnrichmentData | null>(null);
+  const [enrichmentData, setEnrichmentData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [researchLog, setResearchLog] = useState<string>('');
   const [errors, setErrors] = useState<FormErrors>({});
