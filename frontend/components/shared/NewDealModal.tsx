@@ -4,6 +4,10 @@ import { useState } from 'react';
 import ExpandableSection from './ExpandableSection';
 import Tooltip from './Tooltip';
 import { Toast, useToast } from './Toast';
+import { COMPETITORS } from '@/lib/data/competitors';
+import { SA_PARTNERS } from '@/lib/data/sa-partners';
+import { BriefParser } from '@/lib/utils/brief-parser';
+import type { DealEnrichmentData } from '@/lib/types/deal-enrichment';
 
 interface NewDealModalProps {
   isOpen: boolean;
@@ -27,6 +31,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const [competitorId, setCompetitorId] = useState('');
   const [saPartnerId, setSaPartnerId] = useState('');
   const [briefData, setBriefData] = useState<any>(null);
+  const [enrichmentData, setEnrichmentData] = useState<DealEnrichmentData | null>(null);
   const [loading, setLoading] = useState(false);
   const [researchLog, setResearchLog] = useState<string>('');
   const [errors, setErrors] = useState<FormErrors>({});
@@ -83,6 +88,9 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       }
       if (res.ok) {
         setBriefData(data);
+        // Parse enrichment data from brief
+        const extraction = BriefParser.extractEnrichmentData(data);
+        setEnrichmentData(extraction.extractedData);
         setStep('research');
       } else {
         const errorMsg = data?.error || `API error: ${res.status}`;
@@ -246,8 +254,12 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                   onChange={(e) => setCompetitorId(e.target.value)}
                   className="input-field"
                 >
-                  <option value="">No competitor selected</option>
-                  <option value="servicenow">ServiceNow</option>
+                  <option value="">Select platform or Unknown</option>
+                  {COMPETITORS.map((competitor) => (
+                    <option key={competitor.id} value={competitor.id}>
+                      {competitor.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -266,12 +278,12 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                   onChange={(e) => setSaPartnerId(e.target.value)}
                   className="input-field"
                 >
-                  <option value="">No SI partner selected</option>
-                  <option value="pink-elephant-sa">Pink Elephant SA</option>
-                  <option value="think-tank-software">Think Tank Software Solutions</option>
-                  <option value="nexio-sa">Nexio South Africa</option>
-                  <option value="ipt-managed-services">IPT Managed Services</option>
-                  <option value="cyanxt">CyanXT</option>
+                  <option value="">Select provider or Unknown</option>
+                  {SA_PARTNERS.map((partner) => (
+                    <option key={partner.id} value={partner.id}>
+                      {partner.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -322,6 +334,69 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                     </div>
                   </div>
                 </div>
+
+                {/* Phase 2b: Deal Enrichment Data */}
+                {enrichmentData && (
+                  <ExpandableSection title="📋 Company Intelligence" defaultOpen={true}>
+                    <div className="space-y-2 text-sm">
+                      {enrichmentData.website && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Website:</span>
+                          <a href={enrichmentData.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {enrichmentData.website}
+                          </a>
+                        </div>
+                      )}
+                      {enrichmentData.annualRevenue && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Annual Revenue:</span>
+                          <span className="font-medium text-slate-900">
+                            {enrichmentData.annualRevenue.currency} {enrichmentData.annualRevenue.value.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      {enrichmentData.employees && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Employees:</span>
+                          <span className="font-medium text-slate-900">{enrichmentData.employees.toLocaleString()}</span>
+                        </div>
+                      )}
+                      {enrichmentData.industry && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Industry:</span>
+                          <span className="font-medium text-slate-900">{enrichmentData.industry}</span>
+                        </div>
+                      )}
+                      {enrichmentData.legalEntity && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Legal Entity:</span>
+                          <span className="font-medium text-slate-900">{enrichmentData.legalEntity}</span>
+                        </div>
+                      )}
+                      {enrichmentData.cxoDetails && enrichmentData.cxoDetails.length > 0 && (
+                        <div className="mt-3 pt-2 border-t border-slate-200">
+                          <span className="text-slate-600 font-medium">CxO Contacts:</span>
+                          <div className="space-y-1 mt-2">
+                            {enrichmentData.cxoDetails.map((cxo, i) => (
+                              <div key={i} className="text-xs bg-slate-50 p-2 rounded">
+                                <div className="font-medium text-slate-900">{cxo.name} — {cxo.title}</div>
+                                {cxo.email && <div className="text-slate-600">{cxo.email}</div>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {enrichmentData.dataConfidence && (
+                        <div className="mt-2 pt-2 border-t border-slate-200 flex justify-between">
+                          <span className="text-slate-600 text-xs">Data Confidence:</span>
+                          <span className={`text-xs font-medium ${enrichmentData.dataConfidence === 'High' ? 'text-green-600' : enrichmentData.dataConfidence === 'Medium' ? 'text-amber-600' : 'text-red-600'}`}>
+                            {enrichmentData.dataConfidence}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </ExpandableSection>
+                )}
 
                 {/* Phase 3: Key Risks (Expandable) */}
                 <ExpandableSection title="🚨 Key Risks" defaultOpen={true}>
