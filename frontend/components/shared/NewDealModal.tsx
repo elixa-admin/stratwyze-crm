@@ -24,16 +24,46 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const [title, setTitle] = useState('');
   const [value, setValue] = useState('');
   const [accountId, setAccountId] = useState('');
-  const [accounts, setAccounts] = useState<{ id: string; name: string }[]>([]);
+  const [accounts, setAccounts] = useState<{ id: string; name: string; industry?: string; annualRevenue?: number }[]>([]);
   const [stageName, setStageName] = useState('Prospecting');
   const [competitorId, setCompetitorId] = useState('');
   const [saPartnerId, setSaPartnerId] = useState('');
   const [briefData, setBriefData] = useState<any>(null);
-  const [enrichmentData, setEnrichmentData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [researchLog, setResearchLog] = useState<string>('');
   const [errors, setErrors] = useState<FormErrors>({});
 
+  const handleGenerateBrief = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !value) {
+      toast('Deal title and value are required', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const account = accounts.find(a => a.id === accountId);
+      const response = await fetch('/api/deals/brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          incumbentPlatform: competitorId ? COMPETITORS.find(c => c.id === competitorId)?.name : undefined,
+          saPartner: saPartnerId ? SA_PARTNERS.find(p => p.id === saPartnerId)?.name : undefined,
+          accountInfo: account ? { name: account.name, industry: account.industry, annualRevenue: account.annualRevenue } : undefined,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to generate brief');
+
+      setBriefData(data);
+      setStep('research');
+    } catch (err: any) {
+      toast(err?.message || 'Brief generation failed', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleConfirmDeal = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +85,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
           stageName,
           competitorId: competitorId || undefined,
           saPartnerId: saPartnerId || undefined,
-          enrichmentData,
+          briefMetadata: briefData ? { brief: briefData.brief, duration: briefData.duration, cost: briefData.costEstimate } : undefined,
         }),
       });
 
@@ -74,7 +104,6 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       setCompetitorId('');
       setSaPartnerId('');
       setBriefData(null);
-      setEnrichmentData(null);
 
       // Call original callback for any additional handling
       onSubmit({
@@ -91,11 +120,8 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       setTimeout(() => {
         onClose();
       }, 500);
-      setEnrichmentData(null);
-      setResearchLog('');
       setErrors({});
       setStep('basic');
-      onClose();
     } catch (err: any) {
       toast(err?.message || 'Failed to create deal', 'error');
       console.error('Deal creation error:', err);
@@ -131,14 +157,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         </div>
 
         {step === 'basic' ? (
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            if (!title || !value) {
-              toast('Deal title and value are required', 'error');
-              return;
-            }
-            handleConfirmDeal(e);
-          }} className="p-6 space-y-5">
+          <form onSubmit={handleGenerateBrief} className="p-6 space-y-5">
             {/* Deal Title */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -282,13 +301,18 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-600 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-150 disabled:bg-slate-400 disabled:cursor-not-allowed"
               >
                 {loading && <div className="spinner" />}
-                {loading ? 'Creating...' : 'Create Deal'}
+                {loading ? 'Researching...' : 'Generate Brief'}
               </button>
             </div>
           </form>
         ) : (
           <div className="p-6 space-y-4">
-            {briefData && (
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12 gap-4">
+                <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-slate-500">Generating competitive brief...</p>
+              </div>
+            ) : briefData ? (
               <>
                 {/* Phase 1: Opening Impact */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
@@ -312,68 +336,6 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                   </div>
                 </div>
 
-                {/* Phase 2b: Deal Enrichment Data */}
-                {enrichmentData && (
-                  <ExpandableSection title="📋 Company Intelligence" defaultOpen={true}>
-                    <div className="space-y-2 text-sm">
-                      {enrichmentData.website && (
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Website:</span>
-                          <a href={enrichmentData.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                            {enrichmentData.website}
-                          </a>
-                        </div>
-                      )}
-                      {enrichmentData.annualRevenue && (
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Annual Revenue:</span>
-                          <span className="font-medium text-slate-900">
-                            {enrichmentData.annualRevenue.currency} {enrichmentData.annualRevenue.value.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      {enrichmentData.employees && (
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Employees:</span>
-                          <span className="font-medium text-slate-900">{enrichmentData.employees.toLocaleString()}</span>
-                        </div>
-                      )}
-                      {enrichmentData.industry && (
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Industry:</span>
-                          <span className="font-medium text-slate-900">{enrichmentData.industry}</span>
-                        </div>
-                      )}
-                      {enrichmentData.legalEntity && (
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Legal Entity:</span>
-                          <span className="font-medium text-slate-900">{enrichmentData.legalEntity}</span>
-                        </div>
-                      )}
-                      {enrichmentData.cxoDetails && enrichmentData.cxoDetails.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-slate-200">
-                          <span className="text-slate-600 font-medium">CxO Contacts:</span>
-                          <div className="space-y-1 mt-2">
-                            {enrichmentData.cxoDetails.map((cxo: any, i: number) => (
-                              <div key={i} className="text-xs bg-slate-50 p-2 rounded">
-                                <div className="font-medium text-slate-900">{cxo.name} — {cxo.title}</div>
-                                {cxo.email && <div className="text-slate-600">{cxo.email}</div>}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {enrichmentData.dataConfidence && (
-                        <div className="mt-2 pt-2 border-t border-slate-200 flex justify-between">
-                          <span className="text-slate-600 text-xs">Data Confidence:</span>
-                          <span className={`text-xs font-medium ${enrichmentData.dataConfidence === 'High' ? 'text-green-600' : enrichmentData.dataConfidence === 'Medium' ? 'text-amber-600' : 'text-red-600'}`}>
-                            {enrichmentData.dataConfidence}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </ExpandableSection>
-                )}
 
                 {/* Phase 3: Key Risks (Expandable) */}
                 <ExpandableSection title="🚨 Key Risks" defaultOpen={true}>
@@ -413,21 +375,15 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                   </ExpandableSection>
                 )}
 
-                {/* Phase 5: Research Details (Expandable) */}
-                <ExpandableSection title="🔍 Research Details" defaultOpen={false}>
-                  <div className="space-y-2">
-                    {researchLog && (
-                      <div className="bg-slate-900 text-slate-100 rounded p-2 font-mono text-xs overflow-auto max-h-32">
-                        <div className="whitespace-pre-wrap text-slate-400">{researchLog}</div>
-                      </div>
-                    )}
-                    <div className="text-xs text-slate-500 flex gap-4">
-                      <span>⏱️ {briefData.totalDuration}ms</span>
-                      <span>💰 R{briefData.costEstimate?.toFixed(2)}</span>
-                      <span>🤖 {briefData.aiTier}</span>
-                    </div>
+                {/* Research Details */}
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <p className="text-xs text-slate-500 font-medium mb-2">Research Metadata</p>
+                  <div className="text-xs text-slate-500 flex gap-4">
+                    <span>⏱️ {briefData.duration}ms</span>
+                    <span>💰 R{briefData.costEstimate?.toFixed(4)}</span>
+                    <span>🤖 {briefData.aiTier}</span>
                   </div>
-                </ExpandableSection>
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4 border-t border-slate-100">
@@ -447,6 +403,10 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                   </button>
                 </div>
               </>
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-sm text-slate-500">No brief data available</p>
+              </div>
             )}
           </div>
         )}
