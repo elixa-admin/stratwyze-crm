@@ -73,7 +73,6 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [deals, setDeals] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -94,8 +93,6 @@ export default function Dashboard() {
             return acc;
           }, {}),
         });
-      } finally {
-        setLoading(false);
       }
     };
 
