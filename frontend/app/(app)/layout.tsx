@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import GlobalSearch from '@/components/shared/GlobalSearch';
 import NewDealModal from '@/components/shared/NewDealModal';
+import CreateAccountModal from '@/components/shared/CreateAccountModal';
 import { Toast, useToast, ToastType } from '@/components/shared/Toast';
 
 const IconDashboard = () => (
@@ -113,6 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [showNewDealModal, setShowNewDealModal] = useState(false);
+  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
   const { toasts, show } = useToast();
   const showRef = useRef(show);
   showRef.current = show;
@@ -134,9 +136,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const handleOpenModal = () => setShowNewDealModal(true);
-    window.addEventListener('openNewDealModal', handleOpenModal);
-    return () => window.removeEventListener('openNewDealModal', handleOpenModal);
+    const handleOpenDealModal = () => setShowNewDealModal(true);
+    const handleOpenAccountModal = () => setShowCreateAccountModal(true);
+    window.addEventListener('openNewDealModal', handleOpenDealModal);
+    window.addEventListener('openCreateAccountModal', handleOpenAccountModal);
+    return () => {
+      window.removeEventListener('openNewDealModal', handleOpenDealModal);
+      window.removeEventListener('openCreateAccountModal', handleOpenAccountModal);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -268,6 +275,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       <NewDealModal isOpen={showNewDealModal} onClose={() => setShowNewDealModal(false)} onSubmit={handleNewDealSubmit} />
+      <CreateAccountModal isOpen={showCreateAccountModal} onClose={() => setShowCreateAccountModal(false)} />
 
       {/* Global toast stack */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none">

@@ -14,6 +14,15 @@ interface Activity {
   createdAt: string;
 }
 
+interface Contact {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  title?: string;
+  role?: string;
+}
+
 interface Deal {
   id: string;
   title: string;
@@ -23,6 +32,8 @@ interface Deal {
   notes?: string;
   accountId?: string;
   account?: { id: string; name: string; industry?: string; annualRevenue?: number; headquarters?: string };
+  primaryContactId?: string;
+  primaryContact?: Contact;
   incumbentPlatform?: string;
   incumbentProvider?: string;
   activities?: Activity[];
@@ -296,6 +307,23 @@ export default function DealDetailPage() {
               <p className="text-xs text-slate-400 mb-0.5">Location</p>
               <p className="text-sm font-medium text-slate-900">{(deal.account as any).headquarters || '—'}</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Primary contact (if linked) */}
+      {deal.primaryContact && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">Primary Contact</h3>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-slate-900">{deal.primaryContact.name}</p>
+            {deal.primaryContact.title && <p className="text-xs text-slate-600">{deal.primaryContact.title}</p>}
+            {deal.primaryContact.email && (
+              <a href={`mailto:${deal.primaryContact.email}`} className="text-xs text-blue-600 hover:underline block">
+                {deal.primaryContact.email}
+              </a>
+            )}
+            {deal.primaryContact.phone && <p className="text-xs text-slate-600">{deal.primaryContact.phone}</p>}
           </div>
         </div>
       )}

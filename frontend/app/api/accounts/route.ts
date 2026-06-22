@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 export async function GET(_req: NextRequest) {
   try {
     const accounts = await prisma.account.findMany({
+      include: { contacts: true },
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json({ accounts });
@@ -16,7 +17,7 @@ export async function GET(_req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, website, industry, employees, annualRevenue, headquarters, legalEntity, contacts } = body;
+    const { name, website, industry, employees, annualRevenue, headquarters, legalEntity } = body;
 
     if (!name) {
       return NextResponse.json({ error: 'Account name is required' }, { status: 400 });
@@ -31,8 +32,8 @@ export async function POST(req: NextRequest) {
         annualRevenue: annualRevenue ? parseFloat(annualRevenue) : null,
         headquarters:  headquarters  || null,
         legalEntity:   legalEntity   || null,
-        contacts:      contacts      ?? null,
       },
+      include: { contacts: true },
     });
 
     return NextResponse.json(

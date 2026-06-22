@@ -7,7 +7,7 @@ datasource db {
 }
 
 model Account {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String
   website       String?
   industry      String?
@@ -15,10 +15,10 @@ model Account {
   annualRevenue Float?
   headquarters  String?
   legalEntity   String?
-  contacts      Json?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   deals         Deal[]
+  contacts      Contact[]
 }
 
 model Deal {
@@ -30,6 +30,8 @@ model Deal {
   notes             String?
   accountId         String?
   account           Account?   @relation(fields: [accountId], references: [id])
+  primaryContactId  String?
+  primaryContact    Contact?   @relation(fields: [primaryContactId], references: [id])
   incumbentPlatform String?
   incumbentProvider String?
   enrichmentData    Json?
@@ -46,4 +48,18 @@ model Activity {
   content   String
   metadata  Json?
   createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  title     String?
+  role      String?
+  deals     Deal[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -13,6 +13,15 @@ interface Deal {
   createdAt: string;
 }
 
+interface Contact {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  title?: string;
+  role?: string;
+}
+
 interface Account {
   id: string;
   name: string;
@@ -23,6 +32,7 @@ interface Account {
   annualRevenue?: number;
   legalEntity?: string;
   deals: Deal[];
+  contacts: Contact[];
 }
 
 const STAGE_COLORS: Record<string, string> = {
@@ -70,6 +80,8 @@ export default function AccountDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [account, setAccount] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', title: '', role: '' });
+  const [addingContact, setAddingContact] = useState(false);
 
   useEffect(() => {
     fetch(`/api/accounts/${id}`)
@@ -78,6 +90,37 @@ export default function AccountDetailPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleAddContact = async () => {
+    if (!newContact.name || !account) return;
+    setAddingContact(true);
+    try {
+      const res = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId: account.id, ...newContact }),
+      });
+      const data = await res.json();
+      if (data.contact) {
+        setAccount({ ...account, contacts: [...account.contacts, data.contact] });
+        setNewContact({ name: '', email: '', phone: '', title: '', role: '' });
+      }
+    } catch (err) {
+      console.error('Failed to add contact:', err);
+    } finally {
+      setAddingContact(false);
+    }
+  };
+
+  const handleDeleteContact = async (contactId: string) => {
+    if (!account) return;
+    try {
+      await fetch(`/api/contacts/${contactId}`, { method: 'DELETE' });
+      setAccount({ ...account, contacts: account.contacts.filter(c => c.id !== contactId) });
+    } catch (err) {
+      console.error('Failed to delete contact:', err);
+    }
+  };
 
   if (loading) return <AccountSkeleton />;
   if (!account) return (
@@ -206,6 +249,65 @@ export default function AccountDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Contacts */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
+            <h2 className="text-sm font-semibold text-slate-900 mb-4">Contacts</h2>
+            {account.contacts && account.contacts.length > 0 ? (
+              <div className="space-y-3 mb-4">
+                {account.contacts.map(contact => (
+                  <div key={contact.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">{contact.name}</p>
+                      <div className="flex flex-wrap gap-2 mt-1 text-xs text-slate-500">
+                        {contact.title && <span>{contact.title}</span>}
+                        {contact.email && <span className="text-blue-600 cursor-pointer hover:underline">{contact.email}</span>}
+                        {contact.phone && <span>{contact.phone}</span>}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteContact(contact.id)}
+                      className="text-xs text-slate-400 hover:text-red-600 ml-2 flex-shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400 mb-4">No contacts added yet</p>
+            )}
+            <div className="border-t border-slate-100 pt-3 space-y-2">
+              <input
+                type="text"
+                placeholder="Name *"
+                value={newContact.name}
+                onChange={e => setNewContact({ ...newContact, name: e.target.value })}
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={newContact.email}
+                onChange={e => setNewContact({ ...newContact, email: e.target.value })}
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <input
+                type="text"
+                placeholder="Title"
+                value={newContact.title}
+                onChange={e => setNewContact({ ...newContact, title: e.target.value })}
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <button
+                onClick={handleAddContact}
+                disabled={!newContact.name || addingContact}
+                className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-medium rounded-lg transition-colors"
+              >
+                {addingContact ? 'Adding...' : '+ Add contact'}
+              </button>
+            </div>
+          </div>
 
           {/* Company info */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
