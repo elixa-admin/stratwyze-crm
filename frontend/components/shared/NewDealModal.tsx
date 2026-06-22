@@ -52,9 +52,10 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       return;
     }
 
+    // Allow creating deal with or without research - both paths now work
     if (!competitorId && !saPartnerId) {
-      setErrors({ research: 'Select at least a competitor or SI partner' });
-      error('Select competitor or SI partner to generate brief');
+      // Skip research and go straight to deal creation
+      await handleConfirmDeal(e);
       return;
     }
 
