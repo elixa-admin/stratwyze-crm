@@ -10,7 +10,7 @@ import { SA_PARTNERS } from '@/lib/data/sa-partners';
 interface NewDealModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { title: string; value: number; accountId: string; stageName: string; competitorId?: string; saPartnerId?: string }) => void;
+  onSubmit: (data: { title: string; value: number; accountId: string; stageName: string; dealId?: string; competitorId?: string; saPartnerId?: string }) => void;
 }
 
 interface FormErrors {
@@ -60,9 +60,9 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         }),
       });
 
+      const responseData = await response.json();
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || `Failed to create deal (${response.status})`);
+        throw new Error(responseData.error || `Failed to create deal (${response.status})`);
       }
 
       success(`Deal "${title}" created successfully! 🎉`);
@@ -83,6 +83,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         value: parseFloat(value),
         accountId,
         stageName,
+        dealId: responseData.deal?.id,
         competitorId: competitorId || undefined,
         saPartnerId: saPartnerId || undefined,
       });

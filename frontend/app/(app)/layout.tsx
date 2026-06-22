@@ -130,8 +130,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
-  const handleNewDealSubmit = (data: { title: string; value: number; accountId: string; stageName: string }) => {
-    // Dispatch custom event to notify child components about new deal
+  const handleNewDealSubmit = (data: { title: string; value: number; accountId: string; stageName: string; dealId?: string }) => {
     const event = new CustomEvent('dealCreated', { detail: data });
     window.dispatchEvent(event);
     setShowNewDealModal(false);

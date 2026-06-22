@@ -83,9 +83,9 @@ export default function KanbanBoard() {
   useEffect(() => {
     const handleDealCreated = (event: Event) => {
       const customEvent = event as CustomEvent;
-      const data = customEvent.detail as { title: string; value: number; accountId: string; stageName: string };
+      const data = customEvent.detail as { title: string; value: number; accountId: string; stageName: string; dealId?: string };
       const newDeal: Opportunity = {
-        id: Date.now().toString(),
+        id: data.dealId ?? Date.now().toString(),
         title: data.title,
         value: data.value,
         closeDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
