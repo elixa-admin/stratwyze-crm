@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import DealPursuitModal, { DealContext } from '@/components/pipeline/DealPursuitModal';
 
 interface Opportunity {
@@ -18,17 +19,6 @@ interface Opportunity {
   competitiveNotes?: string;
 }
 
-const MOCK_OPPORTUNITIES: Opportunity[] = [
-  { id: '1', title: 'Acme Enterprise Deal',   value: 250000, closeDate: '2026-07-15', probability: 85, owner: 'AB', stage: 'prospecting',  incumbentPlatform: 'ServiceNow',       incumbentSI: 'Nexio',           competitorId: 'servicenow',              saPartnerId: 'nexio-sa' },
-  { id: '2', title: 'Global Corp Renewal',    value: 180000, closeDate: '2026-06-30', probability: 92, owner: 'MR', stage: 'qualification', incumbentPlatform: 'Ivanti Neurons',   incumbentSI: 'Think Tank',      competitorId: 'ivanti-neurons',          saPartnerId: 'think-tank-software' },
-  { id: '3', title: 'TechStart Initial',      value: 45000,  closeDate: '2026-08-20', probability: 60, owner: 'JD', stage: 'proposal' },
-  { id: '4', title: 'Fortune 500 Discussion', value: 500000, closeDate: '2026-09-10', probability: 35, owner: 'SJ', stage: 'prospecting',  incumbentPlatform: 'ServiceNow',                                       competitorId: 'servicenow' },
-  { id: '5', title: 'Mid-Market Close',       value: 120000, closeDate: '2026-06-15', probability: 78, owner: 'AB', stage: 'negotiation' },
-  { id: '6', title: 'SMB Quick Close',        value: 35000,  closeDate: '2026-05-30', probability: 100, owner: 'MR', stage: 'closed-won' },
-  { id: '7', title: 'Enterprise Pilot',       value: 85000,  closeDate: '2026-07-01', probability: 55, owner: 'JD', stage: 'proposal',     incumbentSI: 'Pink Elephant SA',                                       saPartnerId: 'pink-elephant-sa' },
-  { id: '8', title: 'Channel Partner Deal',   value: 95000,  closeDate: '2026-07-20', probability: 72, owner: 'SJ', stage: 'qualification' },
-];
-
 const STAGES = [
   { id: 'prospecting',   label: 'Prospecting' },
   { id: 'qualification', label: 'Qualification' },
@@ -36,6 +26,17 @@ const STAGES = [
   { id: 'negotiation',   label: 'Negotiation' },
   { id: 'closed-won',    label: 'Closed Won' },
 ];
+
+function stageToLocal(stage: string): Opportunity['stage'] {
+  const map: Record<string, Opportunity['stage']> = {
+    'Prospecting': 'prospecting',
+    'Qualification': 'qualification',
+    'Proposal': 'proposal',
+    'Negotiation': 'negotiation',
+    'Closed Won': 'closed-won',
+  };
+  return map[stage] ?? 'prospecting';
+}
 
 function getProbabilityColor(probability: number): string {
   if (probability >= 80) return 'bg-green-100 text-green-700';
@@ -51,14 +52,33 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' });
 }
 
-interface KanbanBoardProps {
-  onAddOpportunity?: () => void;
-}
-
-export default function KanbanBoard({ onAddOpportunity }: KanbanBoardProps) {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>(MOCK_OPPORTUNITIES);
+export default function KanbanBoard() {
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<DealContext | null>(null);
+
+  useEffect(() => {
+    fetch('/api/deals')
+      .then(r => r.json())
+      .then(data => {
+        if (data.deals) {
+          setOpportunities(data.deals.map((d: any): Opportunity => ({
+            id: d.id,
+            title: d.title,
+            value: d.value,
+            closeDate: d.createdAt
+              ? new Date(new Date(d.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+              : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            probability: 50,
+            owner: 'You',
+            stage: stageToLocal(d.stage),
+            incumbentPlatform: d.incumbentPlatform,
+            incumbentSI: d.incumbentProvider,
+          })));
+        }
+      })
+      .catch(() => { /* silently fail — board starts empty */ });
+  }, []);
 
   useEffect(() => {
     const handleDealCreated = (event: Event) => {
@@ -122,17 +142,6 @@ export default function KanbanBoard({ onAddOpportunity }: KanbanBoardProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Pipeline</h1>
-          <p className="text-slate-600 mt-1">Manage your sales opportunities</p>
-        </div>
-        <button onClick={onAddOpportunity} className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm">
-          + Add Opportunity
-        </button>
-      </div>
-
-      {/* Kanban Board */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 pb-4">
         {STAGES.map((stage) => {
           const stageOpps = opportunities.filter((opp) => opp.stage === stage.id);
@@ -158,9 +167,11 @@ export default function KanbanBoard({ onAddOpportunity }: KanbanBoardProps) {
                     key={opp.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, opp.id)}
-                    className="bg-white rounded-lg border border-slate-200 p-3 shadow-xs hover:shadow-sm transition-all cursor-grab active:cursor-grabbing"
+                    className="bg-white rounded-lg border border-slate-200 p-3 shadow-xs hover:shadow-sm transition-all cursor-grab active:cursor-grabbing group"
                   >
-                    <p className="text-sm font-medium text-slate-900 mb-2 leading-snug">{opp.title}</p>
+                    <Link href={`/deals/${opp.id}`} className="block" onClick={e => e.stopPropagation()}>
+                      <p className="text-sm font-medium text-slate-900 mb-2 leading-snug group-hover:text-blue-600 transition-colors">{opp.title}</p>
+                    </Link>
 
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center">
@@ -181,11 +192,10 @@ export default function KanbanBoard({ onAddOpportunity }: KanbanBoardProps) {
                           {formatDate(opp.closeDate)}
                         </span>
                         <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[9px] font-bold text-white">
-                          {opp.owner}
+                          {opp.owner.slice(0, 2).toUpperCase()}
                         </div>
                       </div>
 
-                      {/* Competitive context row */}
                       {(opp.incumbentPlatform || opp.incumbentSI) && (
                         <div className="pt-1.5 border-t border-slate-100">
                           <div className="flex items-center justify-between">
@@ -213,8 +223,14 @@ export default function KanbanBoard({ onAddOpportunity }: KanbanBoardProps) {
                 ))}
 
                 {stageOpps.length === 0 && (
-                  <div className="flex items-center justify-center flex-1 text-slate-400 text-xs">
-                    Drop cards here
+                  <div className="flex flex-col items-center justify-center flex-1 gap-2 text-slate-400">
+                    <p className="text-xs">No deals in this stage</p>
+                    <button
+                      onClick={() => window.dispatchEvent(new CustomEvent('openNewDealModal'))}
+                      className="text-[10px] font-medium text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-all"
+                    >
+                      + Add deal
+                    </button>
                   </div>
                 )}
               </div>
@@ -223,7 +239,6 @@ export default function KanbanBoard({ onAddOpportunity }: KanbanBoardProps) {
         })}
       </div>
 
-      {/* Summary Stats */}
       <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-5">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
           <p className="text-[11px] font-semibold uppercase text-slate-400 tracking-wide mb-2">Total Pipeline</p>
@@ -252,7 +267,6 @@ export default function KanbanBoard({ onAddOpportunity }: KanbanBoardProps) {
         </div>
       </div>
 
-      {/* Deal Pursuit Modal — Sprint C */}
       {activeModal && (
         <DealPursuitModal
           deal={activeModal}

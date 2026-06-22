@@ -25,8 +25,8 @@ const LOCAL_DATA: LocalResult[] = [
   { type: 'account', id: '1', title: 'Acme Corporation', subtitle: 'Technology · $850K ARR', href: '/accounts/1' },
   { type: 'account', id: '2', title: 'Global Industries', subtitle: 'Manufacturing · $1.2M ARR', href: '/accounts/2' },
   { type: 'account', id: '3', title: 'TechStart Inc', subtitle: 'SaaS · $220K ARR', href: '/accounts/3' },
-  { type: 'deal', id: '1', title: 'Enterprise Implementation', subtitle: 'Proposal · $250K', href: '/dashboard' },
-  { type: 'deal', id: '2', title: 'Annual Renewal + Expansion', subtitle: 'Negotiation · $115K', href: '/dashboard' },
+  { type: 'deal', id: '1', title: 'Enterprise Implementation', subtitle: 'Proposal · $250K', href: '/pipeline' },
+  { type: 'deal', id: '2', title: 'Annual Renewal + Expansion', subtitle: 'Negotiation · $115K', href: '/pipeline' },
 ];
 
 const TYPE_ICONS: Record<string, string> = {

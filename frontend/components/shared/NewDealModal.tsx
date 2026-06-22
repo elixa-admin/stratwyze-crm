@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ExpandableSection from './ExpandableSection';
 import Tooltip from './Tooltip';
 import { Toast, useToast } from './Toast';
@@ -20,13 +20,12 @@ interface FormErrors {
 }
 
 export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModalProps) {
-  // CRITICAL FIX: Deal creation without competitor/provider required
-  // Deployed: 2026-06-22 - Remove validation blocking deal creation
   const { toasts, success, error } = useToast();
   const [step, setStep] = useState<'basic' | 'research'>('basic');
   const [title, setTitle] = useState('');
   const [value, setValue] = useState('');
   const [accountId, setAccountId] = useState('');
+  const [accounts, setAccounts] = useState<{ id: string; name: string }[]>([]);
   const [stageName, setStageName] = useState('Prospecting');
   const [competitorId, setCompetitorId] = useState('');
   const [saPartnerId, setSaPartnerId] = useState('');
@@ -105,18 +104,34 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch('/api/accounts')
+      .then(r => r.json())
+      .then(data => { if (data.accounts) setAccounts(data.accounts); })
+      .catch(() => {});
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-slate-200 sticky top-0 bg-white">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {step === 'basic' ? 'Create New Deal' : 'Research Results'}
-          </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            {step === 'basic' ? 'Step 1 of 2' : 'Step 2 of 2'}
-          </p>
+        <div className="px-6 py-4 border-b border-slate-200 sticky top-0 bg-white flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">
+              {step === 'basic' ? 'Create New Deal' : 'Research Results'}
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              {step === 'basic' ? 'Step 1 of 2' : 'Step 2 of 2'}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all -mt-0.5 -mr-1"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
         </div>
 
         {step === 'basic' ? (
@@ -173,8 +188,9 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                 className="input-field"
               >
                 <option value="">Select account (optional)</option>
-                <option value="acme">Acme Corp</option>
-                <option value="global">Global Inc</option>
+                {accounts.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
               </select>
             </div>
 

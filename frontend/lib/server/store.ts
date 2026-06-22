@@ -235,7 +235,7 @@ class DataStore {
 // Singleton instance
 export const store = new DataStore();
 
-// Seed demo data on first load
-if (store.listDeals().length === 0) {
+// Seed demo data in development only
+if (process.env.NODE_ENV !== 'production' && store.listDeals().length === 0) {
   store.seedDemoData();
 }
