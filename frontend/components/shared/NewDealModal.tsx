@@ -66,7 +66,6 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         throw new Error(data.error || `Failed to create deal (${response.status})`);
       }
 
-      const data = await response.json();
       success(`Deal "${title}" created successfully! 🎉`);
 
       // Reset form
