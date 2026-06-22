@@ -36,14 +36,6 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const [researchLog, setResearchLog] = useState<string>('');
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-    if (!title.trim()) newErrors.title = 'Deal title is required';
-    if (!value || parseFloat(value) <= 0) newErrors.value = 'Deal value must be greater than 0';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
 
   const handleConfirmDeal = async (e: React.FormEvent) => {
     e.preventDefault();
