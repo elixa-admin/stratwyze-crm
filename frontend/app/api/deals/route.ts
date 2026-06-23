@@ -1,132 +1,134 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
+/**
+ * GET /api/deals
+ * Get all deals with intelligence scores for Kanban board
+ */
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const stage = searchParams.get('stage');
-
     const deals = await prisma.deal.findMany({
-      where: {
-        archived: false,
-        ...(stage && { stage }),
+      where: { archived: false },
+      include: {
+        account: {
+          select: { id: true, name: true },
+        },
+        primaryContact: {
+          select: {
+            id: true,
+            name: true,
+            intelligenceProfile: {
+              select: {
+                decisionMakerScore: true,
+                buyingRelevance: true,
+              },
+            },
+          },
+        },
+        stageWorkflow: {
+          select: {
+            stageHistory: true,
+          },
+        },
       },
-      include: { account: true },
       orderBy: { createdAt: 'desc' },
     });
 
-    const stats = {
-      totalDeals: deals.length,
-      totalPipeline: deals.reduce((sum: number, d: { value: number }) => sum + d.value, 0),
-      closedWon: deals.filter((d: { stage: string }) => d.stage === 'Closed Won').reduce((sum: number, d: { value: number }) => sum + d.value, 0),
-      byStage: {
-        Prospecting:   deals.filter(d => d.stage === 'Prospecting').length,
-        Qualification: deals.filter(d => d.stage === 'Qualification').length,
-        Proposal:      deals.filter(d => d.stage === 'Proposal').length,
-        Negotiation:   deals.filter(d => d.stage === 'Negotiation').length,
-        'Closed Won':  deals.filter(d => d.stage === 'Closed Won').length,
-      },
-    };
-
-    return NextResponse.json({ deals, stats });
-  } catch (err: any) {
-    console.error('GET /api/deals error:', err);
-    return NextResponse.json({ error: err?.message || 'Failed to fetch deals' }, { status: 500 });
+    return NextResponse.json({
+      deals,
+      count: deals.length,
+    });
+  } catch (error) {
+    console.error('[GET /api/deals]', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch deals' },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(req: NextRequest) {
+/**
+ * POST /api/deals
+ * Create a new deal
+ */
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
     const {
-      title, value, accountId, stageName, competitorId, saPartnerId,
-      enrichmentData, competitiveBrief, autoCreateAccount, buyerIntentBreakdown,
-    } = body;
+      title,
+      value,
+      accountId,
+      primaryContactId,
+      stage = 'Prospecting',
+      currency = 'ZAR',
+    } = await request.json();
 
     if (!title || !value) {
-      return NextResponse.json({ error: 'Title and value are required' }, { status: 400 });
-    }
-
-    // Auto-create account from research data if no accountId provided
-    let resolvedAccountId = accountId || null;
-    if (!resolvedAccountId && autoCreateAccount?.name) {
-      const snap = enrichmentData?.companySnapshot;
-      const account = await (prisma.account.create as any)({
-        data: {
-          name: autoCreateAccount.name,
-          legalEntity: snap?.legalEntity || autoCreateAccount.legalEntity || null,
-          website: snap?.website || autoCreateAccount.website || null,
-          phone: snap?.phone || autoCreateAccount.phone || null,
-          industry: snap?.industry || autoCreateAccount.industry || null,
-          employees: snap?.employeesNumeric ? Number(snap.employeesNumeric) : (autoCreateAccount.employees ? parseInt(autoCreateAccount.employees) : null),
-          annualRevenue: snap?.revenueNumeric ? Number(snap.revenueNumeric) : null,
-          headquarters: snap?.headquarters || autoCreateAccount.headquarters || null,
-          description: snap?.description || null,
-          enrichmentData: enrichmentData ?? null,
-          jseTickerSymbol: autoCreateAccount.jseTickerSymbol || null,
-          isListed: !!autoCreateAccount.jseTickerSymbol,
-          marketData: enrichmentData?.marketData || null,
-        },
-      });
-      resolvedAccountId = account.id;
-
-      // Auto-create key contacts from research if found
-      const keyContacts: any[] = enrichmentData?.keyContacts ?? [];
-      if (keyContacts.length > 0) {
-        await prisma.contact.createMany({
-          data: keyContacts.slice(0, 5).map((c: any) => ({
-            accountId: account.id,
-            name: c.name || 'Unknown Contact',
-            title: c.title || null,
-            role: c.relevance || null,
-            department: c.department || null,
-            linkedin: c.linkedin || null,
-          })),
-          skipDuplicates: true,
-        });
-      }
+      return NextResponse.json(
+        { error: 'Title and value are required' },
+        { status: 400 }
+      );
     }
 
     const deal = await prisma.deal.create({
       data: {
         title,
-        value: parseFloat(value),
-        currency: 'ZAR',
-        stage: stageName || 'Prospecting',
-        accountId: resolvedAccountId,
-        incumbentPlatform: competitorId || null,
-        incumbentProvider: saPartnerId || null,
-        enrichmentData: enrichmentData ?? null,
-        competitiveBrief: competitiveBrief ?? null,
+        value,
+        stage,
+        currency,
+        accountId: accountId || undefined,
+        primaryContactId: primaryContactId || undefined,
       },
-      include: { account: { include: { contacts: true } } },
+      include: {
+        account: true,
+        primaryContact: {
+          include: { intelligenceProfile: true },
+        },
+        stageWorkflow: true,
+      },
     });
 
-    // Create opportunity profile with buyer intent signals
-    if (buyerIntentBreakdown) {
-      await (prisma.opportunityProfile.upsert as any)({
-        where: { dealId: deal.id },
-        create: {
-          dealId: deal.id,
-          companyIntel: enrichmentData ?? null,
-          buyerIntentScore: buyerIntentBreakdown.totalScore,
-          buyerIntentBreakdown,
-          suggestedStakeholders: enrichmentData?.suggestedStakeholders ?? null,
-          technologyClues: enrichmentData?.technologyClues ?? null,
+    // Create stage workflow
+    await prisma.dealStageWorkflow.create({
+      data: {
+        dealId: deal.id,
+        stage,
+        stageHistory: [
+          {
+            stage,
+            enteredAt: new Date().toISOString(),
+            exitedAt: null,
+            durationDays: 0,
+          },
+        ],
+      },
+    });
+
+    // Log activity
+    await prisma.activity.create({
+      data: {
+        dealId: deal.id,
+        type: 'deal_created',
+        content: `Deal "${title}" created`,
+        metadata: {
+          value,
+          stage,
+          timestamp: new Date().toISOString(),
         },
-        update: {
-          buyerIntentScore: buyerIntentBreakdown.totalScore,
-          buyerIntentBreakdown,
-        },
-      });
-    }
+      },
+    });
 
     return NextResponse.json(
-      { deal, message: `Deal "${title}" created successfully!`, accountCreated: !accountId && !!resolvedAccountId },
+      {
+        deal,
+        message: 'Deal created successfully',
+      },
       { status: 201 }
     );
-  } catch (err: any) {
-    console.error('POST /api/deals error:', err);
-    return NextResponse.json({ error: err?.message || 'Failed to create deal' }, { status: 500 });
+  } catch (error) {
+    console.error('[POST /api/deals]', error);
+    return NextResponse.json(
+      { error: 'Failed to create deal' },
+      { status: 500 }
+    );
   }
 }
