@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import { toast } from '@/lib/toast';
 import { COMPETITORS } from '@/lib/data/competitors';
 import { SA_PARTNERS } from '@/lib/data/sa-partners';
+import {
+  getRandomCommentary,
+  getRandomFact,
+  getRandomObservation,
+  getStageCommentary,
+} from '@/lib/research-commentary';
 
 interface NewDealModalProps {
   isOpen: boolean;
@@ -103,7 +109,13 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
     setLoading(true);
 
     try {
-      addLog(`🔍 Searching web for ${nameToResearch}...`);
+      // Opening message
+      addLog(getRandomCommentary('START'));
+
+      // Simulate research phases with entertaining commentary
+      await new Promise(r => setTimeout(r, 300));
+      addLog(getRandomCommentary('WEB_SEARCH'));
+
       const resRes = await fetch('/api/company/research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -115,16 +127,39 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         const resData = await resRes.json();
         researchProfile = resData.profile;
         setResearchData(resData);
-        addLog(`✓ Found company data (${resData.sourceCount || 0} sources)`);
-        addLog(`✓ Revenue & employees extracted`);
-        if (resData.profile?.recentNews?.length) addLog(`✓ ${resData.profile.recentNews.length} recent news items found`);
-        if (resData.profile?.maActivity?.length) addLog(`✓ ${resData.profile.maActivity.length} M&A events identified`);
-        if (resData.profile?.linkedinInsights) addLog(`✓ LinkedIn insights gathered`);
+
+        // Fun observations about what we found
+        if (resData.sourceCount) addLog(`✓ Cracked ${resData.sourceCount} sources (we're thorough)`);
+        if (researchProfile?.companySnapshot?.employees) {
+          addLog(getRandomCommentary('LINKEDIN'));
+          await new Promise(r => setTimeout(r, 200));
+        }
+        if (researchProfile?.recentNews?.length) {
+          addLog(getRandomCommentary('NEWS'));
+          addLog(`✓ ${researchProfile.recentNews.length} news items found. Interesting times.`);
+        }
+        if (researchProfile?.maActivity?.length) {
+          addLog(getRandomCommentary('MA'));
+          addLog(`✓ M&A activity detected. They're thinking big.`);
+        }
+
+        // Inject a fun fact
+        await new Promise(r => setTimeout(r, 150));
+        addLog(`💡 ${getRandomFact()}`);
+
+        // Interesting observation
+        if (Math.random() > 0.3) {
+          await new Promise(r => setTimeout(r, 150));
+          addLog(`🎯 ${getRandomObservation()}`);
+        }
       } else {
-        addLog(`⚠ Web research unavailable — proceeding with competitive brief`);
+        addLog(`⚠ Web research took a nap. No worries, we'll wing it with brilliance.`);
       }
 
-      addLog(`🤖 Generating competitive brief...`);
+      // AI synthesis
+      await new Promise(r => setTimeout(r, 200));
+      addLog(getRandomCommentary('SYNTHESIS'));
+
       const account = accounts.find(a => a.id === accountId);
       const briefRes = await fetch('/api/deals/brief', {
         method: 'POST',
@@ -142,7 +177,20 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
       const briefJson = await briefRes.json();
       if (!briefRes.ok) throw new Error(briefJson.error || 'Brief generation failed');
       setBriefData(briefJson);
-      addLog(`✓ Brief generated (${briefJson.aiTier})`);
+
+      await new Promise(r => setTimeout(r, 150));
+      addLog(`✓ Brief synthesized. You're about to look brilliant.`);
+
+      // Motivational closing
+      await new Promise(r => setTimeout(r, 100));
+      const stageMsg = getStageCommentary(
+        stageName === 'Qualification' ? 'QUALIFICATION' :
+        stageName === 'Solutioning' ? 'SOLUTIONING' :
+        stageName === 'Proposal' ? 'PROPOSAL' :
+        'PROSPECTING'
+      );
+      addLog(`✨ ${stageMsg}`);
+
       setStep('brief');
     } catch (err: any) {
       toast(err?.message || 'Research failed', 'error');
