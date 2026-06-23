@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { detectJseTicker, fetchMarketData } from '@/lib/market-data';
+import { calculateBuyerIntent } from '@/lib/buyer-signals';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -105,6 +106,34 @@ Return this exact JSON structure:
     "growthSignal": "any growth indicators from snippets",
     "keyHires": "any notable hires mentioned"
   },
+  "buyerSignals": {
+    "maActivity": "If M&A detected (acquisition, funding, IPO, merger): list events. Signals modernization needs.",
+    "hiringSignals": "If IT/tech hiring mentioned: 'hiring CTO', 'open IT positions', 'building cloud team' — signals growth + tech investment",
+    "newsMonths": "Count of news/press mentions in last 6 months. 3+ = strong signal",
+    "technologyClues": [
+      "If mentioned: existing tools or platforms (e.g. 'runs ServiceNow', 'Jira shop', 'Salesforce')",
+      "If mentioned: modernization signals ('moving from on-prem', 'cloud-first', 'legacy system replacement')",
+      "If mentioned: integration pain points ('siloed systems', 'manual processes', 'data silos')"
+    ],
+    "budgetSignals": "Any mention of budget allocation, capex approval, vendor selection process?"
+  },
+  "suggestedStakeholders": [
+    {
+      "title": "CTO or VP Technology",
+      "relevance": "Technical decision maker for ITSM platform selection",
+      "likelyName": "inferred from research or null"
+    },
+    {
+      "title": "IT Operations Manager / Head of IT",
+      "relevance": "Day-to-day operations — primary HaloITSM user",
+      "likelyName": "inferred from research or null"
+    },
+    {
+      "title": "CFO or VP Finance",
+      "relevance": "Budget authority and ROI justification",
+      "likelyName": "inferred from research or null"
+    }
+  ],
   "itsmRelevance": "Why this company would benefit from HaloITSM — 2 sentences based on size, industry, and growth signals",
   "qualificationQuestions": [
     "Discovery question 1 tailored to their situation",
@@ -128,6 +157,10 @@ Return this exact JSON structure:
         const text = message.content[0].type === 'text' ? message.content[0].text : '';
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         const profile = JSON.parse(jsonMatch ? jsonMatch[0] : text);
+
+        // Calculate buyer intent score from signals
+        const buyerIntentBreakdown = calculateBuyerIntent(profile.buyerSignals || {});
+
         // Fetch live market data if ticker detected
         let marketData = null;
         if (detectedTicker) {
@@ -140,6 +173,7 @@ Return this exact JSON structure:
           detectedTicker,
           isListed: !!detectedTicker,
           marketData,
+          buyerIntentBreakdown,
           sourceCount: overviewResults.length + newsResults.length + maResults.length + linkedinResults.length + revenueResults.length + jseResults.length,
           sources: {
             overview: overviewResults.length,

@@ -181,6 +181,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
           competitiveBrief: briefData?.brief || undefined,
           enrichmentData: researchData?.profile || undefined,
           autoCreateAccount,
+          buyerIntentBreakdown: researchData?.buyerIntentBreakdown || undefined,
         }),
       });
       const data = await res.json();

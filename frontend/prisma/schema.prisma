@@ -161,6 +161,12 @@ model OpportunityProfile {
   qualificationData    Json?
   proposalData         Json?
 
+  // Buyer intent signals (Wave 22 Intelligence Layer)
+  buyerIntentScore     Int?
+  buyerIntentBreakdown Json?
+  suggestedStakeholders Json?
+  technologyClues      Json?
+
   // Stage completion dates
   prospectingCompletedAt   DateTime?
   qualificationCompletedAt DateTime?

@@ -1,6 +1,7 @@
 'use client';
 
 import MarketHealthCard from '@/components/accounts/MarketHealthCard';
+import BuyerIntentCard from './BuyerIntentCard';
 
 interface OpportunityProfileSidebarProps {
   profile?: any;
@@ -149,6 +150,15 @@ export default function OpportunityProfileSidebar({ profile, deal }: Opportunity
           </div>
         </div>
       ) : null}
+
+      {/* Buyer Intent Signals */}
+      {profile?.buyerIntentBreakdown && (
+        <BuyerIntentCard
+          breakdown={profile.buyerIntentBreakdown}
+          suggestedStakeholders={(profile?.companyIntel as any)?.suggestedStakeholders}
+          technologyClues={(profile?.companyIntel as any)?.technologyClues}
+        />
+      )}
 
       {/* Market Health — shown if account is JSE-listed or ticker was detected */}
       {deal?.account && (deal.account.isListed || deal.account.jseTickerSymbol || (profile?.companyIntel as any)?.detectedTicker) && (

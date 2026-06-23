@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       title, value, accountId, stageName, competitorId, saPartnerId,
-      enrichmentData, competitiveBrief, autoCreateAccount,
+      enrichmentData, competitiveBrief, autoCreateAccount, buyerIntentBreakdown,
     } = body;
 
     if (!title || !value) {
@@ -99,6 +99,25 @@ export async function POST(req: NextRequest) {
       },
       include: { account: { include: { contacts: true } } },
     });
+
+    // Create opportunity profile with buyer intent signals
+    if (buyerIntentBreakdown) {
+      await (prisma.opportunityProfile.upsert as any)({
+        where: { dealId: deal.id },
+        create: {
+          dealId: deal.id,
+          companyIntel: enrichmentData ?? null,
+          buyerIntentScore: buyerIntentBreakdown.totalScore,
+          buyerIntentBreakdown,
+          suggestedStakeholders: enrichmentData?.suggestedStakeholders ?? null,
+          technologyClues: enrichmentData?.technologyClues ?? null,
+        },
+        update: {
+          buyerIntentScore: buyerIntentBreakdown.totalScore,
+          buyerIntentBreakdown,
+        },
+      });
+    }
 
     return NextResponse.json(
       { deal, message: `Deal "${title}" created successfully!`, accountCreated: !accountId && !!resolvedAccountId },
