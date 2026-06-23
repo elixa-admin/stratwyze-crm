@@ -10,6 +10,7 @@ import {
   buildEvidenceIndex,
 } from '@/lib/contact-intelligence/claude-synthesis';
 import { generateSearchQueries, generateEmailCandidates } from '@/lib/contact-intelligence/research-steps';
+import { matchPerson, searchPerson, isApolloConfigured } from '@/lib/contact-intelligence/apollo-client';
 
 export async function POST(
   req: NextRequest,
@@ -251,6 +252,80 @@ async function runResearchAsync(profileId: string, contact: any, contactId: stri
             });
           }
         }
+      }
+    }
+
+    // Apollo fallback: if Hunter found nothing, try Apollo for email + LinkedIn + phone
+    if (!primaryEmail && isApolloConfigured() && firstName && lastName && domain) {
+      const apolloResult = await matchPerson(firstName, lastName, domain);
+      if (apolloResult?.email) {
+        primaryEmail = apolloResult.email;
+        emailConfidence = 70; // Apollo free tier has reasonable accuracy
+        emailCandidates.unshift({
+          email: apolloResult.email,
+          confidence: 70,
+          pattern: 'apollo',
+          source: 'hunter', // reuse 'hunter' slot — both are email finders
+          validated: apolloResult.email_status === 'verified',
+          validationStatus: apolloResult.email_status === 'verified' ? 'valid' : 'unknown',
+        });
+        await storeEvidence(profileId, {
+          evidenceType: 'fact', category: 'email',
+          factType: 'email', factValue: apolloResult.email,
+          confidenceLevel: 'medium',
+          sourceTitle: 'Apollo.io Person Match',
+          sourcePlatform: 'apollo',
+          researchStep: 4,
+        });
+      }
+      // Bonus: Apollo may return phone + LinkedIn we didn't find elsewhere
+      if (apolloResult?.phone) {
+        await storeEvidence(profileId, {
+          evidenceType: 'fact', category: 'individual',
+          factType: 'phone', factValue: apolloResult.phone,
+          confidenceLevel: 'medium',
+          sourceTitle: 'Apollo.io',
+          sourcePlatform: 'apollo',
+          researchStep: 4,
+        });
+        // Update contact phone if not already set
+        if (!contact.phone) {
+          await prisma.contact.update({
+            where: { id: contactId },
+            data: { phone: apolloResult.phone },
+          });
+        }
+      }
+      if (apolloResult?.linkedin_url && !contact.linkedin) {
+        await prisma.contact.update({
+          where: { id: contactId },
+          data: { linkedin: apolloResult.linkedin_url },
+        });
+        await storeEvidence(profileId, {
+          evidenceType: 'fact', category: 'individual',
+          factType: 'linkedin_url', factValue: apolloResult.linkedin_url,
+          confidenceLevel: 'high',
+          sourceUrl: apolloResult.linkedin_url,
+          sourceTitle: 'Apollo.io LinkedIn',
+          sourcePlatform: 'apollo',
+          researchStep: 4,
+        });
+      }
+    }
+
+    // Apollo search fallback: if still no email, try name+company search
+    if (!primaryEmail && isApolloConfigured()) {
+      const apolloSearch = await searchPerson(name, companyName);
+      if (apolloSearch?.email) {
+        primaryEmail = apolloSearch.email;
+        emailConfidence = 60;
+        emailCandidates.push({
+          email: apolloSearch.email,
+          confidence: 60,
+          pattern: 'apollo-search',
+          source: 'hunter',
+          validated: false,
+        });
       }
     }
 
