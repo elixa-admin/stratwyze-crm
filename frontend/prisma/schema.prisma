@@ -44,6 +44,8 @@ model Deal {
   enrichmentData    Json?
   competitiveBrief  Json?
   activities        Activity[]
+  stageWorkflow     DealStageWorkflow?
+  opportunityProfile OpportunityProfile?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }
@@ -79,6 +81,64 @@ model DealTemplate {
   account              Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
   incumbentPlatform    String?
   incumbentProvider    String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model DealStageWorkflow {
+  id                   String   @id @default(cuid())
+  dealId               String   @unique
+  deal                 Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  stage                String   @default("Prospecting")
+
+  // Stage completion tracking
+  stepsCompleted       String[] @default([])
+  gatesMetAt           DateTime?
+  completedAt          DateTime?
+  completedBy          String?
+
+  // Qualification data (filled during Qualification stage)
+  incumbentPlatform    String?
+  budgetRange          String?
+  timeline             String?
+  painPoints           String[] @default([])
+  champion             String?
+  fitScore             Int?
+  goNoGo              String?
+  positioningAngle     String?
+
+  // Proposal data (filled during Proposal stage)
+  solutionDesign       Json?
+  proposalGenerated    DateTime?
+  proposalData         Json?
+  negotiationBrief     Json?
+  proposalSentAt       DateTime?
+
+  // Outcome
+  wonAt                DateTime?
+  lostAt               DateTime?
+  lossReason           String?
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model OpportunityProfile {
+  id                   String   @id @default(cuid())
+  dealId               String   @unique
+  deal                 Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  // Aggregated intel from all stages
+  companyIntel         Json?
+  discoveryData        Json?
+  qualificationData    Json?
+  proposalData         Json?
+
+  // Stage completion dates
+  prospectingCompletedAt DateTime?
+  qualificationCompletedAt DateTime?
+  proposalCompletedAt DateTime?
+
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
