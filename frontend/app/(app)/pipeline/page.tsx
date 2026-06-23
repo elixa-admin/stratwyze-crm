@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import KanbanBoard from '@/components/pipeline/KanbanBoard';
 import PipelineFilters from '@/components/pipeline/PipelineFilters';
+import Breadcrumbs from '@/components/shared/Breadcrumbs';
 
 interface FilterState {
   account?: string;
@@ -26,15 +27,18 @@ export default function PipelinePage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Pipeline</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage and track your active deals.</p>
+    <div>
+      <Breadcrumbs items={[{ label: 'Pipeline' }]} />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">Pipeline</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Manage and track your active deals.</p>
+          </div>
+          <PipelineFilters onFilterChange={setFilters} accounts={accounts} />
         </div>
-        <PipelineFilters onFilterChange={setFilters} accounts={accounts} />
+        <KanbanBoard filters={filters} />
       </div>
-      <KanbanBoard filters={filters} />
     </div>
   );
 }

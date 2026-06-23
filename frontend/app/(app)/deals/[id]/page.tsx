@@ -11,6 +11,7 @@ import ActivityQuickButtons from '@/components/shared/ActivityQuickButtons';
 import DealClosureSection from '@/components/shared/DealClosureSection';
 import SaveAsTemplateModal from '@/components/shared/SaveAsTemplateModal';
 import CompetitiveBriefDisplay from '@/components/shared/CompetitiveBriefDisplay';
+import Breadcrumbs from '@/components/shared/Breadcrumbs';
 
 interface Activity {
   id: string;
@@ -211,12 +212,10 @@ export default function DealDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto pb-20">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-slate-500 mb-5">
-        <Link href="/pipeline" className="hover:text-slate-700 transition-colors">Pipeline</Link>
-        <span>/</span>
-        <span className="text-slate-900 font-medium truncate">{deal.title}</span>
-      </div>
+      <Breadcrumbs items={[
+        { label: 'Pipeline', href: '/pipeline' },
+        { label: deal.title }
+      ]} />
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
