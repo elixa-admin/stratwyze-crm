@@ -7,7 +7,7 @@ datasource db {
 }
 
 model Account {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String
   website       String?
   industry      String?
@@ -15,10 +15,11 @@ model Account {
   annualRevenue Float?
   headquarters  String?
   legalEntity   String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   deals         Deal[]
   contacts      Contact[]
+  templates     DealTemplate[]
 }
 
 model Deal {
@@ -28,6 +29,7 @@ model Deal {
   currency          String     @default("ZAR")
   stage             String     @default("Prospecting")
   notes             String?
+  archived          Boolean    @default(false)
   accountId         String?
   account           Account?   @relation(fields: [accountId], references: [id])
   primaryContactId  String?
@@ -62,4 +64,15 @@ model Contact {
   deals     Deal[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model DealTemplate {
+  id                   String   @id @default(cuid())
+  name                 String
+  accountId            String?
+  account              Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  incumbentPlatform    String?
+  incumbentProvider    String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }

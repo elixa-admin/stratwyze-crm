@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DealPursuitModal, { DealContext } from '@/components/pipeline/DealPursuitModal';
+import DealQuickActions from '@/components/shared/DealQuickActions';
 import { formatCurrency } from '@/lib/format';
 
 interface Opportunity {
@@ -307,27 +308,37 @@ export default function KanbanBoard() {
                     key={opp.id}
                     className={`bg-white rounded-lg border border-slate-200 p-3 shadow-xs hover:shadow-sm transition-all group ${draggedId === opp.id ? 'opacity-50 ring-2 ring-blue-300' : ''}`}
                   >
-                    {/* Title — clickable to navigate or double-click to edit */}
-                    {editingId === opp.id ? (
-                      <input
-                        autoFocus
-                        type="text"
-                        value={editTitle}
-                        onChange={e => setEditTitle(e.target.value)}
-                        onBlur={() => handleSaveEdit(opp.id)}
-                        onKeyDown={e => e.key === 'Enter' && handleSaveEdit(opp.id)}
-                        className="w-full text-sm font-medium text-slate-900 border border-blue-400 rounded px-2 py-1 mb-2"
-                      />
-                    ) : (
-                      <div
-                        onClick={() => router.push(`/deals/${opp.id}`)}
-                        onDoubleClick={e => { e.stopPropagation(); handleStartEdit(opp); }}
-                        className="block text-sm font-medium text-slate-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors mb-2"
-                        title="Click to view • Double-click to edit"
-                      >
-                        {opp.title}
+                    {/* Title + Quick Actions */}
+                    <div className="flex items-start justify-between gap-1 mb-2">
+                      <div className="flex-1 min-w-0">
+                        {editingId === opp.id ? (
+                          <input
+                            autoFocus
+                            type="text"
+                            value={editTitle}
+                            onChange={e => setEditTitle(e.target.value)}
+                            onBlur={() => handleSaveEdit(opp.id)}
+                            onKeyDown={e => e.key === 'Enter' && handleSaveEdit(opp.id)}
+                            className="w-full text-sm font-medium text-slate-900 border border-blue-400 rounded px-2 py-1"
+                          />
+                        ) : (
+                          <div
+                            onClick={() => router.push(`/deals/${opp.id}`)}
+                            onDoubleClick={e => { e.stopPropagation(); handleStartEdit(opp); }}
+                            className="block text-sm font-medium text-slate-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors truncate"
+                            title="Click to view • Double-click to edit"
+                          >
+                            {opp.title}
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <DealQuickActions
+                        dealId={opp.id}
+                        dealTitle={opp.title}
+                        onArchived={() => setOpportunities(prev => prev.filter(o => o.id !== opp.id))}
+                        onDeleted={() => setOpportunities(prev => prev.filter(o => o.id !== opp.id))}
+                      />
+                    </div>
 
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center">

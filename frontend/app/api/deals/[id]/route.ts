@@ -5,7 +5,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   try {
     const deal = await prisma.deal.findUnique({
       where: { id: params.id },
-      include: { account: true, activities: { orderBy: { createdAt: 'desc' } } },
+      include: { account: true, primaryContact: true, activities: { orderBy: { createdAt: 'desc' } } },
     });
     if (!deal) return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
     return NextResponse.json({ deal });
@@ -17,7 +17,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
-    const { title, value, stage, notes, noteContent } = body;
+    const { title, value, stage, notes, noteContent, archived } = body;
 
     const existing = await prisma.deal.findUnique({ where: { id: params.id } });
     if (!existing) return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
@@ -27,6 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (value !== undefined) updates.value = parseFloat(value);
     if (stage !== undefined) updates.stage = stage;
     if (notes !== undefined) updates.notes = notes;
+    if (archived !== undefined) updates.archived = archived;
 
     await prisma.deal.update({
       where: { id: params.id },
@@ -61,5 +62,23 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ deal: fresh });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const deal = await prisma.deal.findUnique({ where: { id: params.id } });
+    if (!deal) return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
+
+    // Delete all associated activities first (cascade)
+    await prisma.activity.deleteMany({ where: { dealId: params.id } });
+
+    // Delete the deal
+    await prisma.deal.delete({ where: { id: params.id } });
+
+    return NextResponse.json({ message: 'Deal deleted' });
+  } catch (err: any) {
+    console.error('DELETE /api/deals/[id] error:', err);
+    return NextResponse.json({ error: err?.message || 'Failed to delete deal' }, { status: 500 });
   }
 }

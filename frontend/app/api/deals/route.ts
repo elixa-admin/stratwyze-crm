@@ -7,7 +7,10 @@ export async function GET(req: NextRequest) {
     const stage = searchParams.get('stage');
 
     const deals = await prisma.deal.findMany({
-      where: stage ? { stage } : {},
+      where: {
+        archived: false,
+        ...(stage && { stage }),
+      },
       include: { account: true },
       orderBy: { createdAt: 'desc' },
     });
