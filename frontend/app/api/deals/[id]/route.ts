@@ -17,9 +17,15 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
-    const { title, value, stage, notes, noteContent, archived, competitiveBrief } = body;
+    const {
+      title, value, stage, notes, noteContent, archived, competitiveBrief,
+      lossReason, competitorWon, lessonsLearned, handoverNotes, expansionPotential,
+    } = body;
 
-    const existing = await prisma.deal.findUnique({ where: { id: params.id } });
+    const existing = await prisma.deal.findUnique({
+      where: { id: params.id },
+      include: { stageWorkflow: true },
+    });
     if (!existing) return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
 
     const updates: any = {};
@@ -35,7 +41,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       data: updates,
     });
 
-    // Auto-log stage change activity
+    // Auto-log stage change activity + update workflow with history and close data
     if (stage && stage !== existing.stage) {
       await prisma.activity.create({
         data: {
@@ -44,6 +50,29 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           content: `Stage moved from ${existing.stage} to ${stage}`,
           metadata: { fromStage: existing.stage, toStage: stage },
         },
+      });
+
+      // Update stage history and close outcome in workflow
+      const now = new Date().toISOString();
+      const existingHistory: any[] = ((existing.stageWorkflow as any)?.stageHistory as any[]) ?? [];
+      const prevEntry = existingHistory.find((h: any) => h.stage === existing.stage);
+      if (prevEntry) prevEntry.exitedAt = now;
+      else existingHistory.push({ stage: existing.stage, enteredAt: now, exitedAt: now });
+      existingHistory.push({ stage, enteredAt: now });
+
+      const workflowUpdates: any = { stageHistory: existingHistory };
+      if (lossReason) workflowUpdates.lossReason = lossReason;
+      if (competitorWon) workflowUpdates.competitorWon = competitorWon;
+      if (lessonsLearned) workflowUpdates.lessonsLearned = lessonsLearned;
+      if (handoverNotes) workflowUpdates.handoverNotes = handoverNotes;
+      if (expansionPotential) workflowUpdates.expansionPotential = expansionPotential;
+      if (stage === 'Won') workflowUpdates.wonAt = new Date();
+      if (stage === 'Lost') workflowUpdates.lostAt = new Date();
+
+      await prisma.dealStageWorkflow.upsert({
+        where: { dealId: params.id },
+        create: { dealId: params.id, ...workflowUpdates },
+        update: workflowUpdates,
       });
     }
 

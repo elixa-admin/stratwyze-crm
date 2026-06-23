@@ -111,6 +111,10 @@ model DealStageWorkflow {
   goNoGo              String?
   positioningAngle     String?
 
+  // Solutioning data (Stage 03 — between Qualification and Proposal)
+  solutioningData      Json?
+  proposalReadinessScore Int?
+
   // Proposal data (filled during Proposal stage)
   solutionDesign       Json?
   proposalGenerated    DateTime?
@@ -118,10 +122,21 @@ model DealStageWorkflow {
   negotiationBrief     Json?
   proposalSentAt       DateTime?
 
-  // Outcome
+  // Outcome + transition
   wonAt                DateTime?
   lostAt               DateTime?
   lossReason           String?
+  competitorWon        String?
+  lessonsLearned       String?
+  handoverNotes        String?
+  expansionPotential   String?
+
+  // Stage history audit trail — array of {stage, enteredAt, exitedAt, durationDays}
+  stageHistory         Json?
+
+  // Buyer intent score (composite of market health + signals)
+  buyerIntentScore     Int?
+  buyerIntentSignals   String[] @default([])
 
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
@@ -139,9 +154,10 @@ model OpportunityProfile {
   proposalData         Json?
 
   // Stage completion dates
-  prospectingCompletedAt DateTime?
+  prospectingCompletedAt   DateTime?
   qualificationCompletedAt DateTime?
-  proposalCompletedAt DateTime?
+  solutioningCompletedAt   DateTime?
+  proposalCompletedAt      DateTime?
 
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt

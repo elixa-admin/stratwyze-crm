@@ -3,9 +3,13 @@
 import { useEffect, useState } from 'react';
 import ProspectingWorkflow from '@/components/deals/stages/ProspectingWorkflow';
 import QualificationWorkflow from '@/components/deals/stages/QualificationWorkflow';
+import SolutioningWorkflow from '@/components/deals/stages/SolutioningWorkflow';
 import ProposalWorkflow from '@/components/deals/stages/ProposalWorkflow';
 import OpportunityProfileSidebar from '@/components/deals/OpportunityProfileSidebar';
-import { getNextStage } from '@/lib/deal-gating';
+import DealJourneyTimeline from '@/components/deals/DealJourneyTimeline';
+import DealBadges from '@/components/deals/DealBadges';
+import NextBestAction from '@/components/deals/NextBestAction';
+import { getNextStage, DEAL_STAGES } from '@/lib/deal-gating';
 import { toast } from '@/lib/toast';
 
 interface DealPageV2Props {
@@ -142,6 +146,9 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
                 {deal.account?.name || 'No account linked'} •{' '}
                 <span className="font-semibold text-blue-600">{deal.stage}</span>
               </p>
+              <div className="mt-2">
+                <DealBadges deal={deal} />
+              </div>
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold text-slate-900">
@@ -179,6 +186,14 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
               />
             )}
 
+            {deal.stage === 'Solutioning' && (
+              <SolutioningWorkflow
+                deal={deal}
+                onStepComplete={handleStepComplete}
+                onAdvance={handleAdvanceStage}
+              />
+            )}
+
             {deal.stage === 'Proposal' && (
               <ProposalWorkflow
                 deal={deal}
@@ -192,9 +207,11 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
             )}
           </div>
 
-          {/* Right column (30%): Opportunity profile sidebar */}
-          <div className="lg:col-span-1">
+          {/* Right column (30%): NBA + Sidebar + Journey Timeline */}
+          <div className="lg:col-span-1 space-y-4">
+            <NextBestAction deal={deal} />
             <OpportunityProfileSidebar profile={profile} deal={deal} />
+            <DealJourneyTimeline deal={deal} />
           </div>
         </div>
       </div>
@@ -203,7 +220,7 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
 }
 
 // Stage stepper — top of page progress indicator
-const STAGES = ['Prospecting', 'Qualification', 'Proposal', 'Won'];
+const STAGES = DEAL_STAGES;
 
 function StageStepper({ currentStage }: { currentStage: string }) {
   const isLost = currentStage === 'Lost';

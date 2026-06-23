@@ -124,11 +124,14 @@ export default function ProposalWorkflow({ deal, onStepComplete, onAdvance }: Pr
   );
 }
 
-// Inline close component — small enough to not warrant a separate file
 function CloseDeal({ deal, stepsCompleted: _stepsCompleted, onStepComplete, onAdvance, gates: _gates }: any) {
   const [outcome, setOutcome] = useState<'Won' | 'Lost' | ''>('');
   const [lossReason, setLossReason] = useState('');
+  const [competitorWon, setCompetitorWon] = useState('');
   const [signedDate, setSignedDate] = useState('');
+  const [lessonsLearned, setLessonsLearned] = useState('');
+  const [handoverNotes, setHandoverNotes] = useState('');
+  const [expansionPotential, setExpansionPotential] = useState('');
   const [saving, setSaving] = useState(false);
 
   const handleClose = async () => {
@@ -141,7 +144,14 @@ function CloseDeal({ deal, stepsCompleted: _stepsCompleted, onStepComplete, onAd
       await fetch(`/api/deals/${deal.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: outcome, lossReason: outcome === 'Lost' ? lossReason : undefined }),
+        body: JSON.stringify({
+          stage: outcome,
+          lossReason: outcome === 'Lost' ? lossReason : undefined,
+          competitorWon: outcome === 'Lost' ? competitorWon : undefined,
+          lessonsLearned: lessonsLearned || undefined,
+          handoverNotes: outcome === 'Won' ? handoverNotes : undefined,
+          expansionPotential: outcome === 'Won' ? expansionPotential : undefined,
+        }),
       });
       onStepComplete?.('proposal-approved');
       toast(`Deal marked as ${outcome}`, 'success');
@@ -155,7 +165,7 @@ function CloseDeal({ deal, stepsCompleted: _stepsCompleted, onStepComplete, onAd
     <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
       <div>
         <h3 className="text-sm font-semibold text-slate-900 mb-1">Close Deal</h3>
-        <p className="text-xs text-slate-500">Record the final outcome and complete the audit trail.</p>
+        <p className="text-xs text-slate-500">Record the final outcome, capture lessons, and create handover or nurture plan.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -177,37 +187,86 @@ function CloseDeal({ deal, stepsCompleted: _stepsCompleted, onStepComplete, onAd
       </div>
 
       {outcome === 'Won' && (
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Signature Date</label>
-          <input
-            type="date"
-            value={signedDate}
-            onChange={e => setSignedDate(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-          />
-        </div>
+        <>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Signature Date</label>
+            <input
+              type="date"
+              value={signedDate}
+              onChange={e => setSignedDate(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Implementation Handover Notes</label>
+            <textarea
+              value={handoverNotes}
+              onChange={e => setHandoverNotes(e.target.value)}
+              placeholder="Key context for the implementation team: timeline, contacts, agreed scope, known risks..."
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
+              rows={3}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Expansion Potential</label>
+            <input
+              type="text"
+              value={expansionPotential}
+              onChange={e => setExpansionPotential(e.target.value)}
+              placeholder="e.g. HR module in 6 months, group-wide rollout by FY27..."
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+            />
+          </div>
+        </>
       )}
 
       {outcome === 'Lost' && (
+        <>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Loss Reason</label>
+            <select
+              value={lossReason}
+              onChange={e => setLossReason(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
+            >
+              <option value="">Select reason...</option>
+              <option>Chose competitor — ServiceNow</option>
+              <option>Chose competitor — Jira Service Management</option>
+              <option>Chose competitor — Freshservice</option>
+              <option>Chose competitor — BMC Helix</option>
+              <option>Budget frozen / no budget</option>
+              <option>Project cancelled / deprioritised</option>
+              <option>No decision — stalled</option>
+              <option>Lost to incumbent (renewal)</option>
+              <option>Poor fit — requirements mismatch</option>
+              <option>Internal champion left</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Competitor that won (if known)</label>
+            <input
+              type="text"
+              value={competitorWon}
+              onChange={e => setCompetitorWon(e.target.value)}
+              placeholder="e.g. Freshservice, ServiceNow Enterprise..."
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
+            />
+          </div>
+        </>
+      )}
+
+      {outcome && (
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Loss Reason</label>
-          <select
-            value={lossReason}
-            onChange={e => setLossReason(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
-          >
-            <option value="">Select reason...</option>
-            <option>Chose competitor — ServiceNow</option>
-            <option>Chose competitor — Jira Service Management</option>
-            <option>Chose competitor — Freshservice</option>
-            <option>Chose competitor — BMC Helix</option>
-            <option>Budget frozen / no budget</option>
-            <option>Project cancelled / deprioritised</option>
-            <option>No decision — stalled</option>
-            <option>Lost to incumbent (renewal)</option>
-            <option>Poor fit — requirements mismatch</option>
-            <option>Internal champion left</option>
-          </select>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">Lessons Learned</label>
+          <textarea
+            value={lessonsLearned}
+            onChange={e => setLessonsLearned(e.target.value)}
+            placeholder={outcome === 'Won'
+              ? "What worked well? What could the team replicate on similar deals?"
+              : "What would you do differently? What signals were missed? Any feedback from the prospect?"}
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
+            rows={3}
+          />
         </div>
       )}
 

@@ -52,7 +52,7 @@ export function checkStageLocking(
       break;
 
     case 'Qualification':
-      // Requirements to move from Qualification → Proposal
+      // Requirements to move from Qualification → Solutioning
       requirements.push({
         id: 'discovery-completed',
         label: 'Discovery workflow completed',
@@ -68,6 +68,21 @@ export function checkStageLocking(
         label: 'Fit score ≥ 70',
         completed: (dealData?.fitScore ?? 0) >= 70,
         blockerMessage: `Current fit score: ${dealData?.fitScore ?? 0}/100. Need ≥70 to advance.`,
+      });
+      break;
+
+    case 'Solutioning':
+      // Requirements to move from Solutioning → Proposal
+      requirements.push({
+        id: 'solution-defined',
+        label: 'Solution modules and scope defined',
+        completed: stepsCompleted.includes('solution-defined'),
+      });
+      requirements.push({
+        id: 'scope-agreed',
+        label: 'Proposal readiness ≥ 70%',
+        completed: stepsCompleted.includes('scope-agreed') || (dealData?.proposalReadinessScore ?? 0) >= 70,
+        blockerMessage: `Proposal readiness: ${dealData?.proposalReadinessScore ?? 0}%. Define modules, scope, and demo plan.`,
       });
       break;
 
@@ -119,22 +134,22 @@ export function completeStep(currentSteps: string[], stepId: string): string[] {
  * Get next stage after current stage
  */
 export function getNextStage(currentStage: string): string | null {
-  const progression = ['Prospecting', 'Qualification', 'Proposal', 'Won'];
+  const progression = ['Prospecting', 'Qualification', 'Solutioning', 'Proposal', 'Won'];
   const currentIndex = progression.indexOf(currentStage);
   if (currentIndex === -1 || currentIndex === progression.length - 1) return null;
   return progression[currentIndex + 1];
 }
 
-/**
- * Get readable stage label
- */
 export function getStageLabelReadable(stage: string): string {
   const labels: Record<string, string> = {
-    Prospecting: 'Prospecting (Pre-Qualification)',
-    Qualification: 'Qualification (Discovery & Scoring)',
-    Proposal: 'Proposal (Solution Design & Negotiation)',
-    Won: 'Deal Won',
-    Lost: 'Deal Lost',
+    Prospecting: 'Prospecting',
+    Qualification: 'Qualification',
+    Solutioning: 'Solutioning',
+    Proposal: 'Proposal',
+    Won: 'Won',
+    Lost: 'Lost',
   };
   return labels[stage] || stage;
 }
+
+export const DEAL_STAGES = ['Prospecting', 'Qualification', 'Solutioning', 'Proposal', 'Won'];
