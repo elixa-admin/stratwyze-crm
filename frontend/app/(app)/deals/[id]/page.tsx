@@ -11,6 +11,7 @@ import ActivityQuickButtons from '@/components/shared/ActivityQuickButtons';
 import DealClosureSection from '@/components/shared/DealClosureSection';
 import SaveAsTemplateModal from '@/components/shared/SaveAsTemplateModal';
 import CompetitiveBriefDisplay from '@/components/shared/CompetitiveBriefDisplay';
+import CompanyIntelligencePanel from '@/components/shared/CompanyIntelligencePanel';
 import Breadcrumbs from '@/components/shared/Breadcrumbs';
 
 interface Activity {
@@ -49,6 +50,7 @@ interface Deal {
   primaryContact?: Contact;
   incumbentPlatform?: string;
   incumbentProvider?: string;
+  enrichmentData?: any;
   competitiveBrief?: any;
   activities?: Activity[];
   createdAt: string;
@@ -352,6 +354,17 @@ export default function DealDetailPage() {
             )}
             {deal.primaryContact.phone && <p className="text-xs text-slate-600">{deal.primaryContact.phone}</p>}
           </div>
+        </div>
+      )}
+
+      {/* Company Intelligence from research */}
+      {deal.enrichmentData && (
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+            <span>🔍 Company Intelligence</span>
+            <span className="text-[10px] text-slate-400 font-normal">From AI research</span>
+          </h3>
+          <CompanyIntelligencePanel enrichmentData={deal.enrichmentData} />
         </div>
       )}
 
