@@ -14,12 +14,16 @@ model Account {
   employees     Int?
   annualRevenue Float?
   headquarters  String?
-  legalEntity   String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  deals         Deal[]
-  contacts      Contact[]
-  templates     DealTemplate[]
+  legalEntity        String?
+  jseTickerSymbol    String?
+  isListed           Boolean   @default(false)
+  lastMarketDataAt   DateTime?
+  marketData         Json?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deals              Deal[]
+  contacts           Contact[]
+  templates          DealTemplate[]
 }
 
 model Deal {

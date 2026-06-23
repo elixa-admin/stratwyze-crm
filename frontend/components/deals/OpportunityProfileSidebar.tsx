@@ -1,10 +1,13 @@
 'use client';
 
+import MarketHealthCard from '@/components/accounts/MarketHealthCard';
+
 interface OpportunityProfileSidebarProps {
   profile?: any;
+  deal?: any;
 }
 
-export default function OpportunityProfileSidebar({ profile }: OpportunityProfileSidebarProps) {
+export default function OpportunityProfileSidebar({ profile, deal }: OpportunityProfileSidebarProps) {
   const companyIntel = profile?.companyIntel || {};
   const discoveryData = profile?.discoveryData || {};
   const qualificationData = profile?.qualificationData || {};
@@ -146,6 +149,17 @@ export default function OpportunityProfileSidebar({ profile }: OpportunityProfil
           </div>
         </div>
       ) : null}
+
+      {/* Market Health — shown if account is JSE-listed or ticker was detected */}
+      {deal?.account && (deal.account.isListed || deal.account.jseTickerSymbol || (profile?.companyIntel as any)?.detectedTicker) && (
+        <MarketHealthCard
+          accountId={deal.account.id}
+          accountName={deal.account.name}
+          initialData={deal.account.marketData ?? null}
+          ticker={deal.account.jseTickerSymbol ?? (profile?.companyIntel as any)?.detectedTicker ?? null}
+          isListed={deal.account.isListed ?? false}
+        />
+      )}
 
       {/* When empty */}
       {!profile || (Object.keys(profile).length === 0 && (

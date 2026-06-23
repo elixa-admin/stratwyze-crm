@@ -17,38 +17,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Company name required' }, { status: 400 });
     }
 
-    // Step 1: Fetch company research (from Phase 14 research endpoint, or basic lookup)
-    let companyIntelligence: any = {};
-    try {
-      const researchRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/company/research`, {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+    // Step 1: Run company research + account lookup in parallel
+    const [researchRes, accountRes] = await Promise.allSettled([
+      fetch(`${baseUrl}/api/company/research`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companyName }),
-      });
+      }),
+      accountId ? fetch(`${baseUrl}/api/accounts/${accountId}`) : Promise.resolve(null),
+    ]);
 
-      if (researchRes.ok) {
-        const researchData = await researchRes.json();
-        companyIntelligence = researchData.profile || {};
-      }
-    } catch (err) {
-      console.warn('Company research unavailable, proceeding with basic brief');
+    let companyIntelligence: any = {};
+    let detectedTicker: string | null = null;
+    let marketData: any = null;
+
+    if (researchRes.status === 'fulfilled' && researchRes.value?.ok) {
+      const researchData = await researchRes.value.json();
+      companyIntelligence = researchData.profile || {};
+      detectedTicker = researchData.detectedTicker || null;
+      marketData = researchData.marketData || null;
     }
 
-    // Step 2: Fetch existing account data (if linked)
     let accountData: any = {};
-    if (accountId) {
-      try {
-        const accountRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/accounts/${accountId}`, {
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (accountRes.ok) {
-          const data = await accountRes.json();
-          accountData = data.account || {};
-        }
-      } catch (err) {
-        console.warn('Account lookup failed');
+    if (accountRes.status === 'fulfilled' && accountRes.value?.ok) {
+      const data = await accountRes.value.json();
+      accountData = data.account || {};
+      // Use cached market data from account if fresher than research fetch
+      if (!marketData && accountData.marketData) {
+        marketData = accountData.marketData;
       }
     }
+
+    // Market health summary for AI context
+    const marketSection = marketData?.quote
+      ? `MARKET HEALTH (JSE: ${marketData.symbol}):
+Price: ${marketData.quote.price} ${marketData.quote.currency} (${marketData.quote.percentChange > 0 ? '+' : ''}${marketData.quote.percentChange.toFixed(2)}% today)
+52-week range position: ${marketData.rangePosition}% — ${marketData.healthLabel}
+Sales context: ${marketData.salesContext}`
+      : '';
 
     // Step 3: Generate pre-meeting brief using Claude
     const briefPrompt = `You are a B2B sales consultant. Generate a concise pre-meeting brief for a discovery call.
@@ -58,6 +66,7 @@ ${companyIntelligence.companySnapshot?.description || `Company: ${companyName}`}
 ${companyIntelligence.companySnapshot?.revenue ? `Revenue: ${companyIntelligence.companySnapshot.revenue}` : ''}
 ${companyIntelligence.companySnapshot?.employees ? `Employees: ${companyIntelligence.companySnapshot.employees}` : ''}
 ${companyIntelligence.itsmRelevance ? `ITSM Relevance: ${companyIntelligence.itsmRelevance}` : ''}
+${marketSection}
 
 RECENT ACTIVITY:
 ${companyIntelligence.recentNews?.slice(0, 2).map((n: any) => `- ${n.headline}: ${n.significance || n.summary}`).join('\n') || 'No recent news found'}
@@ -108,9 +117,10 @@ Return ONLY valid JSON, no markdown.`;
       };
     }
 
-    // Add research data to brief
     brief.companyIntelligence = companyIntelligence;
     brief.accountData = accountData;
+    brief.marketData = marketData;
+    brief.detectedTicker = detectedTicker;
 
     return NextResponse.json(brief);
   } catch (err: any) {

@@ -23,22 +23,26 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
-    const { name, website, industry, headquarters, employees, annualRevenue } = body;
+    const { name, website, industry, headquarters, employees, annualRevenue, jseTickerSymbol, isListed } = body;
 
     if (!name || !name.trim()) {
       return NextResponse.json({ error: 'Company name is required' }, { status: 400 });
     }
 
+    const data: any = {
+      name: name.trim(),
+      website: website || null,
+      industry: industry || null,
+      headquarters: headquarters || null,
+      employees: employees ? parseInt(employees, 10) : null,
+      annualRevenue: annualRevenue ? parseFloat(annualRevenue) : null,
+    };
+    if (jseTickerSymbol !== undefined) data.jseTickerSymbol = jseTickerSymbol ? jseTickerSymbol.toUpperCase().trim() : null;
+    if (isListed !== undefined) data.isListed = !!isListed;
+
     const account = await prisma.account.update({
       where: { id: params.id },
-      data: {
-        name: name.trim(),
-        website: website || null,
-        industry: industry || null,
-        headquarters: headquarters || null,
-        employees: employees ? parseInt(employees, 10) : null,
-        annualRevenue: annualRevenue ? parseFloat(annualRevenue) : null,
-      },
+      data,
       include: { deals: { orderBy: { createdAt: 'desc' }, select: { id: true, title: true, value: true, stage: true, createdAt: true } }, contacts: true },
     });
 

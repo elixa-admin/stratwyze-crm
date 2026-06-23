@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { detectJseTicker, fetchMarketData } from '@/lib/market-data';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -32,13 +33,14 @@ export async function POST(req: NextRequest) {
     const { companyName, website, industry, employees, location } = await req.json();
     if (!companyName) return NextResponse.json({ error: 'Company name required' }, { status: 400 });
 
-    // Run all searches in parallel
-    const [overviewResults, newsResults, maResults, linkedinResults, revenueResults] = await Promise.all([
+    // Run all searches in parallel — includes JSE listing search
+    const [overviewResults, newsResults, maResults, linkedinResults, revenueResults, jseResults] = await Promise.all([
       serpSearch(`"${companyName}" company overview ${industry || ''} ${location || 'South Africa'} employees revenue`),
       serpSearch(`"${companyName}" news 2025 2026`),
       serpSearch(`"${companyName}" acquisition merger funding investment 2024 2025 2026`),
       serpSearch(`site:linkedin.com/company "${companyName}"`),
       serpSearch(`"${companyName}" annual revenue turnover financial results`),
+      serpSearch(`"${companyName}" JSE listed ticker symbol Johannesburg Stock Exchange`),
     ]);
 
     const webContext = [
@@ -47,7 +49,12 @@ export async function POST(req: NextRequest) {
       newsResults.length ? `RECENT NEWS:\n${formatResults(newsResults)}` : '',
       maResults.length ? `M&A ACTIVITY:\n${formatResults(maResults)}` : '',
       linkedinResults.length ? `LINKEDIN PRESENCE:\n${formatResults(linkedinResults)}` : '',
+      jseResults.length ? `JSE LISTING:\n${formatResults(jseResults)}` : '',
     ].filter(Boolean).join('\n\n');
+
+    // Auto-detect JSE ticker from all research text
+    const allResearchText = webContext + '\n' + jseResults.map((r: any) => `${r.title} ${r.snippet}`).join(' ');
+    const detectedTicker = detectJseTicker(allResearchText, companyName);
 
     if (!webContext) {
       return NextResponse.json({ error: 'No research data found' }, { status: 404 });
@@ -109,16 +116,26 @@ Return this exact JSON structure:
         const text = message.content[0].type === 'text' ? message.content[0].text : '';
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         const profile = JSON.parse(jsonMatch ? jsonMatch[0] : text);
+        // Fetch live market data if ticker detected
+        let marketData = null;
+        if (detectedTicker) {
+          try { marketData = await fetchMarketData(detectedTicker, companyName); } catch { /* non-blocking */ }
+        }
+
         return NextResponse.json({
           profile,
           model,
-          sourceCount: overviewResults.length + newsResults.length + maResults.length + linkedinResults.length + revenueResults.length,
+          detectedTicker,
+          isListed: !!detectedTicker,
+          marketData,
+          sourceCount: overviewResults.length + newsResults.length + maResults.length + linkedinResults.length + revenueResults.length + jseResults.length,
           sources: {
             overview: overviewResults.length,
             news: newsResults.length,
             ma: maResults.length,
             linkedin: linkedinResults.length,
             revenue: revenueResults.length,
+            jse: jseResults.length,
           },
         });
       } catch (err) {

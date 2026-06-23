@@ -194,7 +194,7 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
 
           {/* Right column (30%): Opportunity profile sidebar */}
           <div className="lg:col-span-1">
-            <OpportunityProfileSidebar profile={profile} />
+            <OpportunityProfileSidebar profile={profile} deal={deal} />
           </div>
         </div>
       </div>
