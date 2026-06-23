@@ -68,22 +68,98 @@ model Activity {
 }
 
 model Contact {
-  id               String   @id @default(cuid())
-  accountId        String
-  account          Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  name             String
-  email            String?
-  phone            String?
-  title            String?
-  role             String?
-  linkedin         String?
-  location         String?
-  department       String?
-  intelligenceData Json?
-  lastResearchedAt DateTime?
-  deals            Deal[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                        String    @id @default(cuid())
+  accountId                 String
+  account                   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name                      String
+  email                     String?
+  phone                     String?
+  title                     String?
+  role                      String?
+  linkedin                  String?
+  location                  String?
+  department                String?
+  intelligenceData          Json?
+  lastResearchedAt          DateTime?
+  intelligenceProfile       ContactIntelligenceProfile?
+  deals                     Deal[]
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+}
+
+model ContactIntelligenceProfile {
+  id                       String    @id @default(cuid())
+  contactId                String    @unique
+  contact                  Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  researchStartedAt        DateTime?
+  researchCompletedAt      DateTime?
+  researchStatus           String    @default("pending")
+  researchError            String?
+  nextRefreshAt            DateTime?
+
+  companyDomain            String?
+  domainConfidence         Int?
+  domainSource             String?
+
+  companyResearchData      Json?
+  webResearchData          Json?
+
+  emailCandidates          Json?
+  primaryEmail             String?
+  emailConfidence          Int?
+
+  careerSummary            Json?
+
+  decisionMakerScore       Int?
+  influenceScore           Int?
+  technicalInfluence       Int?
+  commercialInfluence      Int?
+  haloItsmRelevance        Int?
+  buyingRelevance          Int?
+  confidenceScore          Int?
+
+  briefing                 Json?
+  evidenceIndex            Json?
+
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  evidence                 ContactIntelligenceEvidence[]
+
+  @@index([contactId])
+  @@index([researchStatus])
+}
+
+model ContactIntelligenceEvidence {
+  id                 String    @id @default(cuid())
+  profileId          String
+  profile            ContactIntelligenceProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  evidenceType       String
+  category           String
+
+  factType           String?
+  factValue          String?
+
+  inferenceType      String?
+  inference          String?
+  reasoning          String?
+  confidenceLevel    String?
+
+  sourceUrl          String?
+  sourceTitle        String?
+  sourcePlatform     String?
+  sourceContent      String?
+  sourceCrawlDate    DateTime?
+  sourceRelevance    String?
+
+  researchStep       Int?
+  dataExtractedAt    DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([profileId])
+  @@index([category])
 }
 
 model DealTemplate {
