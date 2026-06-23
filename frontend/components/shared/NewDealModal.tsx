@@ -10,6 +10,7 @@ import {
   getRandomObservation,
   getStageCommentary,
 } from '@/lib/research-commentary';
+import { TYPOGRAPHY } from '@/lib/typography';
 
 interface NewDealModalProps {
   isOpen: boolean;
@@ -459,9 +460,9 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
               {/* Company snapshot */}
               {researchData?.profile?.companySnapshot && (
                 <div className="bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Company Snapshot</p>
-                  <p className="text-sm text-slate-800 mb-3">{researchData.profile.companySnapshot.description}</p>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
+                  <p className={TYPOGRAPHY.CARD_SUBTITLE + ' mb-2'}>Company Snapshot</p>
+                  <p className={TYPOGRAPHY.BODY + ' mb-3'}>{researchData.profile.companySnapshot.description}</p>
+                  <div className="grid grid-cols-3 gap-2">
                     {researchData.profile.companySnapshot.revenue && (
                       <div className="bg-white rounded-lg p-2 border border-slate-100">
                         <p className="text-slate-500">Revenue</p>

@@ -2,6 +2,7 @@
 
 import MarketHealthCard from '@/components/accounts/MarketHealthCard';
 import BuyerIntentCard from './BuyerIntentCard';
+import { TYPOGRAPHY, SPACING_TYPOGRAPHY } from '@/lib/typography';
 
 interface OpportunityProfileSidebarProps {
   profile?: any;
@@ -18,34 +19,34 @@ export default function OpportunityProfileSidebar({ profile, deal }: Opportunity
     <div className="space-y-4 sticky top-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4">
-        <h2 className="text-sm font-bold text-slate-900">Opportunity Profile</h2>
-        <p className="text-xs text-slate-600 mt-1">All deal intel aggregated in one view</p>
+        <h2 className={TYPOGRAPHY.SUBSECTION_TITLE}>Opportunity Profile</h2>
+        <p className={`${TYPOGRAPHY.BODY_SM} mt-1`}>All deal intel aggregated in one view</p>
       </div>
 
       {/* Company Intel */}
       {companyIntel.companySnapshot || !profile ? (
         <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Company Intel</h3>
+          <h3 className={TYPOGRAPHY.CARD_TITLE + ' mb-2'}>Company Intel</h3>
           {companyIntel.companySnapshot ? (
-            <div className="space-y-2">
-              <p className="text-xs text-slate-700 leading-relaxed">{companyIntel.companySnapshot.description}</p>
+            <div className={SPACING_TYPOGRAPHY.ITEM}>
+              <p className={TYPOGRAPHY.BODY_SM}>{companyIntel.companySnapshot.description}</p>
               <div className="grid grid-cols-2 gap-2">
                 {companyIntel.companySnapshot.revenue && (
                   <div className="bg-slate-50 rounded p-2">
-                    <p className="text-[10px] text-slate-500">Revenue</p>
-                    <p className="text-xs font-bold text-slate-800">{companyIntel.companySnapshot.revenue}</p>
+                    <p className={TYPOGRAPHY.LABEL}>Revenue</p>
+                    <p className={TYPOGRAPHY.HIGHLIGHT}>{companyIntel.companySnapshot.revenue}</p>
                   </div>
                 )}
                 {companyIntel.companySnapshot.employees && (
                   <div className="bg-slate-50 rounded p-2">
-                    <p className="text-[10px] text-slate-500">Employees</p>
-                    <p className="text-xs font-bold text-slate-800">{companyIntel.companySnapshot.employees}</p>
+                    <p className={TYPOGRAPHY.LABEL}>Employees</p>
+                    <p className={TYPOGRAPHY.HIGHLIGHT}>{companyIntel.companySnapshot.employees}</p>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <p className="text-xs text-slate-500 italic">Generate pre-meeting brief to populate company intel</p>
+            <p className={`${TYPOGRAPHY.BODY_SM} italic`}>Generate pre-meeting brief to populate company intel</p>
           )}
         </div>
       ) : null}
