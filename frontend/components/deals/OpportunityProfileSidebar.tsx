@@ -125,10 +125,25 @@ export default function OpportunityProfileSidebar({ profile }: OpportunityProfil
       ) : null}
 
       {/* Proposal Summary */}
-      {proposalData && Object.keys(proposalData).length > 0 ? (
+      {proposalData?.generated ? (
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Proposal</h3>
-          <p className="text-xs text-slate-600">Proposal in preparation</p>
+          <div className="space-y-2">
+            {proposalData.generated.proposedSolution?.headline && (
+              <p className="text-xs font-semibold text-blue-800 bg-blue-50 rounded p-2 border border-blue-100">
+                {proposalData.generated.proposedSolution.headline}
+              </p>
+            )}
+            {proposalData.generated.roiSummary?.headline && (
+              <p className="text-xs text-emerald-700 font-semibold">{proposalData.generated.roiSummary.headline}</p>
+            )}
+            {proposalData.solutionDesign?.positioningAngle && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wide font-semibold">Angle:</span>
+                <span className="text-xs text-indigo-700 font-bold">{proposalData.solutionDesign.positioningAngle}</span>
+              </div>
+            )}
+          </div>
         </div>
       ) : null}
 

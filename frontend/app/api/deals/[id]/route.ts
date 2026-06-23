@@ -5,7 +5,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   try {
     const deal = await prisma.deal.findUnique({
       where: { id: params.id },
-      include: { account: true, primaryContact: true, activities: { orderBy: { createdAt: 'desc' } } },
+      include: { account: true, primaryContact: true, stageWorkflow: true, opportunityProfile: true, activities: { orderBy: { createdAt: 'desc' } } },
     });
     if (!deal) return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
     return NextResponse.json({ deal });
@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // Re-fetch with fresh activities after any new ones were created
     const fresh = await prisma.deal.findUnique({
       where: { id: params.id },
-      include: { account: true, activities: { orderBy: { createdAt: 'desc' } } },
+      include: { account: true, stageWorkflow: true, opportunityProfile: true, activities: { orderBy: { createdAt: 'desc' } } },
     });
 
     return NextResponse.json({ deal: fresh });

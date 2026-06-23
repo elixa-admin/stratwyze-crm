@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import ProspectingWorkflow from '@/components/deals/stages/ProspectingWorkflow';
 import QualificationWorkflow from '@/components/deals/stages/QualificationWorkflow';
+import ProposalWorkflow from '@/components/deals/stages/ProposalWorkflow';
 import OpportunityProfileSidebar from '@/components/deals/OpportunityProfileSidebar';
 import { getNextStage } from '@/lib/deal-gating';
 import { toast } from '@/lib/toast';
@@ -152,6 +153,11 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
         </div>
       </div>
 
+      {/* Stage progress indicator */}
+      <div className="max-w-7xl mx-auto px-6 pt-4">
+        <StageStepper currentStage={deal.stage} />
+      </div>
+
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -174,22 +180,15 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
             )}
 
             {deal.stage === 'Proposal' && (
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-3">Proposal Workflow</h2>
-                <p className="text-sm text-slate-600">
-                  Proposal workflow (Phase 19) will be embedded here.
-                </p>
-                <p className="text-xs text-slate-500 mt-2">Coming in Wave 19</p>
-              </div>
+              <ProposalWorkflow
+                deal={deal}
+                onStepComplete={handleStepComplete}
+                onAdvance={handleAdvanceStage}
+              />
             )}
 
             {(deal.stage === 'Won' || deal.stage === 'Lost') && (
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-3">Deal Complete</h2>
-                <p className="text-sm text-slate-600">
-                  This deal is in a final state. No further actions available.
-                </p>
-              </div>
+              <DealOutcomeCard deal={deal} />
             )}
           </div>
 
@@ -198,6 +197,80 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
             <OpportunityProfileSidebar profile={profile} />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Stage stepper — top of page progress indicator
+const STAGES = ['Prospecting', 'Qualification', 'Proposal', 'Won'];
+
+function StageStepper({ currentStage }: { currentStage: string }) {
+  const isLost = currentStage === 'Lost';
+  const currentIdx = STAGES.indexOf(currentStage);
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 px-6 py-3 flex items-center gap-0">
+      {STAGES.map((stage, idx) => {
+        const isDone = !isLost && currentIdx > idx;
+        const isCurrent = stage === currentStage;
+        return (
+          <div key={stage} className="flex items-center flex-1">
+            <div className="flex flex-col items-center flex-1">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                isDone ? 'bg-emerald-500 border-emerald-500 text-white'
+                  : isCurrent ? (isLost ? 'bg-red-500 border-red-500 text-white' : 'bg-blue-600 border-blue-600 text-white')
+                  : 'border-slate-200 text-slate-400'
+              }`}>
+                {isDone ? '✓' : idx + 1}
+              </div>
+              <span className={`text-[10px] mt-1 font-semibold ${isCurrent ? 'text-blue-600' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>
+                {stage}
+              </span>
+            </div>
+            {idx < STAGES.length - 1 && (
+              <div className={`h-0.5 flex-1 mx-1 -mt-4 ${isDone ? 'bg-emerald-400' : 'bg-slate-200'}`} />
+            )}
+          </div>
+        );
+      })}
+      {isLost && (
+        <div className="flex flex-col items-center ml-2">
+          <div className="w-7 h-7 rounded-full bg-red-100 border-2 border-red-300 text-red-500 flex items-center justify-center text-xs font-bold">✗</div>
+          <span className="text-[10px] mt-1 font-semibold text-red-500">Lost</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DealOutcomeCard({ deal }: { deal: any }) {
+  const isWon = deal.stage === 'Won';
+  return (
+    <div className={`rounded-xl border p-8 text-center ${isWon ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
+      <div className="text-5xl mb-4">{isWon ? '🏆' : '📋'}</div>
+      <h2 className={`text-2xl font-bold mb-2 ${isWon ? 'text-emerald-800' : 'text-red-800'}`}>
+        Deal {deal.stage}
+      </h2>
+      {isWon && (
+        <p className="text-sm text-emerald-700">
+          Congratulations! R{(deal.value || 0).toLocaleString()} closed successfully.
+        </p>
+      )}
+      {!isWon && deal.lossReason && (
+        <p className="text-sm text-red-700">Loss reason: {deal.lossReason}</p>
+      )}
+      <div className="mt-6 flex justify-center gap-3">
+        <a href="/deals" className="px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors">
+          ← Back to Pipeline
+        </a>
+        {!isWon && (
+          <button
+            className="px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+            onClick={() => window.location.reload()}
+          >
+            Review Deal
+          </button>
+        )}
       </div>
     </div>
   );
