@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/format';
+import AccountEditorModal from '@/components/shared/AccountEditorModal';
 
 interface Deal {
   id: string;
@@ -82,6 +83,7 @@ export default function AccountDetailPage() {
   const [loading, setLoading] = useState(true);
   const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', title: '', role: '' });
   const [addingContact, setAddingContact] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/accounts/${id}`)
@@ -153,9 +155,17 @@ export default function AccountDetailPage() {
               {[account.industry, account.headquarters].filter(Boolean).join(' · ')}
             </p>
           </div>
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200">
-            Active
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+              Active
+            </span>
+            <button
+              onClick={() => setEditorOpen(true)}
+              className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              Edit
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-100 pt-6">
           <div>
@@ -394,6 +404,16 @@ export default function AccountDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Account Editor Modal */}
+      {account && (
+        <AccountEditorModal
+          isOpen={editorOpen}
+          account={account}
+          onClose={() => setEditorOpen(false)}
+          onSaved={(updated) => setAccount(updated)}
+        />
+      )}
     </div>
   );
 }

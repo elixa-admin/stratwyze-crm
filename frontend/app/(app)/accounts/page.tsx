@@ -3,18 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import NewAccountModal from '@/components/shared/NewAccountModal';
-import { formatCurrency, parseARRInput } from '@/lib/format';
-
-interface Account {
-  id: string;
-  name: string;
-  industry?: string;
-  location?: string;
-  annualRevenue?: number;
-  employees?: number;
-  status?: string;
-  technologyStack?: { platform?: string; siPartner?: string };
-}
+import { parseARRInput } from '@/lib/format';
 
 function AccountSkeleton() {
   return (
@@ -63,28 +52,46 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 
 export default function AccountsPage() {
   const [showModal, setShowModal] = useState(false);
-  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'created' | 'deals' | 'contacts'>('name');
 
   useEffect(() => {
     fetch('/api/accounts')
       .then(r => r.json())
       .then(data => {
         if (data.accounts) {
-          setAccounts(data.accounts.map((a: any): Account => ({
-            id: a.id,
-            name: a.name,
-            industry: a.industry || 'Unknown',
-            location: a.headquarters || 'Unknown',
-            annualRevenue: a.annualRevenue || 0,
-            employees: a.employees || 0,
-            status: 'Active',
-          })));
+          setAccounts(data.accounts);
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    let filtered = accounts.filter(acc =>
+      acc.name.toLowerCase().includes(search.toLowerCase()) ||
+      acc.industry?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'created':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'deals':
+          return (b.deals?.length ?? 0) - (a.deals?.length ?? 0);
+        case 'contacts':
+          return (b.contacts?.length ?? 0) - (a.contacts?.length ?? 0);
+        case 'name':
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+
+    setFilteredAccounts(filtered);
+  }, [accounts, search, sortBy]);
 
   const handleAddAccount = async (data: { name: string; industry: string; location: string; arr: string; employees: number }) => {
     const response = await fetch('/api/accounts', {
@@ -114,74 +121,90 @@ export default function AccountsPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Accounts</h1>
-          <p className="text-slate-600 mt-1">Manage your business accounts</p>
+          <p className="text-sm text-slate-500 mt-1">{filteredAccounts.length} account{filteredAccounts.length !== 1 ? 's' : ''}</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm">
-          + Add Account
+        <button onClick={() => setShowModal(true)} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          + New Account
         </button>
       </div>
 
-      <div className="flex gap-3">
-        <input
-          type="text"
-          placeholder="Search accounts..."
-          className="flex-1 px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <select className="px-3 py-2.5 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option>All Status</option>
-          <option>Active</option>
-          <option>Prospect</option>
-          <option>Inactive</option>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white rounded-xl border border-slate-200 p-4">
+        <div className="md:col-span-2">
+          <input
+            type="text"
+            placeholder="Search by company name or industry..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value as typeof sortBy)}
+          className="px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="name">Sort by: Name</option>
+          <option value="created">Sort by: Created</option>
+          <option value="deals">Sort by: Deals</option>
+          <option value="contacts">Sort by: Contacts</option>
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <AccountSkeleton key={i} />)
-        ) : accounts.length === 0 ? (
+          <div className="space-y-3 p-5">
+            {Array.from({ length: 4 }).map((_, i) => <AccountSkeleton key={i} />)}
+          </div>
+        ) : filteredAccounts.length === 0 ? (
           <EmptyState onAdd={() => setShowModal(true)} />
         ) : (
-          accounts.map((account) => (
-            <Link href={`/accounts/${account.id}`} key={account.id}>
-              <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-sm transition-all cursor-pointer h-full">
-                <div className="mb-4">
-                  <h3 className="font-semibold text-slate-900 mb-0.5">{account.name}</h3>
-                  <p className="text-xs text-slate-500">{account.industry} · {account.location}</p>
+          <div className="divide-y divide-slate-100">
+            {filteredAccounts.map((account) => (
+              <Link
+                key={account.id}
+                href={`/accounts/${account.id}`}
+                className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group"
+              >
+                {/* Avatar */}
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-bold text-blue-700">
+                    {account.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                  </span>
                 </div>
-                <div className="space-y-2 border-t border-slate-100 pt-3">
-                  <div className="flex justify-between">
-                    <span className="text-xs text-slate-500">ARR</span>
-                    <span className="text-sm font-semibold text-slate-900">{formatCurrency(account.annualRevenue || 0)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-slate-500">Employees</span>
-                    <span className="text-sm font-semibold text-slate-900">{(account.employees || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-500">Status</span>
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-green-50 text-green-700">
-                      {account.status}
-                    </span>
-                  </div>
+
+                {/* Company Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                    {account.name}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {[account.industry, account.headquarters].filter(Boolean).join(' · ') || 'No details'}
+                  </p>
                 </div>
-                {account.technologyStack?.platform && (
-                  <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400 flex-shrink-0">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+
+                {/* Stats */}
+                <div className="flex items-center gap-6 text-right">
+                  <div className="hidden sm:block">
+                    <p className="text-sm font-semibold text-slate-900">{account.deals?.length ?? 0}</p>
+                    <p className="text-xs text-slate-500">Deal{(account.deals?.length ?? 0) !== 1 ? 's' : ''}</p>
+                  </div>
+                  <div className="hidden sm:block">
+                    <p className="text-sm font-semibold text-slate-900">{account.contacts?.length ?? 0}</p>
+                    <p className="text-xs text-slate-500">Contact{(account.contacts?.length ?? 0) !== 1 ? 's' : ''}</p>
+                  </div>
+                  <div className="w-5 h-5 text-slate-300 group-hover:text-slate-400 flex-shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
-                    <span className="text-[10px] text-slate-500 truncate">
-                      {account.technologyStack.platform}
-                      {account.technologyStack.siPartner && ` / ${account.technologyStack.siPartner}`}
-                    </span>
                   </div>
-                )}
-              </div>
-            </Link>
-          ))
+                </div>
+              </Link>
+            ))}
+          </div>
         )}
       </div>
 

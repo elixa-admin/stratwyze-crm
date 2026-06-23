@@ -8,6 +8,7 @@ import { toast } from '@/lib/toast';
 import ContactPanel from '@/components/shared/ContactPanel';
 import FollowUpScheduling from '@/components/shared/FollowUpScheduling';
 import ActivityQuickButtons from '@/components/shared/ActivityQuickButtons';
+import DealClosureSection from '@/components/shared/DealClosureSection';
 
 interface Activity {
   id: string;
@@ -31,7 +32,7 @@ interface Deal {
   title: string;
   value: number;
   currency: string;
-  stage: 'Prospecting' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Closed Won';
+  stage: 'Prospecting' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
   notes?: string;
   archived?: boolean;
   dueDate?: string;
@@ -50,7 +51,7 @@ interface Deal {
   updatedAt: string;
 }
 
-const STAGES: Deal['stage'][] = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won'];
+const STAGES: Deal['stage'][] = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'];
 
 const STAGE_ACCENT: Record<string, { bar: string; badge: string }> = {
   Prospecting:   { bar: 'bg-slate-400',   badge: 'bg-slate-100 text-slate-700' },
@@ -58,6 +59,7 @@ const STAGE_ACCENT: Record<string, { bar: string; badge: string }> = {
   Proposal:      { bar: 'bg-amber-500',   badge: 'bg-amber-100 text-amber-700' },
   Negotiation:   { bar: 'bg-purple-500',  badge: 'bg-purple-100 text-purple-700' },
   'Closed Won':  { bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
+  'Closed Lost': { bar: 'bg-red-500',     badge: 'bg-red-100 text-red-700' },
 };
 
 const ACTIVITY_ICONS: Record<string, JSX.Element> = {
@@ -432,7 +434,17 @@ export default function DealDetailPage() {
         <div className="space-y-5">
           <ContactPanel contact={deal.primaryContact} />
           <FollowUpScheduling dealId={deal.id} dueDate={deal.dueDate} nextAction={deal.nextAction} />
-          <ActivityQuickButtons dealId={deal.id} />
+          {editStage === 'Closed Won' || editStage === 'Closed Lost' ? (
+            <DealClosureSection
+              dealId={deal.id}
+              stage={editStage}
+              closureReason={deal.closureReason}
+              lossReason={deal.lossReason}
+              onUpdate={() => window.location.reload()}
+            />
+          ) : (
+            <ActivityQuickButtons dealId={deal.id} />
+          )}
         </div>
       </div>
 
