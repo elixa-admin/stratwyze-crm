@@ -42,6 +42,7 @@ model Deal {
   incumbentPlatform String?
   incumbentProvider String?
   enrichmentData    Json?
+  competitiveBrief  Json?
   activities        Activity[]
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt

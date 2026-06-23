@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, value, accountId, stageName, competitorId, saPartnerId, enrichmentData } = body;
+    const { title, value, accountId, stageName, competitorId, saPartnerId, enrichmentData, competitiveBrief } = body;
 
     if (!title || !value) {
       return NextResponse.json({ error: 'Title and value are required' }, { status: 400 });
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
         incumbentPlatform: competitorId || null,
         incumbentProvider: saPartnerId || null,
         enrichmentData: enrichmentData ?? null,
+        competitiveBrief: competitiveBrief ?? null,
       },
       include: { account: true },
     });

@@ -85,7 +85,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
           stageName,
           competitorId: competitorId || undefined,
           saPartnerId: saPartnerId || undefined,
-          briefMetadata: briefData ? { brief: briefData.brief, duration: briefData.duration, cost: briefData.costEstimate } : undefined,
+          competitiveBrief: briefData?.brief || undefined,
         }),
       });
 

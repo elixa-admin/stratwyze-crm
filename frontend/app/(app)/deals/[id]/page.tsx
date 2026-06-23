@@ -10,6 +10,7 @@ import FollowUpScheduling from '@/components/shared/FollowUpScheduling';
 import ActivityQuickButtons from '@/components/shared/ActivityQuickButtons';
 import DealClosureSection from '@/components/shared/DealClosureSection';
 import SaveAsTemplateModal from '@/components/shared/SaveAsTemplateModal';
+import CompetitiveBriefDisplay from '@/components/shared/CompetitiveBriefDisplay';
 
 interface Activity {
   id: string;
@@ -47,6 +48,7 @@ interface Deal {
   primaryContact?: Contact;
   incumbentPlatform?: string;
   incumbentProvider?: string;
+  competitiveBrief?: any;
   activities?: Activity[];
   createdAt: string;
   updatedAt: string;
@@ -355,23 +357,34 @@ export default function DealDetailPage() {
       )}
 
       {/* Competitive context */}
-      {(deal.incumbentPlatform || deal.incumbentProvider) && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Competitive Context</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {deal.incumbentPlatform && (
-              <div className="bg-red-50 border border-red-100 rounded-lg p-3">
-                <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wide mb-1">Incumbent Platform</p>
-                <p className="text-sm font-semibold text-red-700">{deal.incumbentPlatform}</p>
+      {(deal.incumbentPlatform || deal.incumbentProvider || deal.competitiveBrief) && (
+        <div className="space-y-4">
+          {(deal.incumbentPlatform || deal.incumbentProvider) && (
+            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">Incumbent Info</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {deal.incumbentPlatform && (
+                  <div className="bg-red-50 border border-red-100 rounded-lg p-3">
+                    <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wide mb-1">Incumbent Platform</p>
+                    <p className="text-sm font-semibold text-red-700">{deal.incumbentPlatform}</p>
+                  </div>
+                )}
+                {deal.incumbentProvider && (
+                  <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                    <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wide mb-1">SI Partner</p>
+                    <p className="text-sm font-semibold text-amber-700">{deal.incumbentProvider}</p>
+                  </div>
+                )}
               </div>
-            )}
-            {deal.incumbentProvider && (
-              <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
-                <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wide mb-1">SI Partner</p>
-                <p className="text-sm font-semibold text-amber-700">{deal.incumbentProvider}</p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+          <CompetitiveBriefDisplay
+            dealId={deal.id}
+            incumbentPlatform={deal.incumbentPlatform}
+            incumbentProvider={deal.incumbentProvider}
+            brief={deal.competitiveBrief}
+            onBriefUpdated={brief => setDeal({...deal, competitiveBrief: brief})}
+          />
         </div>
       )}
 

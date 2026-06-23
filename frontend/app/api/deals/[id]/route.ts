@@ -17,7 +17,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
-    const { title, value, stage, notes, noteContent, archived } = body;
+    const { title, value, stage, notes, noteContent, archived, competitiveBrief } = body;
 
     const existing = await prisma.deal.findUnique({ where: { id: params.id } });
     if (!existing) return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
@@ -28,6 +28,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (stage !== undefined) updates.stage = stage;
     if (notes !== undefined) updates.notes = notes;
     if (archived !== undefined) updates.archived = archived;
+    if (competitiveBrief !== undefined) updates.competitiveBrief = competitiveBrief;
 
     await prisma.deal.update({
       where: { id: params.id },
