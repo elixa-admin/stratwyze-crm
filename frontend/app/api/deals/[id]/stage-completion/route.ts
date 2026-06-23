@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+let prisma: PrismaClient | undefined;
+
+function getPrisma() {
+  if (!prisma) {
+    prisma = new PrismaClient();
+  }
+  return prisma;
+}
 
 interface StageCompletionRequest {
   stepId: string;
@@ -15,23 +22,24 @@ export async function POST(
   try {
     const { stepId, metadata } = (await req.json()) as StageCompletionRequest;
     const dealId = params.id;
+    const db = getPrisma();
 
     if (!stepId) {
       return NextResponse.json({ error: 'stepId required' }, { status: 400 });
     }
 
     // Get or create deal stage workflow
-    let workflow = await prisma.dealStageWorkflow.findUnique({
+    let workflow = await db.dealStageWorkflow.findUnique({
       where: { dealId },
     });
 
     if (!workflow) {
-      const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+      const deal = await db.deal.findUnique({ where: { id: dealId } });
       if (!deal) {
         return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
       }
 
-      workflow = await prisma.dealStageWorkflow.create({
+      workflow = await db.dealStageWorkflow.create({
         data: {
           dealId,
           stage: deal.stage,
@@ -43,7 +51,7 @@ export async function POST(
     const updatedSteps = Array.from(new Set([...workflow.stepsCompleted, stepId]));
 
     // Update workflow
-    const updated = await prisma.dealStageWorkflow.update({
+    const updated = await db.dealStageWorkflow.update({
       where: { dealId },
       data: {
         stepsCompleted: updatedSteps,
@@ -51,7 +59,7 @@ export async function POST(
     });
 
     // Log activity
-    await prisma.activity.create({
+    await db.activity.create({
       data: {
         dealId,
         type: 'stage-step-completed',

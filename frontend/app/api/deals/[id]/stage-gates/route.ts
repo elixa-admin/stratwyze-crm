@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { checkStageLocking } from '@/lib/deal-gating';
 
-const prisma = new PrismaClient();
+let prisma: PrismaClient | undefined;
+
+function getPrisma() {
+  if (!prisma) {
+    prisma = new PrismaClient();
+  }
+  return prisma;
+}
 
 export async function GET(
   _req: NextRequest,
@@ -10,9 +17,10 @@ export async function GET(
 ) {
   try {
     const dealId = params.id;
+    const db = getPrisma();
 
     // Fetch deal and workflow
-    const deal = await prisma.deal.findUnique({
+    const deal = await db.deal.findUnique({
       where: { id: dealId },
       include: {
         stageWorkflow: true,

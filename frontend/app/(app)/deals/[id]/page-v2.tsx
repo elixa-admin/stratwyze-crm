@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ProspectingWorkflow from '@/components/deals/stages/ProspectingWorkflow';
+import QualificationWorkflow from '@/components/deals/stages/QualificationWorkflow';
 import OpportunityProfileSidebar from '@/components/deals/OpportunityProfileSidebar';
 import { getNextStage } from '@/lib/deal-gating';
 import { toast } from '@/lib/toast';
@@ -165,13 +166,11 @@ export default function DealDetailPageV2({ params }: DealPageV2Props) {
             )}
 
             {deal.stage === 'Qualification' && (
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-3">Qualification Workflow</h2>
-                <p className="text-sm text-slate-600">
-                  Qualification workflow (Phase 18) will be embedded here.
-                </p>
-                <p className="text-xs text-slate-500 mt-2">Coming in Wave 18</p>
-              </div>
+              <QualificationWorkflow
+                deal={deal}
+                onStepComplete={handleStepComplete}
+                onAdvance={handleAdvanceStage}
+              />
             )}
 
             {deal.stage === 'Proposal' && (

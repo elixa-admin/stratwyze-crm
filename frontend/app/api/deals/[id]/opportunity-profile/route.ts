@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+let prisma: PrismaClient | undefined;
+
+function getPrisma() {
+  if (!prisma) {
+    prisma = new PrismaClient();
+  }
+  return prisma;
+}
 
 export async function GET(
   _req: NextRequest,
@@ -9,20 +16,21 @@ export async function GET(
 ) {
   try {
     const dealId = params.id;
+    const db = getPrisma();
 
     // Fetch opportunity profile
-    let profile = await prisma.opportunityProfile.findUnique({
+    let profile = await db.opportunityProfile.findUnique({
       where: { dealId },
     });
 
     // If not found, create stub
     if (!profile) {
-      const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+      const deal = await db.deal.findUnique({ where: { id: dealId } });
       if (!deal) {
         return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
       }
 
-      profile = await prisma.opportunityProfile.create({
+      profile = await db.opportunityProfile.create({
         data: { dealId },
       });
     }
@@ -44,25 +52,26 @@ export async function PATCH(
   try {
     const dealId = params.id;
     const updates = await req.json();
+    const db = getPrisma();
 
     // Get or create profile
-    let profile = await prisma.opportunityProfile.findUnique({
+    let profile = await db.opportunityProfile.findUnique({
       where: { dealId },
     });
 
     if (!profile) {
-      const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+      const deal = await db.deal.findUnique({ where: { id: dealId } });
       if (!deal) {
         return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
       }
 
-      profile = await prisma.opportunityProfile.create({
+      profile = await db.opportunityProfile.create({
         data: { dealId },
       });
     }
 
     // Update profile
-    const updated = await prisma.opportunityProfile.update({
+    const updated = await db.opportunityProfile.update({
       where: { dealId },
       data: updates,
     });
