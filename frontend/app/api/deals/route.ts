@@ -59,11 +59,13 @@ export async function POST(req: NextRequest) {
           phone: snap?.phone || autoCreateAccount.phone || null,
           industry: snap?.industry || autoCreateAccount.industry || null,
           employees: snap?.employeesNumeric ? Number(snap.employeesNumeric) : (autoCreateAccount.employees ? parseInt(autoCreateAccount.employees) : null),
+          annualRevenue: snap?.revenueNumeric ? Number(snap.revenueNumeric) : null,
           headquarters: snap?.headquarters || autoCreateAccount.headquarters || null,
           description: snap?.description || null,
           enrichmentData: enrichmentData ?? null,
           jseTickerSymbol: autoCreateAccount.jseTickerSymbol || null,
           isListed: !!autoCreateAccount.jseTickerSymbol,
+          marketData: enrichmentData?.marketData || null,
         },
       });
       resolvedAccountId = account.id;

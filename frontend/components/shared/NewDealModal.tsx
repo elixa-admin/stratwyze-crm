@@ -517,24 +517,23 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
 
               {/* Opening + Win */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-xs font-semibold text-blue-700 mb-1">Opening Statement</p>
-                <p className="text-sm text-blue-900">{briefData.brief?.openingStatement}</p>
+                <p className="text-xs font-semibold text-blue-700 mb-2 uppercase tracking-wide">Opening Statement</p>
+                <p className="text-sm leading-relaxed text-blue-900">{briefData.brief?.openingStatement}</p>
               </div>
 
               <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
-                <p className="text-xs font-semibold text-emerald-700 mb-1">Win Statement</p>
-                <p className="text-sm text-emerald-900 font-medium">{briefData.brief?.winStatement}</p>
+                <p className="text-xs font-semibold text-emerald-700 mb-2 uppercase tracking-wide">Win Statement</p>
+                <p className="text-sm leading-relaxed text-emerald-900 font-medium">{briefData.brief?.winStatement}</p>
               </div>
 
               {/* Risks */}
               {(briefData.brief?.platformRisks?.length > 0 || briefData.brief?.siRisks?.length > 0) && (
                 <div className="border border-slate-200 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-slate-700 mb-2">Key Risks</p>
-                  <ul className="space-y-1">
+                  <p className="text-xs font-semibold text-slate-700 mb-3 uppercase tracking-wide">Key Risks</p>
+                  <ul className="space-y-2">
                     {[...(briefData.brief?.platformRisks || []), ...(briefData.brief?.siRisks || [])].map((r: string, i: number) => (
-                      <li key={i} className="text-xs text-slate-700 flex gap-2">
-                        <span className="text-red-400 flex-shrink-0">•</span>{r}
-                      </li>
+                      <li key={i} className="text-sm text-slate-700 flex gap-2 leading-relaxed">
+                        <span className="text-red-400 flex-shrink-0 mt-0.5">•</span><span>{r}</span></li>
                     ))}
                   </ul>
                 </div>
