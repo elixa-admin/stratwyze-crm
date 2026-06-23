@@ -14,21 +14,39 @@ interface BriefResponse {
   itManagerAngle: string;
 }
 
-const BRIEF_PROMPT = (title: string, accountContext: string, incumbentPlatform?: string, saPartner?: string) => `You are a sales strategist. Generate a competitive brief for a deal. Return ONLY valid JSON (no markdown, no code blocks).
+const BRIEF_PROMPT = (
+  title: string,
+  accountContext: string,
+  incumbentPlatform?: string,
+  saPartner?: string,
+  companyResearch?: any,
+  extraContext?: string,
+) => `You are a senior B2B sales strategist specialising in ITSM and service management software. Generate a competitive qualification brief. Return ONLY valid JSON (no markdown, no code blocks).
 
 Deal: "${title}"
 ${accountContext}
 ${incumbentPlatform ? `Current Platform: ${incumbentPlatform}` : ''}
 ${saPartner ? `Current SI Partner: ${saPartner}` : ''}
+${extraContext ? `Seller's notes: ${extraContext}` : ''}
+${companyResearch ? `
+COMPANY INTELLIGENCE (from web research):
+- Overview: ${companyResearch.companySnapshot?.description || 'N/A'}
+- Revenue: ${companyResearch.companySnapshot?.revenue || 'N/A'}
+- Employees: ${companyResearch.companySnapshot?.employees || 'N/A'}
+- ITSM Relevance: ${companyResearch.itsmRelevance || 'N/A'}
+- Recent news: ${companyResearch.recentNews?.slice(0, 2).map((n: any) => n.headline).join('; ') || 'None'}
+- M&A: ${companyResearch.maActivity?.slice(0, 1).map((m: any) => m.event).join('; ') || 'None'}
+- Red flags: ${companyResearch.redFlags?.join('; ') || 'None'}
+` : ''}
 
 Return this exact JSON structure (all fields required, use empty string if N/A):
 {
-  "openingStatement": "Hook that resonates with the prospect's current pain",
-  "winStatement": "Your specific value proposition vs incumbent",
+  "openingStatement": "Hook that resonates with the prospect's current pain, referencing what we know about them",
+  "winStatement": "Your specific value proposition vs incumbent, tuned to their industry and scale",
   "platformRisks": ["risk1", "risk2", "risk3"],
   "siRisks": ["risk1", "risk2"],
-  "cioAngle": "CIO's perspective and pain points",
-  "itManagerAngle": "IT Manager's concerns and quick wins"
+  "cioAngle": "CIO's perspective, business outcomes, and strategic priorities based on what we know",
+  "itManagerAngle": "IT Manager's day-to-day pain and quick wins HaloITSM can deliver"
 }`;
 
 async function generateBriefWithClaude(prompt: string, model: string): Promise<{ brief: BriefResponse; tokens: number }> {
@@ -87,7 +105,7 @@ async function generateBriefWithRetry(prompt: string): Promise<{ brief: BriefRes
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, incumbentPlatform, saPartner, accountInfo } = body;
+    const { title, incumbentPlatform, saPartner, accountInfo, companyResearch, extraContext } = body;
 
     if (!title) {
       return NextResponse.json({ error: 'Deal title required' }, { status: 400 });
@@ -97,7 +115,7 @@ export async function POST(req: NextRequest) {
       ? `Account: ${accountInfo.name} (${accountInfo.industry || 'unknown industry'}, ${accountInfo.annualRevenue ? `~${accountInfo.annualRevenue.toLocaleString()}` : 'revenue unknown'})`
       : '';
 
-    const prompt = BRIEF_PROMPT(title, accountContext, incumbentPlatform, saPartner);
+    const prompt = BRIEF_PROMPT(title, accountContext, incumbentPlatform, saPartner, companyResearch, extraContext);
     const startTime = Date.now();
 
     const { brief, aiTier, tokens } = await generateBriefWithRetry(prompt);
