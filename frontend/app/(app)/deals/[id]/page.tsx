@@ -9,6 +9,7 @@ import ContactPanel from '@/components/shared/ContactPanel';
 import FollowUpScheduling from '@/components/shared/FollowUpScheduling';
 import ActivityQuickButtons from '@/components/shared/ActivityQuickButtons';
 import DealClosureSection from '@/components/shared/DealClosureSection';
+import SaveAsTemplateModal from '@/components/shared/SaveAsTemplateModal';
 
 interface Activity {
   id: string;
@@ -123,6 +124,7 @@ export default function DealDetailPage() {
   const [noteInput, setNoteInput] = useState('');
   const [postingNote, setPostingNote] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -233,10 +235,18 @@ export default function DealDetailPage() {
             {editStage}
           </span>
         </div>
-        <p className="text-xs text-slate-400 mb-5">
-          Created {new Date(deal.createdAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}
-          {saving && <span className="ml-2 text-blue-500">Saving…</span>}
-        </p>
+        <div className="flex items-center justify-between mb-5">
+          <p className="text-xs text-slate-400">
+            Created {new Date(deal.createdAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}
+            {saving && <span className="ml-2 text-blue-500">Saving…</span>}
+          </p>
+          <button
+            onClick={() => setTemplateModalOpen(true)}
+            className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            💾 Save as Template
+          </button>
+        </div>
 
         {/* Stage progression */}
         <div className="mb-5">
@@ -466,6 +476,19 @@ export default function DealDetailPage() {
             {saving ? 'Saving…' : 'Save changes'}
           </button>
         </div>
+      )}
+
+      {/* Save as Template Modal */}
+      {deal && (
+        <SaveAsTemplateModal
+          isOpen={templateModalOpen}
+          dealTitle={deal.title}
+          accountId={deal.accountId}
+          incumbentPlatform={deal.incumbentPlatform}
+          incumbentProvider={deal.incumbentProvider}
+          onClose={() => setTemplateModalOpen(false)}
+          onSaved={() => {}}
+        />
       )}
     </div>
   );

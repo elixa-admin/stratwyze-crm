@@ -97,9 +97,20 @@ function KanbanSkeleton() {
   );
 }
 
-export default function KanbanBoard() {
+interface KanbanBoardProps {
+  filters?: {
+    account?: string;
+    contact?: string;
+    stage?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  };
+}
+
+export default function KanbanBoard({ filters = {} }: KanbanBoardProps) {
   const router = useRouter();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [allDeals, setAllDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<DealContext | null>(null);
@@ -115,23 +126,50 @@ export default function KanbanBoard() {
       .then(r => r.json())
       .then(data => {
         if (data.deals) {
-          setOpportunities(data.deals.map((d: any): Opportunity => ({
-            id:              d.id,
-            title:           d.title,
-            value:           d.value,
-            createdAt:       d.createdAt,
-            probability:     STAGE_PROBABILITY[stageToLocal(d.stage)] ?? 50,
-            owner:           'You',
-            stage:           stageToLocal(d.stage),
-            incumbentPlatform: d.incumbentPlatform,
-            incumbentSI:     d.incumbentProvider,
-            accountId:       d.accountId,
-          })));
+          setAllDeals(data.deals);
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    let filtered = allDeals;
+
+    if (filters.account) {
+      filtered = filtered.filter(d => d.accountId === filters.account);
+    }
+
+    if (filters.stage) {
+      filtered = filtered.filter(d => d.stage === filters.stage);
+    }
+
+    if (filters.dateFrom) {
+      const dateFrom = new Date(filters.dateFrom);
+      filtered = filtered.filter(d => new Date(d.createdAt) >= dateFrom);
+    }
+
+    if (filters.dateTo) {
+      const dateTo = new Date(filters.dateTo);
+      dateTo.setDate(dateTo.getDate() + 1);
+      filtered = filtered.filter(d => new Date(d.createdAt) < dateTo);
+    }
+
+    setOpportunities(
+      filtered.map((d: any): Opportunity => ({
+        id: d.id,
+        title: d.title,
+        value: d.value,
+        createdAt: d.createdAt,
+        probability: STAGE_PROBABILITY[stageToLocal(d.stage)] ?? 50,
+        owner: 'You',
+        stage: stageToLocal(d.stage),
+        incumbentPlatform: d.incumbentPlatform,
+        incumbentSI: d.incumbentProvider,
+        accountId: d.accountId,
+      }))
+    );
+  }, [allDeals, filters]);
 
   useEffect(() => {
     const handleDealCreated = (event: Event) => {
