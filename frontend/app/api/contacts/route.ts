@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+async function triggerAutoEnrichment(contactId: string) {
+  const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  try {
+    await fetch(`${baseUrl}/api/contacts/${contactId}/intelligence/research`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ forceRefresh: false }),
+    });
+  } catch (err) {
+    console.error('[AutoEnrich] Failed to trigger research for contact', contactId, err);
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -41,7 +54,11 @@ export async function POST(req: NextRequest) {
 
     const contact = await prisma.contact.create({
       data: { accountId, name, email: email || null, phone: phone || null, title: title || null, role: role || null },
+      include: { account: true },
     });
+
+    // Auto-enrich: kick off intelligence research in background (fire and forget)
+    triggerAutoEnrichment(contact.id).catch(console.error);
 
     return NextResponse.json({ contact }, { status: 201 });
   } catch (err: any) {

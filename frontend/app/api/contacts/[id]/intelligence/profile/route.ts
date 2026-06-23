@@ -51,6 +51,30 @@ export async function GET(
       );
     }
 
+    // Smart refresh: if overdue and not already running, trigger in background
+    if (
+      profile.researchStatus === 'completed' &&
+      profile.nextRefreshAt &&
+      profile.nextRefreshAt < new Date()
+    ) {
+      const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      fetch(`${baseUrl}/api/contacts/${contactId}/intelligence/research`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ forceRefresh: true }),
+      }).catch(console.error);
+    }
+
+    // Auto-trigger on view if never researched or failed
+    if (!profile.researchStatus || profile.researchStatus === 'failed') {
+      const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      fetch(`${baseUrl}/api/contacts/${contactId}/intelligence/research`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ forceRefresh: false }),
+      }).catch(console.error);
+    }
+
     // Build response
     return NextResponse.json({
       contact: {
