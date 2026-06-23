@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/format';
 import { toast } from '@/lib/toast';
+import ContactPanel from '@/components/shared/ContactPanel';
+import FollowUpScheduling from '@/components/shared/FollowUpScheduling';
+import ActivityQuickButtons from '@/components/shared/ActivityQuickButtons';
 
 interface Activity {
   id: string;
@@ -30,6 +33,12 @@ interface Deal {
   currency: string;
   stage: 'Prospecting' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Closed Won';
   notes?: string;
+  archived?: boolean;
+  dueDate?: string;
+  nextAction?: string;
+  source?: string;
+  closureReason?: string;
+  lossReason?: string;
   accountId?: string;
   account?: { id: string; name: string; industry?: string; annualRevenue?: number; headquarters?: string };
   primaryContactId?: string;
@@ -195,13 +204,18 @@ export default function DealDetailPage() {
   const activities = deal.activities ?? [];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5 pb-20">
+    <div className="max-w-7xl mx-auto pb-20">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-slate-500">
+      <div className="flex items-center gap-2 text-sm text-slate-500 mb-5">
         <Link href="/pipeline" className="hover:text-slate-700 transition-colors">Pipeline</Link>
         <span>/</span>
         <span className="text-slate-900 font-medium truncate">{deal.title}</span>
       </div>
+
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Left column (2/3 width) */}
+        <div className="lg:col-span-2 space-y-5">
 
       {/* Header card */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
@@ -411,6 +425,15 @@ export default function DealDetailPage() {
             <p className="text-xs text-slate-400">No activity yet — add a note or update the stage to get started.</p>
           </div>
         )}
+      </div>
+        </div>
+
+        {/* Right column (1/3 width) */}
+        <div className="space-y-5">
+          <ContactPanel contact={deal.primaryContact} />
+          <FollowUpScheduling dealId={deal.id} dueDate={deal.dueDate} nextAction={deal.nextAction} />
+          <ActivityQuickButtons dealId={deal.id} />
+        </div>
       </div>
 
       {/* Floating save bar */}

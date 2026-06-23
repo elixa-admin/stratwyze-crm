@@ -30,6 +30,11 @@ model Deal {
   stage             String     @default("Prospecting")
   notes             String?
   archived          Boolean    @default(false)
+  dueDate           DateTime?
+  nextAction        String?
+  source            String?
+  closureReason     String?
+  lossReason        String?
   accountId         String?
   account           Account?   @relation(fields: [accountId], references: [id])
   primaryContactId  String?
