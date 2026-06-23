@@ -155,6 +155,19 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const handleCreateDeal = async () => {
     setLoading(true);
     try {
+      const snap = researchData?.profile?.companySnapshot;
+      // Auto-create account from research if none selected
+      const autoCreateAccount = !accountId ? {
+        name: companyName || title,
+        legalEntity: snap?.legalEntity || null,
+        website: snap?.website || website || null,
+        phone: snap?.phone || null,
+        industry: snap?.industry || industry || null,
+        headquarters: snap?.headquarters || location || null,
+        employees: snap?.employees || employees || null,
+        jseTickerSymbol: researchData?.detectedTicker || null,
+      } : undefined;
+
       const res = await fetch('/api/deals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -167,12 +180,14 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
           saPartnerId: saPartnerId || undefined,
           competitiveBrief: briefData?.brief || undefined,
           enrichmentData: researchData?.profile || undefined,
+          autoCreateAccount,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create deal');
-      toast(`Deal "${title}" created`, 'success');
-      onSubmit({ title, value: parseFloat(value), accountId, stageName, dealId: data.deal?.id });
+      const accountMsg = data.accountCreated ? ' · Account auto-created' : '';
+      toast(`Deal "${title}" created${accountMsg}`, 'success');
+      onSubmit({ title, value: parseFloat(value), accountId: data.deal?.accountId || accountId, stageName, dealId: data.deal?.id });
       setTimeout(() => { resetAll(); onClose(); }, 400);
     } catch (err: any) {
       toast(err?.message || 'Failed to create deal', 'error');
@@ -371,6 +386,27 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
           {/* ─── STEP 4: Brief ─── */}
           {step === 'brief' && briefData && (
             <div className="p-6 space-y-4">
+              {/* Auto-account creation notice */}
+              {!accountId && (researchData?.profile?.companySnapshot || companyName || title) && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-start gap-3">
+                  <span className="text-emerald-600 text-base shrink-0 mt-0.5">✓</span>
+                  <div>
+                    <p className="text-xs font-semibold text-emerald-800">Account will be auto-created</p>
+                    <p className="text-xs text-emerald-700 mt-0.5">
+                      <strong>{researchData?.profile?.companySnapshot?.legalEntity || companyName || title}</strong>
+                      {researchData?.profile?.companySnapshot?.headquarters ? ` · ${researchData.profile.companySnapshot.headquarters}` : ''}
+                      {researchData?.profile?.companySnapshot?.employees ? ` · ${researchData.profile.companySnapshot.employees} employees` : ''}
+                      {researchData?.detectedTicker ? ` · JSE: ${researchData.detectedTicker}` : ''}
+                    </p>
+                    {(researchData?.profile?.keyContacts?.length ?? 0) > 0 && (
+                      <p className="text-xs text-emerald-600 mt-1">
+                        {researchData.profile.keyContacts.length} key contact{researchData.profile.keyContacts.length !== 1 ? 's' : ''} will also be created
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Company snapshot */}
               {researchData?.profile?.companySnapshot && (
                 <div className="bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 rounded-xl p-4">

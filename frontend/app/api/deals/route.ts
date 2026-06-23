@@ -38,10 +38,51 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, value, accountId, stageName, competitorId, saPartnerId, enrichmentData, competitiveBrief } = body;
+    const {
+      title, value, accountId, stageName, competitorId, saPartnerId,
+      enrichmentData, competitiveBrief, autoCreateAccount,
+    } = body;
 
     if (!title || !value) {
       return NextResponse.json({ error: 'Title and value are required' }, { status: 400 });
+    }
+
+    // Auto-create account from research data if no accountId provided
+    let resolvedAccountId = accountId || null;
+    if (!resolvedAccountId && autoCreateAccount?.name) {
+      const snap = enrichmentData?.companySnapshot;
+      const account = await (prisma.account.create as any)({
+        data: {
+          name: autoCreateAccount.name,
+          legalEntity: snap?.legalEntity || autoCreateAccount.legalEntity || null,
+          website: snap?.website || autoCreateAccount.website || null,
+          phone: snap?.phone || autoCreateAccount.phone || null,
+          industry: snap?.industry || autoCreateAccount.industry || null,
+          employees: snap?.employeesNumeric ? Number(snap.employeesNumeric) : (autoCreateAccount.employees ? parseInt(autoCreateAccount.employees) : null),
+          headquarters: snap?.headquarters || autoCreateAccount.headquarters || null,
+          description: snap?.description || null,
+          enrichmentData: enrichmentData ?? null,
+          jseTickerSymbol: autoCreateAccount.jseTickerSymbol || null,
+          isListed: !!autoCreateAccount.jseTickerSymbol,
+        },
+      });
+      resolvedAccountId = account.id;
+
+      // Auto-create key contacts from research if found
+      const keyContacts: any[] = enrichmentData?.keyContacts ?? [];
+      if (keyContacts.length > 0) {
+        await prisma.contact.createMany({
+          data: keyContacts.slice(0, 5).map((c: any) => ({
+            accountId: account.id,
+            name: c.name || 'Unknown Contact',
+            title: c.title || null,
+            role: c.relevance || null,
+            department: c.department || null,
+            linkedin: c.linkedin || null,
+          })),
+          skipDuplicates: true,
+        });
+      }
     }
 
     const deal = await prisma.deal.create({
@@ -50,17 +91,17 @@ export async function POST(req: NextRequest) {
         value: parseFloat(value),
         currency: 'ZAR',
         stage: stageName || 'Prospecting',
-        accountId: accountId || null,
+        accountId: resolvedAccountId,
         incumbentPlatform: competitorId || null,
         incumbentProvider: saPartnerId || null,
         enrichmentData: enrichmentData ?? null,
         competitiveBrief: competitiveBrief ?? null,
       },
-      include: { account: true },
+      include: { account: { include: { contacts: true } } },
     });
 
     return NextResponse.json(
-      { deal, message: `Deal "${title}" created successfully!` },
+      { deal, message: `Deal "${title}" created successfully!`, accountCreated: !accountId && !!resolvedAccountId },
       { status: 201 }
     );
   } catch (err: any) {

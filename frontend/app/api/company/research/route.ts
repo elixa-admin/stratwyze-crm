@@ -75,13 +75,25 @@ Return this exact JSON structure:
 {
   "companySnapshot": {
     "description": "1-2 sentence overview of what the company does",
+    "legalEntity": "official registered company name (e.g. 'MTN Group Limited') or null if not found",
     "revenue": "estimated annual revenue or range (use ZAR if SA company)",
     "employees": "employee count or range",
+    "employeesNumeric": 500,
     "founded": "founding year if known, else null",
     "headquarters": "city, country",
     "website": "website URL if found",
+    "phone": "main contact phone number if found, else null",
     "industry": "industry sector"
   },
+  "keyContacts": [
+    {
+      "name": "full name if found in research",
+      "title": "job title",
+      "department": "IT / Finance / Operations / Executive",
+      "relevance": "why relevant to ITSM sale — e.g. 'likely decision maker for IT tooling'",
+      "linkedin": "linkedin.com/in/slug if found, else null"
+    }
+  ],
   "recentNews": [
     { "headline": "news headline", "summary": "1-sentence summary", "date": "date if known", "significance": "why this matters for sales" }
   ],

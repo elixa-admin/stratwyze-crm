@@ -7,14 +7,17 @@ datasource db {
 }
 
 model Account {
-  id            String          @id @default(cuid())
-  name          String
-  website       String?
-  industry      String?
-  employees     Int?
-  annualRevenue Float?
-  headquarters  String?
+  id                 String          @id @default(cuid())
+  name               String
+  website            String?
+  phone              String?
+  industry           String?
+  employees          Int?
+  annualRevenue      Float?
+  headquarters       String?
   legalEntity        String?
+  description        String?
+  enrichmentData     Json?
   jseTickerSymbol    String?
   isListed           Boolean   @default(false)
   lastMarketDataAt   DateTime?
@@ -65,17 +68,22 @@ model Activity {
 }
 
 model Contact {
-  id        String   @id @default(cuid())
-  accountId String
-  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  name      String
-  email     String?
-  phone     String?
-  title     String?
-  role      String?
-  deals     Deal[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(cuid())
+  accountId        String
+  account          Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name             String
+  email            String?
+  phone            String?
+  title            String?
+  role             String?
+  linkedin         String?
+  location         String?
+  department       String?
+  intelligenceData Json?
+  lastResearchedAt DateTime?
+  deals            Deal[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model DealTemplate {
