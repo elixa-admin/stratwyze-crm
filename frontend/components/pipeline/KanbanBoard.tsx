@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import DealPursuitModal, { DealContext } from '@/components/pipeline/DealPursuitModal';
 import { formatCurrency } from '@/lib/format';
 
@@ -96,6 +97,7 @@ function KanbanSkeleton() {
 }
 
 export default function KanbanBoard() {
+  const router = useRouter();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -305,7 +307,7 @@ export default function KanbanBoard() {
                     key={opp.id}
                     className={`bg-white rounded-lg border border-slate-200 p-3 shadow-xs hover:shadow-sm transition-all group ${draggedId === opp.id ? 'opacity-50 ring-2 ring-blue-300' : ''}`}
                   >
-                    {/* Title — inline edit or link */}
+                    {/* Title — clickable to navigate or double-click to edit */}
                     {editingId === opp.id ? (
                       <input
                         autoFocus
@@ -318,9 +320,10 @@ export default function KanbanBoard() {
                       />
                     ) : (
                       <div
-                        onClick={e => { e.preventDefault(); handleStartEdit(opp); }}
+                        onClick={() => router.push(`/deals/${opp.id}`)}
+                        onDoubleClick={e => { e.stopPropagation(); handleStartEdit(opp); }}
                         className="block text-sm font-medium text-slate-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors mb-2"
-                        title="Click to edit"
+                        title="Click to view • Double-click to edit"
                       >
                         {opp.title}
                       </div>
