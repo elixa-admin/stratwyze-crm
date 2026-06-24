@@ -157,9 +157,9 @@ export default function CompetitiveIntelPage() {
             <div className="flex gap-3">
               {[
                 { label: 'Critical', color: 'bg-red-500' },
-                { label: 'High', color: 'bg-orange-500' },
-                { label: 'Medium', color: 'bg-blue-500' },
-                { label: 'Low', color: 'bg-green-500' },
+                { label: 'High', color: 'bg-amber-400' },
+                { label: 'Medium', color: 'bg-indigo-500' },
+                { label: 'Low', color: 'bg-emerald-500' },
               ].map(({ label, color }) => (
                 <div key={label} className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${color}`} />

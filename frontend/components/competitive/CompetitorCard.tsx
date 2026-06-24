@@ -2,25 +2,32 @@
 
 import { Competitor, RiskLevel } from '@/lib/types/competitive';
 
-const RISK_COLORS: Record<RiskLevel, string> = {
-  Critical: 'bg-red-50 border-red-200 hover:shadow-md hover:border-red-300',
-  High: 'bg-orange-50 border-orange-200 hover:shadow-md hover:border-orange-300',
-  Medium: 'bg-blue-50 border-blue-200 hover:shadow-md hover:border-blue-300',
-  Low: 'bg-green-50 border-green-200 hover:shadow-md hover:border-green-300',
+const RISK_LEFT_BORDER: Record<RiskLevel, string> = {
+  Critical: 'border-l-red-500',
+  High:     'border-l-amber-400',
+  Medium:   'border-l-indigo-400',
+  Low:      'border-l-emerald-400',
 };
 
 const RISK_BADGE_COLORS: Record<RiskLevel, string> = {
-  Critical: 'bg-red-100 text-red-700 border border-red-300',
-  High: 'bg-orange-100 text-orange-700 border border-orange-300',
-  Medium: 'bg-blue-100 text-blue-700 border border-blue-300',
-  Low: 'bg-green-100 text-green-700 border border-green-300',
+  Critical: 'bg-red-50 text-red-700 border border-red-200',
+  High:     'bg-amber-50 text-amber-700 border border-amber-200',
+  Medium:   'bg-indigo-50 text-indigo-700 border border-indigo-200',
+  Low:      'bg-emerald-50 text-emerald-700 border border-emerald-200',
 };
 
 const AVATAR_COLORS: Record<RiskLevel, string> = {
-  Critical: 'bg-red-500',
-  High: 'bg-orange-500',
-  Medium: 'bg-blue-500',
-  Low: 'bg-green-500',
+  Critical: 'bg-red-600',
+  High:     'bg-amber-500',
+  Medium:   'bg-indigo-500',
+  Low:      'bg-emerald-500',
+};
+
+const TCO_BAR_COMPETITOR: Record<RiskLevel, string> = {
+  Critical: 'bg-red-400',
+  High:     'bg-amber-400',
+  Medium:   'bg-slate-400',
+  Low:      'bg-slate-300',
 };
 
 interface CompetitorCardProps {
@@ -34,17 +41,16 @@ export default function CompetitorCard({
   isSelected = false,
   onClick,
 }: CompetitorCardProps) {
-  const riskColor = RISK_COLORS[competitor.riskLevel];
+  const leftBorder = RISK_LEFT_BORDER[competitor.riskLevel];
   const avatarColor = AVATAR_COLORS[competitor.riskLevel];
   const badgeColor = RISK_BADGE_COLORS[competitor.riskLevel];
+  const tcoBarColor = TCO_BAR_COMPETITOR[competitor.riskLevel];
 
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left border-2 rounded-2xl p-6 transition-all ${
-        isSelected
-          ? `${riskColor} border-l-4`
-          : `${riskColor} border-transparent hover:border-slate-300`
+      className={`w-full text-left bg-white border border-slate-200 border-l-4 ${leftBorder} rounded-xl p-5 transition-all hover:shadow-md hover:border-slate-300 ${
+        isSelected ? 'shadow-md ring-2 ring-blue-500/20 border-slate-300' : ''
       }`}
     >
       {/* Header: Avatar + Name + Badge */}
@@ -111,19 +117,8 @@ export default function CompetitorCard({
                 {competitor.tco3Year.competitor.max ? `-${competitor.tco3Year.competitor.max / 1000}M` : 'K'}
               </span>
             </div>
-            <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${
-                  competitor.riskLevel === 'Critical'
-                    ? 'bg-red-500'
-                    : competitor.riskLevel === 'High'
-                      ? 'bg-orange-500'
-                      : 'bg-blue-500'
-                }`}
-                style={{
-                  width: '75%',
-                }}
-              />
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${tcoBarColor}`} style={{ width: '75%' }} />
             </div>
           </div>
           <div>
@@ -134,7 +129,7 @@ export default function CompetitorCard({
                 {competitor.tco3Year.haloITSM.max ? `-${competitor.tco3Year.haloITSM.max / 1000}M` : 'K'}
               </span>
             </div>
-            <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div className="h-full rounded-full bg-blue-600" style={{ width: '35%' }} />
             </div>
           </div>
