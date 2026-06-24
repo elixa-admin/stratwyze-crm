@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateWithFallback } from '@/lib/utils/ai-fallback-chain';
 import { COMPETITORS } from '@/lib/data/competitors';
 import { SA_PARTNERS } from '@/lib/data/sa-partners';
+import { SA_MARKET_PAIRINGS } from '@/lib/data/market-pairings';
 import { ResearchActivityTracker } from '@/lib/utils/research-activity';
+
+const MARKET_PAIRINGS_CONTEXT = `
+KNOWN SA MARKET PAIRINGS (established SI ↔ platform relationships in South Africa — use to anticipate which integrator likely fronts an incumbent platform):
+${SA_MARKET_PAIRINGS.map(p => `- ${p.si} + ${p.platform}: ${p.note}`).join('\n')}
+`;
 
 async function serpSearch(query: string): Promise<string> {
   const apiKey = process.env.SERPAPI_KEY;
@@ -133,6 +139,7 @@ Notes: ${dealContext.notes ?? 'none'}
 ${competitorContext}
 ${partnerContext}
 ${accountContext}
+${MARKET_PAIRINGS_CONTEXT}
 ${webContext}
 
 Generate a battle card. Return ONLY valid JSON (no markdown):

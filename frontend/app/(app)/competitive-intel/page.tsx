@@ -388,7 +388,9 @@ export default function CompetitiveIntelPage() {
           </div>
 
           <div className="text-sm text-slate-500 text-center">
-            Showing {filteredPartners.length} of {SA_PARTNERS.length} SA competitors
+            {saSubTab === 'halo-partners'
+              ? `Showing ${channelPartners.length} HaloITSM partner${channelPartners.length !== 1 ? 's' : ''}`
+              : `Showing ${platformPartners.length} platform SI${platformPartners.length !== 1 ? 's' : ''}`}
           </div>
         </div>
       )}

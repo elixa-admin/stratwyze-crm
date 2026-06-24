@@ -238,27 +238,6 @@ export default function PursuitEngine({ onNavigateToProposal }: Props) {
           )}
         </div>
 
-        {/* Known pairings */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-          <p className="text-[11px] font-semibold text-slate-600 uppercase tracking-wide mb-2">Known SA Market Pairings</p>
-          <div className="space-y-1.5">
-            {[
-              { si: 'Nexio', platform: 'ServiceNow', note: 'OEM Reseller — Gauteng enterprise' },
-              { si: 'Think Tank', platform: 'Ivanti', note: 'Ivanti Premier Partner SA' },
-              { si: 'ITR Technology', platform: 'ManageEngine', note: 'Exclusive SA distributor' },
-              { si: 'S Con', platform: 'Freshservice', note: 'Freshworks SA partner' },
-              { si: 'Mediro', platform: 'ServiceNow', note: 'ServiceNow BSM specialist' },
-            ].map(({ si, platform, note }) => (
-              <div key={si} className="flex items-start gap-1.5">
-                <span className="text-[10px] font-medium text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded flex-shrink-0">{si}</span>
-                <span className="text-[10px] text-slate-400 mt-0.5">+</span>
-                <span className="text-[10px] font-medium text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded flex-shrink-0">{platform}</span>
-                <span className="text-[10px] text-slate-400 mt-0.5 leading-tight">{note}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Verification panel (inline, below selector) */}
         {briefMode === 'ai' && canGenerate && showVerify && (
           <IntelVerificationPanel

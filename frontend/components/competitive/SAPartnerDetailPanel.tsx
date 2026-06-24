@@ -2,10 +2,12 @@
 
 import { SAPartner, ThreatLevel } from '@/lib/types/sa-partners';
 
-const GRADIENT: Record<ThreatLevel, string> = {
-  Primary: 'from-red-600 to-red-800',
-  Secondary: 'from-orange-500 to-orange-700',
-  Emerging: 'from-slate-600 to-slate-800',
+// Threat is signalled by a coloured dot on the badge (matching the cards),
+// not by tinting the whole header — keeps the panel on the site's dark chrome.
+const THREAT_DOT: Record<ThreatLevel, string> = {
+  Primary: 'bg-red-500',
+  Secondary: 'bg-orange-500',
+  Emerging: 'bg-slate-400',
 };
 
 const PLATFORM_ACCENT: Record<string, string> = {
@@ -40,12 +42,11 @@ export default function SAPartnerDetailPanel({ partner }: Props) {
   }
 
   const accentColor = PLATFORM_ACCENT[partner.platformAlignment] ?? 'bg-slate-600';
-  const gradient = GRADIENT[partner.threatLevel];
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-      {/* Header gradient */}
-      <div className={`bg-gradient-to-br ${gradient} p-5 text-white`}>
+      {/* Header — neutral dark chrome, matches site theme */}
+      <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-5 text-white">
         <div className="flex items-start gap-3">
           <div className={`w-11 h-11 rounded-lg ${accentColor} flex items-center justify-center text-white font-bold text-base flex-shrink-0`}>
             {partner.avatar}
@@ -59,7 +60,8 @@ export default function SAPartnerDetailPanel({ partner }: Props) {
           <span className="text-[10px] font-semibold text-white/90 bg-white/20 px-2 py-0.5 rounded-full">
             {partner.category}
           </span>
-          <span className="text-[10px] font-semibold text-white/90 bg-white/20 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-semibold text-white/90 bg-white/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${THREAT_DOT[partner.threatLevel]}`} />
             {partner.threatLevel} Threat
           </span>
           <span className="text-[10px] font-semibold text-white/90 bg-white/20 px-2 py-0.5 rounded-full">
