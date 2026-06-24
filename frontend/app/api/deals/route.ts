@@ -53,20 +53,45 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json();
     const {
       title,
       value,
-      accountId,
+      accountId: accountIdInput,
       primaryContactId,
-      stage = 'Prospecting',
+      // Accept both `stage` and the modal's legacy `stageName`
+      stage: stageInput,
+      stageName,
       currency = 'ZAR',
-    } = await request.json();
+      incumbentPlatform,
+      incumbentProvider,
+      notes,
+      autoCreateAccount,
+    } = body;
+
+    const stage = stageInput || stageName || 'Prospecting';
 
     if (!title || !value) {
       return NextResponse.json(
         { error: 'Title and value are required' },
         { status: 400 }
       );
+    }
+
+    // Auto-create an account when none is linked and we have details for one
+    let accountId: string | undefined = accountIdInput || undefined;
+    let accountCreated = false;
+    if (!accountId && autoCreateAccount?.name) {
+      const newAccount = await prisma.account.create({
+        data: {
+          name: autoCreateAccount.name,
+          website: autoCreateAccount.website || undefined,
+          industry: autoCreateAccount.industry || undefined,
+          headquarters: autoCreateAccount.headquarters || undefined,
+        },
+      });
+      accountId = newAccount.id;
+      accountCreated = true;
     }
 
     const deal = await prisma.deal.create({
@@ -77,6 +102,9 @@ export async function POST(request: NextRequest) {
         currency,
         accountId: accountId || undefined,
         primaryContactId: primaryContactId || undefined,
+        incumbentPlatform: incumbentPlatform || undefined,
+        incumbentProvider: incumbentProvider || undefined,
+        notes: notes || undefined,
       },
       include: {
         account: true,
@@ -120,6 +148,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         deal,
+        accountCreated,
         message: 'Deal created successfully',
       },
       { status: 201 }

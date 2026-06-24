@@ -2,15 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from '@/lib/toast';
+import { formatCurrency } from '@/lib/format';
 import { COMPETITORS } from '@/lib/data/competitors';
 import { SA_PARTNERS } from '@/lib/data/sa-partners';
-import {
-  getRandomCommentary,
-  getRandomFact,
-  getRandomObservation,
-  getStageCommentary,
-} from '@/lib/research-commentary';
-import { TYPOGRAPHY } from '@/lib/typography';
 
 interface NewDealModalProps {
   isOpen: boolean;
@@ -18,28 +12,37 @@ interface NewDealModalProps {
   onSubmit: (data: { title: string; value: number; accountId: string; stageName: string; dealId?: string }) => void;
 }
 
-type Step = 'details' | 'profile' | 'researching' | 'brief';
+type Step = 'details' | 'confirm';
 
-const EMPLOYEE_RANGES = ['1–50', '51–200', '201–500', '501–1,000', '1,001–5,000', '5,001–10,000', '10,000+'];
 const INDUSTRIES = ['IT Services', 'Financial Services', 'Healthcare', 'Manufacturing', 'Retail & FMCG', 'Government & Public Sector', 'Logistics & Transport', 'Education', 'Mining & Resources', 'Telecommunications', 'Professional Services', 'Other'];
+const STAGES = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won'];
+const CLOSED = ['Closed Won', 'Closed Lost'];
+
+interface AccountLite {
+  id: string; name: string; industry?: string; annualRevenue?: number;
+  website?: string; employees?: number; headquarters?: string;
+}
+interface DealLite {
+  id: string; title: string; stage: string; value: number;
+  account?: { id: string; name: string } | null;
+}
 
 const IconChevron = ({ dir = 'right' }: { dir?: 'left' | 'right' }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     {dir === 'right' ? <polyline points="9 18 15 12 9 6" /> : <polyline points="15 18 9 12 15 6" />}
   </svg>
 );
-
 const IconX = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
-
 const Spinner = () => (
   <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
 );
 
-function StepIndicator({ current, steps }: { current: number; steps: string[] }) {
+function StepIndicator({ current }: { current: number }) {
+  const steps = ['Deal Details', 'Review & Create'];
   return (
     <div className="flex items-center gap-2 px-6 py-3 border-b border-slate-100 bg-slate-50">
       {steps.map((label, i) => (
@@ -63,36 +66,34 @@ function StepIndicator({ current, steps }: { current: number; steps: string[] })
 
 export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModalProps) {
   const [step, setStep] = useState<Step>('details');
-  // Step 1 — Deal details
+  // Essentials
   const [title, setTitle] = useState('');
   const [value, setValue] = useState('');
   const [accountId, setAccountId] = useState('');
   const [stageName, setStageName] = useState('Prospecting');
-  const [accounts, setAccounts] = useState<{
-    id: string; name: string; industry?: string; annualRevenue?: number;
-    website?: string; employees?: number; headquarters?: string;
-  }[]>([]);
-  // Step 2 — Company profile
+  // New-account fields (only used when no account is linked)
   const [companyName, setCompanyName] = useState('');
   const [website, setWebsite] = useState('');
   const [industry, setIndustry] = useState('');
-  const [employees, setEmployees] = useState('');
   const [location, setLocation] = useState('');
+  // Optional extras
+  const [showExtras, setShowExtras] = useState(false);
   const [competitorId, setCompetitorId] = useState('');
   const [saPartnerId, setSaPartnerId] = useState('');
-  const [extraContext, setExtraContext] = useState('');
-  // Research + brief
-  const [researchLog, setResearchLog] = useState<string[]>([]);
-  const [researchData, setResearchData] = useState<any>(null);
-  const [briefData, setBriefData] = useState<any>(null);
+  const [notes, setNotes] = useState('');
+  // Data
+  const [accounts, setAccounts] = useState<AccountLite[]>([]);
+  const [existingDeals, setExistingDeals] = useState<DealLite[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
     fetch('/api/accounts').then(r => r.json()).then(d => { if (d.accounts) setAccounts(d.accounts); }).catch(() => {});
+    fetch('/api/deals').then(r => r.json()).then(d => { if (d.deals) setExistingDeals(d.deals); }).catch(() => {});
   }, [isOpen]);
 
-  // Auto-fill step 2 when an account is selected in step 1
+  // Auto-fill new-account fields when an account is selected (so the company
+  // summary on the review step reflects the linked account).
   useEffect(() => {
     if (!accountId) return;
     const acct = accounts.find(a => a.id === accountId);
@@ -100,7 +101,6 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
     if (!companyName) setCompanyName(acct.name);
     if (!website && acct.website) setWebsite(acct.website);
     if (!industry && acct.industry) setIndustry(acct.industry);
-    if (!employees && acct.employees) setEmployees(String(acct.employees));
     if (!location && acct.headquarters) setLocation(acct.headquarters);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId]);
@@ -108,163 +108,68 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const resetAll = () => {
     setStep('details');
     setTitle(''); setValue(''); setAccountId(''); setStageName('Prospecting');
-    setCompanyName(''); setWebsite(''); setIndustry(''); setEmployees('');
-    setLocation(''); setCompetitorId(''); setSaPartnerId(''); setExtraContext('');
-    setResearchLog([]); setResearchData(null); setBriefData(null); setLoading(false);
+    setCompanyName(''); setWebsite(''); setIndustry(''); setLocation('');
+    setShowExtras(false); setCompetitorId(''); setSaPartnerId(''); setNotes('');
+    setLoading(false);
   };
 
   const handleClose = () => { resetAll(); onClose(); };
 
-  const addLog = (msg: string) => setResearchLog(prev => [...prev, msg]);
+  const selectedAccount = accounts.find(a => a.id === accountId);
+  const incumbentPlatform = competitorId ? COMPETITORS.find(c => c.id === competitorId)?.name : undefined;
+  const incumbentProvider = saPartnerId ? SA_PARTNERS.find(p => p.id === saPartnerId)?.name : undefined;
 
-  const handleResearch = async () => {
-    if (!title || !value) { toast('Deal title and value required', 'error'); return; }
-    const nameToResearch = companyName || title;
+  // Duplicate guard — open deals already on the chosen account
+  const openDealsOnAccount = accountId
+    ? existingDeals.filter(d => d.account?.id === accountId && !CLOSED.includes(d.stage))
+    : [];
 
-    setStep('researching');
-    setResearchLog([]);
-    setLoading(true);
-
-    try {
-      // Opening message
-      addLog(getRandomCommentary('START'));
-
-      // Simulate research phases with entertaining commentary
-      await new Promise(r => setTimeout(r, 300));
-      addLog(getRandomCommentary('WEB_SEARCH'));
-
-      const resRes = await fetch('/api/company/research', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyName: nameToResearch, website, industry, employees, location }),
-      });
-
-      let researchProfile = null;
-      if (resRes.ok) {
-        const resData = await resRes.json();
-        researchProfile = resData.profile;
-        setResearchData(resData);
-
-        // Fun observations about what we found
-        if (resData.sourceCount) addLog(`✓ Cracked ${resData.sourceCount} sources (we're thorough)`);
-        if (researchProfile?.companySnapshot?.employees) {
-          addLog(getRandomCommentary('LINKEDIN'));
-          await new Promise(r => setTimeout(r, 200));
-        }
-        if (researchProfile?.recentNews?.length) {
-          addLog(getRandomCommentary('NEWS'));
-          addLog(`✓ ${researchProfile.recentNews.length} news items found. Interesting times.`);
-        }
-        if (researchProfile?.maActivity?.length) {
-          addLog(getRandomCommentary('MA'));
-          addLog(`✓ M&A activity detected. They're thinking big.`);
-        }
-
-        // Inject a fun fact
-        await new Promise(r => setTimeout(r, 150));
-        addLog(`💡 ${getRandomFact()}`);
-
-        // Interesting observation
-        if (Math.random() > 0.3) {
-          await new Promise(r => setTimeout(r, 150));
-          addLog(`🎯 ${getRandomObservation()}`);
-        }
-      } else {
-        addLog(`⚠ Web research took a nap. No worries, we'll wing it with brilliance.`);
-      }
-
-      // AI synthesis
-      await new Promise(r => setTimeout(r, 200));
-      addLog(getRandomCommentary('SYNTHESIS'));
-
-      const account = accounts.find(a => a.id === accountId);
-      const briefRes = await fetch('/api/deals/brief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          incumbentPlatform: competitorId ? COMPETITORS.find(c => c.id === competitorId)?.name : undefined,
-          saPartner: saPartnerId ? SA_PARTNERS.find(p => p.id === saPartnerId)?.name : undefined,
-          accountInfo: account ? { name: account.name, industry: account.industry, annualRevenue: account.annualRevenue } : undefined,
-          companyResearch: researchProfile,
-          extraContext,
-        }),
-      });
-
-      const briefJson = await briefRes.json();
-      if (!briefRes.ok) throw new Error(briefJson.error || 'Brief generation failed');
-      setBriefData(briefJson);
-
-      await new Promise(r => setTimeout(r, 150));
-      addLog(`✓ Brief synthesized. You're about to look brilliant.`);
-
-      // Motivational closing
-      await new Promise(r => setTimeout(r, 100));
-      const stageMsg = getStageCommentary(
-        stageName === 'Qualification' ? 'QUALIFICATION' :
-        stageName === 'Solutioning' ? 'SOLUTIONING' :
-        stageName === 'Proposal' ? 'PROPOSAL' :
-        'PROSPECTING'
-      );
-      addLog(`✨ ${stageMsg}`);
-
-      setStep('brief');
-    } catch (err: any) {
-      toast(err?.message || 'Research failed', 'error');
-      setStep('profile');
-    } finally {
-      setLoading(false);
-    }
+  const goToReview = () => {
+    if (!title.trim() || !value) { toast('Deal title and value required', 'error'); return; }
+    if (parseFloat(value) <= 0) { toast('Deal value must be greater than zero', 'error'); return; }
+    setStep('confirm');
   };
 
   const handleCreateDeal = async () => {
     setLoading(true);
     try {
-      const snap = researchData?.profile?.companySnapshot;
-      // Auto-create account from research if none selected
-      const autoCreateAccount = !accountId ? {
-        name: companyName || title,
-        legalEntity: snap?.legalEntity || null,
-        website: snap?.website || website || null,
-        phone: snap?.phone || null,
-        industry: snap?.industry || industry || null,
-        headquarters: snap?.headquarters || location || null,
-        employees: snap?.employees || employees || null,
-        jseTickerSymbol: researchData?.detectedTicker || null,
-      } : undefined;
+      const autoCreateAccount = !accountId && (companyName.trim() || title.trim())
+        ? {
+            name: companyName.trim() || title.trim(),
+            website: website.trim() || null,
+            industry: industry || null,
+            headquarters: location.trim() || null,
+          }
+        : undefined;
 
       const res = await fetch('/api/deals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
+          title: title.trim(),
           value: parseFloat(value),
+          stage: stageName,
           accountId: accountId || undefined,
-          stageName,
-          competitorId: competitorId || undefined,
-          saPartnerId: saPartnerId || undefined,
-          competitiveBrief: briefData?.brief || undefined,
-          enrichmentData: researchData?.profile || undefined,
+          incumbentPlatform,
+          incumbentProvider,
+          notes: notes.trim() || undefined,
           autoCreateAccount,
-          buyerIntentBreakdown: researchData?.buyerIntentBreakdown || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create deal');
+
       const accountMsg = data.accountCreated ? ' · Account auto-created' : '';
-      toast(`Deal "${title}" created${accountMsg}`, 'success');
-      onSubmit({ title, value: parseFloat(value), accountId: data.deal?.accountId || accountId, stageName, dealId: data.deal?.id });
-      setTimeout(() => { resetAll(); onClose(); }, 400);
+      toast(`Deal "${title.trim()}" created${accountMsg}`, 'success');
+      onSubmit({ title: title.trim(), value: parseFloat(value), accountId: data.deal?.accountId || accountId, stageName, dealId: data.deal?.id });
+      setTimeout(() => { resetAll(); onClose(); }, 300);
     } catch (err: any) {
       toast(err?.message || 'Failed to create deal', 'error');
-    } finally {
       setLoading(false);
     }
   };
 
   if (!isOpen) return null;
-
-  const stepIndex = step === 'details' ? 0 : step === 'profile' ? 1 : 2;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
@@ -274,38 +179,37 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
         <div className="px-6 py-4 border-b border-slate-200 flex items-start justify-between bg-gradient-to-r from-blue-600 to-indigo-600">
           <div>
             <h2 className="text-base font-bold text-white">Create New Deal</h2>
-            <p className="text-xs text-blue-200 mt-0.5">AI-powered prospect intelligence and competitive brief</p>
+            <p className="text-xs text-blue-200 mt-0.5">Capture the essentials — generate the AI brief later from the deal.</p>
           </div>
           <button onClick={handleClose} className="w-7 h-7 rounded-full flex items-center justify-center text-blue-200 hover:text-white hover:bg-white/20 transition-all">
             <IconX />
           </button>
         </div>
 
-        {/* Step indicator */}
-        {step !== 'researching' && (
-          <StepIndicator current={stepIndex} steps={['Deal Details', 'Prospect Profile', 'AI Brief']} />
-        )}
+        <StepIndicator current={step === 'details' ? 0 : 1} />
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto">
 
-          {/* ─── STEP 1: Deal Details ─── */}
+          {/* ─── STEP 1: Details ─── */}
           {step === 'details' && (
             <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                  Deal Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') goToReview(); }}
+                  placeholder="e.g. MTN ITSM Modernisation"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Deal Title <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    placeholder="e.g. MTN ITSM Modernisation"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoFocus
-                  />
-                </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
                     Value (ZAR) <span className="text-red-500">*</span>
@@ -321,277 +225,172 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Stage</label>
                   <select value={stageName} onChange={e => setStageName(e.target.value)} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    {['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won'].map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Link to Account</label>
-                  <select value={accountId} onChange={e => setAccountId(e.target.value)} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Select account (optional)</option>
-                    {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                    {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* ─── STEP 2: Prospect Profile ─── */}
-          {step === 'profile' && (
-            <div className="p-6 space-y-4">
-              <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
-                <p className="text-xs font-semibold text-blue-800">AI Company Research</p>
-                <p className="text-xs text-blue-600 mt-0.5">We'll search the web, recent news, M&A events, and LinkedIn to build a qualification brief before your first meeting.</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Company Name</label>
-                  <input
-                    type="text"
-                    value={companyName}
-                    onChange={e => setCompanyName(e.target.value)}
-                    placeholder={title || 'e.g. MTN Group'}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-[10px] text-slate-400 mt-1">Leave blank to use deal title</p>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Website URL</label>
-                  <input
-                    type="url"
-                    value={website}
-                    onChange={e => setWebsite(e.target.value)}
-                    placeholder="https://mtn.co.za"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Industry</label>
-                  <select value={industry} onChange={e => setIndustry(e.target.value)} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Select industry</option>
-                    {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Company Size</label>
-                  <select value={employees} onChange={e => setEmployees(e.target.value)} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Employees (optional)</option>
-                    {EMPLOYEE_RANGES.map(r => <option key={r} value={r}>{r} employees</option>)}
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Headquarters / Location</label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={e => setLocation(e.target.value)}
-                    placeholder="e.g. Johannesburg, South Africa"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Competitive context */}
-              <div className="border-t border-slate-100 pt-4">
-                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-3">Competitive Intelligence (Optional)</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1.5">Incumbent Platform</label>
-                    <select value={competitorId} onChange={e => setCompetitorId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                      <option value="">Unknown / None</option>
-                      {COMPETITORS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1.5">Incumbent SI</label>
-                    <select value={saPartnerId} onChange={e => setSaPartnerId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                      <option value="">Unknown / None</option>
-                      {SA_PARTNERS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Extra context */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Additional Context</label>
-                <textarea
-                  value={extraContext}
-                  onChange={e => setExtraContext(e.target.value)}
-                  placeholder="e.g. Met at MicroFocus event. CIO mentioned pain with current ticketing system. Budget cycle Q1 2026."
-                  rows={3}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                />
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Link to Account</label>
+                <select value={accountId} onChange={e => setAccountId(e.target.value)} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">No account — create a new one below</option>
+                  {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
               </div>
-            </div>
-          )}
 
-          {/* ─── STEP 3: Researching ─── */}
-          {step === 'researching' && (
-            <div className="p-6">
-              <div className="flex flex-col items-center mb-6">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                  <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                </div>
-                <p className="text-sm font-semibold text-slate-900">Researching {companyName || title}...</p>
-                <p className="text-xs text-slate-500 mt-1">Searching web, news, LinkedIn and M&A data</p>
-              </div>
-              <div className="bg-slate-900 rounded-xl p-4 font-mono text-xs space-y-1.5 min-h-[160px]">
-                {researchLog.map((line, i) => (
-                  <p key={i} className={`${line.startsWith('✓') ? 'text-emerald-400' : line.startsWith('⚠') ? 'text-amber-400' : line.startsWith('🤖') ? 'text-blue-400' : 'text-slate-400'}`}>
-                    {line}
+              {/* Linked account summary OR new-account fields */}
+              {selectedAccount ? (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3">
+                  <p className="text-xs font-semibold text-slate-700">{selectedAccount.name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {[selectedAccount.industry, selectedAccount.headquarters].filter(Boolean).join(' · ') || 'Linked account'}
                   </p>
-                ))}
-                {loading && <p className="text-slate-500 animate-pulse">_</p>}
-              </div>
+                  {openDealsOnAccount.length > 0 && (
+                    <p className="text-[11px] text-amber-600 mt-1.5 font-medium">
+                      ⚠ {openDealsOnAccount.length} open deal{openDealsOnAccount.length !== 1 ? 's' : ''} already on this account
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="border border-dashed border-slate-300 rounded-lg p-4 space-y-3 bg-slate-50/50">
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">New account will be created</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2">
+                      <input
+                        type="text"
+                        value={companyName}
+                        onChange={e => setCompanyName(e.target.value)}
+                        placeholder={title || 'Company name'}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the deal title</p>
+                    </div>
+                    <input
+                      type="url"
+                      value={website}
+                      onChange={e => setWebsite(e.target.value)}
+                      placeholder="Website"
+                      className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select value={industry} onChange={e => setIndustry(e.target.value)} className="px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="">Industry</option>
+                      {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+                    </select>
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={e => setLocation(e.target.value)}
+                      placeholder="Headquarters / location"
+                      className="col-span-2 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Optional extras — collapsed by default to keep the flow fast */}
+              {!showExtras ? (
+                <button
+                  onClick={() => setShowExtras(true)}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                >
+                  + Add competitive context & notes (optional)
+                </button>
+              ) : (
+                <div className="border-t border-slate-100 pt-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-slate-600 mb-1.5">Incumbent Platform</label>
+                      <select value={competitorId} onChange={e => setCompetitorId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="">Unknown / None</option>
+                        {COMPETITORS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-600 mb-1.5">Incumbent SI</label>
+                      <select value={saPartnerId} onChange={e => setSaPartnerId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="">Unknown / None</option>
+                        {SA_PARTNERS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Notes</label>
+                    <textarea
+                      value={notes}
+                      onChange={e => setNotes(e.target.value)}
+                      placeholder="e.g. Met at MicroFocus event. CIO mentioned pain with current ticketing. Budget cycle Q1 2026."
+                      rows={2}
+                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ─── STEP 4: Brief ─── */}
-          {step === 'brief' && briefData && (
+          {/* ─── STEP 2: Review & Create ─── */}
+          {step === 'confirm' && (
             <div className="p-6 space-y-4">
-              {/* Auto-account creation notice */}
-              {!accountId && (researchData?.profile?.companySnapshot || companyName || title) && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-start gap-3">
-                  <span className="text-emerald-600 text-base shrink-0 mt-0.5">✓</span>
-                  <div>
-                    <p className="text-xs font-semibold text-emerald-800">Account will be auto-created</p>
-                    <p className="text-xs text-emerald-700 mt-0.5">
-                      <strong>{researchData?.profile?.companySnapshot?.legalEntity || companyName || title}</strong>
-                      {researchData?.profile?.companySnapshot?.headquarters ? ` · ${researchData.profile.companySnapshot.headquarters}` : ''}
-                      {researchData?.profile?.companySnapshot?.employees ? ` · ${researchData.profile.companySnapshot.employees} employees` : ''}
-                      {researchData?.detectedTicker ? ` · JSE: ${researchData.detectedTicker}` : ''}
-                    </p>
-                    {(researchData?.profile?.keyContacts?.length ?? 0) > 0 && (
-                      <p className="text-xs text-emerald-600 mt-1">
-                        {researchData.profile.keyContacts.length} key contact{researchData.profile.keyContacts.length !== 1 ? 's' : ''} will also be created
-                      </p>
-                    )}
-                  </div>
+              {/* Summary */}
+              <div className="border border-slate-200 rounded-xl divide-y divide-slate-100">
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Deal</span>
+                  <span className="text-sm font-semibold text-slate-900 text-right">{title.trim()}</span>
                 </div>
-              )}
-
-              {/* Company snapshot */}
-              {researchData?.profile?.companySnapshot && (
-                <div className="bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 rounded-xl p-4">
-                  <p className={TYPOGRAPHY.CARD_SUBTITLE + ' mb-2'}>Company Snapshot</p>
-                  <p className={TYPOGRAPHY.BODY + ' mb-3'}>{researchData.profile.companySnapshot.description}</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {researchData.profile.companySnapshot.revenue && (
-                      <div className="bg-white rounded-lg p-2 border border-slate-100">
-                        <p className="text-slate-500">Revenue</p>
-                        <p className="font-semibold text-slate-800">{researchData.profile.companySnapshot.revenue}</p>
-                      </div>
-                    )}
-                    {researchData.profile.companySnapshot.employees && (
-                      <div className="bg-white rounded-lg p-2 border border-slate-100">
-                        <p className="text-slate-500">Employees</p>
-                        <p className="font-semibold text-slate-800">{researchData.profile.companySnapshot.employees}</p>
-                      </div>
-                    )}
-                    {researchData.profile.companySnapshot.headquarters && (
-                      <div className="bg-white rounded-lg p-2 border border-slate-100">
-                        <p className="text-slate-500">HQ</p>
-                        <p className="font-semibold text-slate-800">{researchData.profile.companySnapshot.headquarters}</p>
-                      </div>
-                    )}
-                  </div>
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Value</span>
+                  <span className="text-sm font-semibold text-slate-900">{value ? formatCurrency(parseFloat(value)) : '—'}</span>
                 </div>
-              )}
-
-              {/* Recent news */}
-              {researchData?.profile?.recentNews?.length > 0 && (
-                <div className="border border-slate-200 rounded-xl overflow-hidden">
-                  <div className="bg-slate-50 px-4 py-2.5 border-b border-slate-200">
-                    <p className="text-xs font-semibold text-slate-700">Recent News & Activity</p>
-                  </div>
-                  <div className="divide-y divide-slate-100">
-                    {researchData.profile.recentNews.slice(0, 3).map((item: any, i: number) => (
-                      <div key={i} className="px-4 py-3">
-                        <p className="text-xs font-medium text-slate-900">{item.headline}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{item.summary}</p>
-                        {item.significance && <p className="text-xs text-blue-600 mt-1">→ {item.significance}</p>}
-                      </div>
-                    ))}
-                  </div>
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Stage</span>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">{stageName}</span>
                 </div>
-              )}
-
-              {/* M&A */}
-              {researchData?.profile?.maActivity?.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-amber-800 mb-2">M&A Activity Detected</p>
-                  {researchData.profile.maActivity.slice(0, 2).map((item: any, i: number) => (
-                    <div key={i} className="mb-1">
-                      <p className="text-xs font-medium text-amber-900">{item.event}</p>
-                      <p className="text-xs text-amber-700">{item.implication}</p>
-                    </div>
-                  ))}
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Account</span>
+                  <span className="text-sm font-medium text-slate-900 text-right">
+                    {selectedAccount
+                      ? selectedAccount.name
+                      : <span className="text-emerald-700">{companyName.trim() || title.trim()} <span className="text-[11px] font-normal text-emerald-600">(new)</span></span>}
+                  </span>
                 </div>
-              )}
-
-              {/* Opening + Win */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-xs font-semibold text-blue-700 mb-2 uppercase tracking-wide">Opening Statement</p>
-                <p className="text-sm leading-relaxed text-blue-900">{briefData.brief?.openingStatement}</p>
+                {(incumbentPlatform || incumbentProvider) && (
+                  <div className="px-4 py-3 flex items-center justify-between gap-2">
+                    <span className="text-xs text-slate-500">Competitive</span>
+                    <span className="flex gap-1.5 flex-wrap justify-end">
+                      {incumbentPlatform && <span className="text-[11px] bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded-full">vs {incumbentPlatform}</span>}
+                      {incumbentProvider && <span className="text-[11px] bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full">SI: {incumbentProvider}</span>}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
-                <p className="text-xs font-semibold text-emerald-700 mb-2 uppercase tracking-wide">Win Statement</p>
-                <p className="text-sm leading-relaxed text-emerald-900 font-medium">{briefData.brief?.winStatement}</p>
-              </div>
-
-              {/* Risks */}
-              {(briefData.brief?.platformRisks?.length > 0 || briefData.brief?.siRisks?.length > 0) && (
-                <div className="border border-slate-200 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-slate-700 mb-3 uppercase tracking-wide">Key Risks</p>
-                  <ul className="space-y-2">
-                    {[...(briefData.brief?.platformRisks || []), ...(briefData.brief?.siRisks || [])].map((r: string, i: number) => (
-                      <li key={i} className="text-sm text-slate-700 flex gap-2 leading-relaxed">
-                        <span className="text-red-400 flex-shrink-0 mt-0.5">•</span><span>{r}</span></li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Discovery questions */}
-              {researchData?.profile?.qualificationQuestions?.length > 0 && (
-                <div className="border border-purple-200 bg-purple-50 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-purple-700 mb-2">Discovery Questions</p>
-                  <ol className="space-y-1.5">
-                    {researchData.profile.qualificationQuestions.map((q: string, i: number) => (
-                      <li key={i} className="text-xs text-purple-900 flex gap-2">
-                        <span className="font-bold text-purple-400 flex-shrink-0">{i + 1}.</span>{q}
+              {/* Duplicate guard */}
+              {openDealsOnAccount.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
+                    <span>⚠</span> This account already has {openDealsOnAccount.length} open deal{openDealsOnAccount.length !== 1 ? 's' : ''}
+                  </p>
+                  <ul className="mt-1.5 space-y-1">
+                    {openDealsOnAccount.slice(0, 4).map(d => (
+                      <li key={d.id} className="text-xs text-amber-700 flex items-center justify-between gap-2">
+                        <span className="truncate">{d.title}</span>
+                        <span className="text-[11px] text-amber-600 flex-shrink-0">{d.stage} · {formatCurrency(d.value)}</span>
                       </li>
                     ))}
-                  </ol>
+                  </ul>
+                  <p className="text-[11px] text-amber-600 mt-1.5">Create anyway if this is a separate opportunity.</p>
                 </div>
               )}
 
-              {/* CIO / IT Manager angles */}
-              {(briefData.brief?.cioAngle || briefData.brief?.itManagerAngle) && (
-                <div className="grid grid-cols-2 gap-3">
-                  {briefData.brief?.cioAngle && (
-                    <div className="bg-slate-50 rounded-lg p-3 border-l-2 border-blue-500">
-                      <p className="text-[10px] font-semibold text-slate-600 uppercase mb-1">CIO Angle</p>
-                      <p className="text-xs text-slate-700">{briefData.brief.cioAngle}</p>
-                    </div>
-                  )}
-                  {briefData.brief?.itManagerAngle && (
-                    <div className="bg-slate-50 rounded-lg p-3 border-l-2 border-indigo-500">
-                      <p className="text-[10px] font-semibold text-slate-600 uppercase mb-1">IT Manager Angle</p>
-                      <p className="text-xs text-slate-700">{briefData.brief.itManagerAngle}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Meta */}
-              <p className="text-[10px] text-slate-400 text-center">
-                Generated with {briefData.aiTier} · {researchData?.sourceCount || 0} web sources
-              </p>
+              {/* Brief hint */}
+              <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-start gap-2.5">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500 flex-shrink-0 mt-0.5">
+                  <circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                </svg>
+                <p className="text-xs text-blue-700 leading-relaxed">
+                  Need a competitive brief and prospect research? Generate it in one click from the deal page after creating — no need to wait now.
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -604,35 +403,17 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  if (!title || !value) { toast('Deal title and value required', 'error'); return; }
-                  setStep('profile');
-                }}
+                onClick={goToReview}
                 className="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
               >
-                Prospect Profile <IconChevron />
+                Review <IconChevron />
               </button>
             </>
           )}
 
-          {step === 'profile' && (
+          {step === 'confirm' && (
             <>
               <button onClick={() => setStep('details')} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1">
-                <IconChevron dir="left" /> Back
-              </button>
-              <button
-                onClick={handleResearch}
-                disabled={loading}
-                className="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
-              >
-                {loading ? <Spinner /> : '🔍'} Research & Generate Brief
-              </button>
-            </>
-          )}
-
-          {step === 'brief' && (
-            <>
-              <button onClick={() => setStep('profile')} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1">
                 <IconChevron dir="left" /> Back
               </button>
               <button
