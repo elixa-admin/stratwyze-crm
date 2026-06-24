@@ -14,6 +14,8 @@ import CompetitiveBriefDisplay from '@/components/shared/CompetitiveBriefDisplay
 import CompanyIntelligencePanel from '@/components/shared/CompanyIntelligencePanel';
 import Breadcrumbs from '@/components/shared/Breadcrumbs';
 
+import StageProgressCard from '@/components/deals/StageProgressCard';
+import { calculateDaysInStage } from '@/lib/deals/kanban';
 interface Activity {
   id: string;
   type: string;
@@ -52,6 +54,7 @@ interface Deal {
   incumbentProvider?: string;
   enrichmentData?: any;
   competitiveBrief?: any;
+  stageWorkflow?: { stageHistory?: any[] };
   activities?: Activity[];
   createdAt: string;
   updatedAt: string;
@@ -313,6 +316,14 @@ export default function DealDetailPage() {
       </div>
 
       {/* Account detail panel (if linked) */}
+
+      {/* Stage Progress Card - Wave 35 */}
+      <StageProgressCard
+        dealId={deal.id}
+        currentStage={editStage}
+        daysInStage={calculateDaysInStage(deal.stageWorkflow?.stageHistory)}
+        activities={activities}
+      />
       {deal.account && (
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
           <div className="flex items-center justify-between mb-3">
