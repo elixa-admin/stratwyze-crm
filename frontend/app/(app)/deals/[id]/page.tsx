@@ -18,6 +18,7 @@ import StageCTACard from '@/components/deals/StageCTACard';
 import DealTasksPanel from '@/components/deals/DealTasksPanel';
 import { calculateDaysInStage } from '@/lib/deals/kanban';
 import GenerateProposalModal from '@/components/proposals/GenerateProposalModal';
+import EmailComposeModal from '@/components/email/EmailComposeModal';
 interface Activity {
   id: string;
   type: string;
@@ -157,6 +158,7 @@ export default function DealDetailPage() {
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [proposalModalOpen, setProposalModalOpen] = useState(false);
   const [taskRefreshKey, setTaskRefreshKey] = useState(0);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -454,8 +456,18 @@ export default function DealDetailPage() {
 
       {/* Activity Timeline + Note composer */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-900">Activity</h3>
+          <button
+            onClick={() => setEmailModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all"
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Send Email
+          </button>
         </div>
 
         {/* Note composer */}
@@ -629,6 +641,20 @@ export default function DealDetailPage() {
           dealId={deal.id}
           dealTitle={deal.title}
           onClose={() => setProposalModalOpen(false)}
+        />
+      )}
+
+      {emailModalOpen && deal && (
+        <EmailComposeModal
+          isOpen={emailModalOpen}
+          onClose={() => { setEmailModalOpen(false); window.location.reload(); }}
+          dealId={deal.id}
+          dealTitle={deal.title}
+          toEmail={deal.primaryContact?.email ?? ''}
+          toName={deal.primaryContact?.name ?? ''}
+          contactId={deal.primaryContactId ?? undefined}
+          accountName={deal.account?.name}
+          stage={editStage}
         />
       )}
     </div>
