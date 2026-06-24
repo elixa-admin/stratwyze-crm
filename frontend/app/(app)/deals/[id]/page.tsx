@@ -7,7 +7,6 @@ import { formatCurrency } from '@/lib/format';
 import { toast } from '@/lib/toast';
 import ContactPanel from '@/components/shared/ContactPanel';
 import FollowUpScheduling from '@/components/shared/FollowUpScheduling';
-import ActivityQuickButtons from '@/components/shared/ActivityQuickButtons';
 import DealClosureSection from '@/components/shared/DealClosureSection';
 import SaveAsTemplateModal from '@/components/shared/SaveAsTemplateModal';
 import CompetitiveBriefDisplay from '@/components/shared/CompetitiveBriefDisplay';
@@ -507,9 +506,7 @@ export default function DealDetailPage() {
               lossReason={deal.lossReason}
               onUpdate={() => window.location.reload()}
             />
-          ) : (
-            <ActivityQuickButtons dealId={deal.id} />
-          )}
+          ) : null}
         </div>
       </div>
 

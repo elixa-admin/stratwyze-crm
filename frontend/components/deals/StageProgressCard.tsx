@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import StageChecklist from './StageChecklist';
-import ActivityTimeline from '@/components/activity/ActivityTimeline';
+import StageQuickLog from './StageQuickLog';
 import { getStageDef } from '@/lib/deals/stage-definitions';
 import { toast } from '@/lib/toast';
 
@@ -13,86 +13,141 @@ interface StageProgressCardProps {
   activities: any[];
 }
 
-/**
- * Stage Progress Card - Shows what needs to happen in current stage
- */
+type ActionState = {
+  id: string;
+  title: string;
+  description?: string;
+  required: boolean;
+  completed: boolean;
+  completedAt?: string;
+};
+
+// Map action IDs to activity types for the activity feed
+const ACTION_ACTIVITY_TYPE: Record<string, string> = {
+  contact_found: 'note',
+  initial_contact: 'call',
+  fit_assessment: 'note',
+  discovery_call: 'call',
+  pain_points: 'note',
+  budget_confirmed: 'note',
+  timeline_identified: 'note',
+  solution_designed: 'note',
+  proposal_sent: 'email',
+  demo_scheduled: 'meeting',
+  objections_addressed: 'call',
+  contract_ready: 'note',
+  executive_approval: 'meeting',
+  contract_signed: 'note',
+  deal_closed: 'note',
+  loss_documented: 'note',
+};
+
+function buildActions(stage: string, completedIds: string[] = []): ActionState[] {
+  const def = getStageDef(stage);
+  return def?.actions.map(a => ({
+    id: a.id,
+    title: a.title,
+    description: a.description,
+    required: a.required,
+    completed: completedIds.includes(a.id),
+    completedAt: completedIds.includes(a.id) ? new Date().toISOString() : undefined,
+  })) ?? [];
+}
+
 export default function StageProgressCard({
   dealId,
   currentStage,
   daysInStage,
-  activities,
 }: StageProgressCardProps) {
   const stageDef = getStageDef(currentStage);
-  const buildActions = (stage: string) => {
-    const def = getStageDef(stage);
-    return def?.actions.map((a) => ({
-      id: a.id,
-      title: a.title,
-      description: a.description,
-      required: a.required,
-      completed: false,
-      completedAt: undefined as string | undefined,
-    })) ?? [];
-  };
+  const [stageActions, setStageActions] = useState<ActionState[]>(() => buildActions(currentStage));
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
-  const [stageActions, setStageActions] = useState(() => buildActions(currentStage));
-  const [isLoading, setIsLoading] = useState(false);
+  // Fetch persisted completion state on mount
+  useEffect(() => {
+    fetch(`/api/deals/stage-progress?dealId=${dealId}`)
+      .then(r => r.json())
+      .then(data => {
+        const completedIds: string[] = data.stageWorkflow?.stepsCompleted ?? [];
+        setStageActions(buildActions(currentStage, completedIds));
+      })
+      .catch(() => {
+        // Silently fall back to all-incomplete state
+        setStageActions(buildActions(currentStage));
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dealId]);
 
-  // Reset checklist whenever the stage changes (useState initializer only runs once)
+  // Reset checklist whenever the deal changes stage
   useEffect(() => {
     setStageActions(buildActions(currentStage));
   }, [currentStage]);
-  const [isAdvancing, setIsAdvancing] = useState(false);
 
-  // Calculate readiness based on completed required actions
-  const requiredActions = stageActions.filter((a) => a.required);
-  const completedRequired = stageActions.filter((a) => a.required && a.completed).length;
+  const requiredActions = stageActions.filter(a => a.required);
+  const completedRequired = stageActions.filter(a => a.required && a.completed).length;
   const readinessPercent = requiredActions.length > 0
-    ? (completedRequired / requiredActions.length) * 100
+    ? Math.round((completedRequired / requiredActions.length) * 100)
     : 0;
-
   const isReadyToAdvance = readinessPercent >= 90;
 
-  const handleActionToggle = async (actionId: string, completed: boolean) => {
-    setIsLoading(true);
+  const readinessColor = readinessPercent >= 90
+    ? 'text-emerald-600'
+    : readinessPercent >= 60
+    ? 'text-amber-600'
+    : 'text-red-500';
+
+  const handleActionLogged = async (actionId: string, outcome: string, notes: string) => {
+    const action = stageActions.find(a => a.id === actionId);
+    if (!action) return;
+
+    const activityType = ACTION_ACTIVITY_TYPE[actionId] ?? 'note';
+    const outcomeLabel = outcome === 'positive' ? '✓' : outcome === 'blocked' ? '⚠' : '—';
+    const content = `[${outcomeLabel} ${outcome}] ${action.title}${notes ? ': ' + notes : ''}`;
+
     try {
-      // Update local state
-      setStageActions((prev) =>
-        prev.map((a) =>
+      const res = await fetch('/api/deals/stage-progress', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dealId,
+          actionId,
+          completed: true,
+          activityType,
+          content,
+          metadata: { outcome, notes, actionId, stage: currentStage },
+        }),
+      });
+
+      if (!res.ok) throw new Error('Save failed');
+
+      setStageActions(prev =>
+        prev.map(a =>
           a.id === actionId
-            ? { ...a, completed, completedAt: completed ? new Date().toISOString() : undefined }
+            ? { ...a, completed: true, completedAt: new Date().toISOString() }
             : a
         )
       );
 
-      // TODO: Persist to API
-      // await fetch(`/api/deals/${dealId}/stage-progress`, {
-      //   method: 'PATCH',
-      //   body: JSON.stringify({ actionId, completed }),
-      // });
-
-      toast(`Action ${completed ? 'completed' : 'uncompleted'}`, 'success');
-    } catch (error) {
-      toast('Failed to update action', 'error');
-    } finally {
-      setIsLoading(false);
+      toast(`${action.title} logged`, 'success');
+    } catch {
+      toast('Failed to save — try again', 'error');
     }
   };
 
   const handleAdvanceStage = async () => {
-    if (!isReadyToAdvance) return;
-
+    if (!isReadyToAdvance || isAdvancing) return;
     setIsAdvancing(true);
     try {
-      // TODO: Call API to advance stage
-      // const res = await fetch(`/api/deals/${dealId}/stage-advance`, {
-      //   method: 'POST',
-      // });
-      // const data = await res.json();
-      // onStageChange?.(data.newStage);
-
-      toast(`Deal advanced from ${currentStage}`, 'success');
-    } catch (error) {
+      const res = await fetch('/api/deals/stage-advance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealId }),
+      });
+      if (!res.ok) throw new Error('Advance failed');
+      const data = await res.json();
+      toast(`Moved to ${data.newStage}`, 'success');
+      window.location.reload();
+    } catch {
       toast('Failed to advance stage', 'error');
     } finally {
       setIsAdvancing(false);
@@ -100,99 +155,111 @@ export default function StageProgressCard({
   };
 
   if (!stageDef) {
-    return <div className="text-slate-500">Unknown stage: {currentStage}</div>;
+    return <div className="text-xs text-slate-400 px-1">Stage definition not found: {currentStage}</div>;
   }
 
-  // Filter activities to THIS stage only
-  const stageActivities = activities.filter((a) => !a.dealId || a.dealId === dealId);
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
+    <div className="space-y-4">
+      {/* Stage header */}
+      <div className="bg-white rounded-xl border border-slate-200 px-5 py-4 shadow-xs">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">{stageDef.label} Stage</h2>
-            <p className="text-sm text-slate-600 mt-1">{stageDef.description}</p>
-            <p className="text-xs text-slate-500 mt-2">
-              {daysInStage} days in stage (expected: {stageDef.expectedDays} days)
+            <p className="text-sm text-slate-500 mt-0.5">{stageDef.description}</p>
+            <p className="text-xs text-slate-400 mt-2">
+              {daysInStage}d in stage · expected: {stageDef.expectedDays}d
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-blue-600">{Math.round(readinessPercent)}%</div>
-            <p className="text-xs text-slate-600 mt-1">Ready to advance</p>
+          <div className="text-right flex-shrink-0">
+            <div className={`text-3xl font-bold ${readinessColor}`}>{readinessPercent}%</div>
+            <p className="text-xs text-slate-500 mt-0.5">Ready to advance</p>
           </div>
         </div>
       </div>
 
-      {/* Checklist */}
-      <StageChecklist
+      {/* Inline quick log — "What happened?" */}
+      <StageQuickLog
+        dealId={dealId}
+        stage={currentStage}
         actions={stageActions}
-        onActionToggle={handleActionToggle}
-        isLoading={isLoading}
+        onActionLogged={handleActionLogged}
       />
 
-      {/* Conversation Starters */}
+      {/* Readiness score strip */}
+      <div
+        className="rounded-xl px-5 py-4"
+        style={{
+          backgroundColor: readinessPercent >= 90 ? '#ECFDF5' : readinessPercent >= 60 ? '#FFFBEB' : '#FEF2F2',
+          borderLeft: `4px solid ${readinessPercent >= 90 ? '#10B981' : readinessPercent >= 60 ? '#F59E0B' : '#EF4444'}`,
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className={`text-sm font-semibold ${readinessPercent >= 90 ? 'text-emerald-800' : readinessPercent >= 60 ? 'text-amber-800' : 'text-red-800'}`}>
+              Readiness Score
+            </p>
+            <p className={`text-xs mt-0.5 ${readinessPercent >= 90 ? 'text-emerald-600' : readinessPercent >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
+              {completedRequired} of {requiredActions.length} required actions complete
+            </p>
+          </div>
+          <span className={`text-2xl font-bold ${readinessColor}`}>{readinessPercent}%</span>
+        </div>
+      </div>
+
+      {/* Full checklist (completed + incomplete) */}
+      <StageChecklist
+        actions={stageActions}
+        onActionToggle={async (actionId, completed) => {
+          setStageActions(prev =>
+            prev.map(a =>
+              a.id === actionId
+                ? { ...a, completed, completedAt: completed ? new Date().toISOString() : undefined }
+                : a
+            )
+          );
+        }}
+      />
+
+      {/* Conversation starters */}
       {stageDef.conversationStarters.length > 0 && (
-        <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3">💬 Conversation Starters</h3>
+        <div className="bg-blue-50 rounded-xl border border-blue-100 px-5 py-4">
+          <p className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-3">
+            Conversation Starters
+          </p>
           <ul className="space-y-2">
-            {stageDef.conversationStarters.map((starter, idx) => (
-              <li key={idx} className="text-sm text-blue-800 flex gap-2">
-                <span className="text-blue-600 font-bold min-w-fit">•</span>
-                <span>"{starter}"</span>
+            {stageDef.conversationStarters.map((s, i) => (
+              <li key={i} className="text-sm text-blue-800 flex gap-2">
+                <span className="text-blue-400 font-bold flex-shrink-0">•</span>
+                <span>"{s}"</span>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Recent Activity */}
-      {stageActivities.length > 0 && (
-        <div className="bg-white rounded-lg border border-slate-200 p-4">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">📋 Recent Activity</h3>
-          <ActivityTimeline
-            events={stageActivities.map((a) => ({
-              id: a.id,
-              type: a.type,
-              timestamp: a.createdAt,
-              summary: a.content,
-              details: a.metadata ? JSON.stringify(a.metadata) : undefined,
-            }))}
-          />
+      {/* Advance stage button */}
+      {isReadyToAdvance ? (
+        <div className="space-y-3">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-4">
+            <p className="text-sm font-semibold text-emerald-800">All required actions complete</p>
+            <p className="text-xs text-emerald-600 mt-0.5">This deal is ready to move to the next stage.</p>
+          </div>
+          <button
+            onClick={handleAdvanceStage}
+            disabled={isAdvancing}
+            className="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-all text-sm"
+          >
+            {isAdvancing ? 'Advancing…' : `Advance to next stage →`}
+          </button>
+        </div>
+      ) : (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-4">
+          <p className="text-sm font-semibold text-slate-700">
+            {requiredActions.length - completedRequired} required action{requiredActions.length - completedRequired !== 1 ? 's' : ''} remaining
+          </p>
+          <p className="text-xs text-slate-400 mt-0.5">Complete the checklist above to unlock the advance button.</p>
         </div>
       )}
-
-      {/* Advance Button */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        {isReadyToAdvance ? (
-          <div className="space-y-3">
-            <div className="bg-emerald-50 border border-emerald-200 rounded p-3">
-              <p className="text-sm font-semibold text-emerald-900">✓ Ready to advance!</p>
-              <p className="text-xs text-emerald-700 mt-1">
-                All required actions for {stageDef.label} are complete.
-              </p>
-            </div>
-            <button
-              onClick={handleAdvanceStage}
-              disabled={isAdvancing}
-              className="w-full py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-all"
-            >
-              {isAdvancing ? 'Advancing...' : `Move to Next Stage →`}
-            </button>
-          </div>
-        ) : (
-          <div className="bg-amber-50 border border-amber-200 rounded p-3">
-            <p className="text-sm font-semibold text-amber-900">
-              ⏳ Not quite ready yet ({Math.round(readinessPercent)}%)
-            </p>
-            <p className="text-xs text-amber-700 mt-2">
-              Complete {requiredActions.length - completedRequired} more action
-              {requiredActions.length - completedRequired !== 1 ? 's' : ''} to advance.
-            </p>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

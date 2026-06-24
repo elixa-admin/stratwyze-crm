@@ -47,7 +47,7 @@ export default function CompetitiveIntelPage() {
   // SA tab state
   const [selectedPartner, setSelectedPartner] = useState<SAPartner | null>(null);
   const [saSearchQuery, setSaSearchQuery] = useState('');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<PartnerCategory | 'All'>('All');
+  const [selectedCategoryFilter] = useState<PartnerCategory | 'All'>('All');
 
   // Get unique deployment options
   const deploymentOptions = useMemo(() => {
@@ -87,6 +87,8 @@ export default function CompetitiveIntelPage() {
   const channelPartners = filteredPartners.filter(p => p.category === 'HaloITSM Channel Partner');
   const platformPartners = filteredPartners.filter(p => p.category === 'Competing Platform Partner');
 
+  const [saSubTab, setSaSubTab] = useState<'halo-partners' | 'platform-sis'>('halo-partners');
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -107,7 +109,7 @@ export default function CompetitiveIntelPage() {
               : 'text-slate-500 border-transparent hover:text-slate-700'
           }`}
         >
-          Global Platforms
+          Platforms
           <span className="ml-2 text-[11px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full">
             {COMPETITORS.length}
           </span>
@@ -120,7 +122,7 @@ export default function CompetitiveIntelPage() {
               : 'text-slate-500 border-transparent hover:text-slate-700'
           }`}
         >
-          SA Landscape
+          System Integrators
           <span className="ml-2 text-[11px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full">
             {SA_PARTNERS.length}
           </span>
@@ -247,130 +249,94 @@ export default function CompetitiveIntelPage() {
       {/* ─── SA LANDSCAPE TAB ─── */}
       {activeTab === 'sa' && (
         <div className="space-y-5">
-          {/* Context banner */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-500 flex-shrink-0 mt-0.5">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <div>
-                <p className="text-sm font-semibold text-slate-800 mb-0.5">South African Competitive Landscape</p>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Two categories of SA competitors: <span className="font-medium text-blue-700">HaloITSM Channel Partners</span> compete for the same Halo implementation contracts.{' '}
-                  <span className="font-medium text-purple-700">Competing Platform Partners</span> target the same ITSM budget with Ivanti, ServiceNow, ManageEngine, or Freshservice.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* SA Threat legend */}
-          <div className="flex flex-wrap gap-4 items-center text-sm">
-            <span className="font-semibold text-slate-700">Threat Level:</span>
-            <div className="flex gap-3">
-              {[
-                { label: 'Primary', color: 'bg-red-500' },
-                { label: 'Secondary', color: 'bg-orange-500' },
-                { label: 'Emerging', color: 'bg-slate-400' },
-              ].map(({ label, color }) => (
-                <div key={label} className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${color}`} />
-                  <span className="text-slate-600">{label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* SA Search & Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                value={saSearchQuery}
-                onChange={e => setSaSearchQuery(e.target.value)}
-                placeholder="Search SA competitors..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-              />
-            </div>
-            <select
-              value={selectedCategoryFilter}
-              onChange={e => setSelectedCategoryFilter(e.target.value as PartnerCategory | 'All')}
-              className="px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+          {/* Sub-tab: HaloITSM Partners | Platform SIs */}
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl w-fit">
+            <button
+              onClick={() => setSaSubTab('halo-partners')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                saSubTab === 'halo-partners'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
             >
-              <option value="All">All Categories</option>
-              <option value="HaloITSM Channel Partner">HaloITSM Channel Partners</option>
-              <option value="Competing Platform Partner">Competing Platform Partners</option>
-            </select>
+              HaloITSM Partners
+              <span className="ml-2 text-[11px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                {channelPartners.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setSaSubTab('platform-sis')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                saSubTab === 'platform-sis'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Platform SIs
+              <span className="ml-2 text-[11px] font-semibold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
+                {platformPartners.length}
+              </span>
+            </button>
           </div>
 
-          {/* Two-section grid + sticky panel */}
+          {/* Context line */}
+          <p className="text-xs text-slate-500">
+            {saSubTab === 'halo-partners'
+              ? 'SA companies that also implement HaloITSM — competing for the same Halo contracts.'
+              : 'SA system integrators implementing ServiceNow, ManageEngine, Freshservice, or Ivanti — competing for the same ITSM budget.'}
+          </p>
+
+          {/* Search */}
+          <div className="relative max-w-sm">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={saSearchQuery}
+              onChange={e => setSaSearchQuery(e.target.value)}
+              placeholder={saSubTab === 'halo-partners' ? 'Search HaloITSM partners…' : 'Search platform SIs…'}
+              className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            />
+          </div>
+
+          {/* Grid + sticky panel */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Left: two sections */}
-            <div className="lg:col-span-3 space-y-6">
-
-              {/* HaloITSM Channel Partners */}
-              {(selectedCategoryFilter === 'All' || selectedCategoryFilter === 'HaloITSM Channel Partner') && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
-                    <h3 className="text-sm font-semibold text-slate-800">
-                      HaloITSM Channel Partners
-                    </h3>
-                    <span className="text-[11px] text-slate-500">({channelPartners.length})</span>
-                    <span className="text-[11px] text-slate-500 ml-1">— same platform, competing for same contracts</span>
+            {/* Left: cards */}
+            <div className="lg:col-span-3 space-y-3">
+              {saSubTab === 'halo-partners' && (
+                channelPartners.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {channelPartners.map(partner => (
+                      <SAPartnerCard
+                        key={partner.id}
+                        partner={partner}
+                        isSelected={selectedPartner?.id === partner.id}
+                        onClick={() => setSelectedPartner(partner)}
+                      />
+                    ))}
                   </div>
-                  {channelPartners.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {channelPartners.map(partner => (
-                        <SAPartnerCard
-                          key={partner.id}
-                          partner={partner}
-                          isSelected={selectedPartner?.id === partner.id}
-                          onClick={() => setSelectedPartner(partner)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-slate-500 text-sm py-4 text-center">No channel partners match your search</p>
-                  )}
-                </div>
+                ) : (
+                  <p className="text-slate-500 text-sm py-8 text-center">No HaloITSM partners match your search</p>
+                )
               )}
-
-              {/* Divider */}
-              {selectedCategoryFilter === 'All' && <div className="border-t border-slate-200" />}
-
-              {/* Competing Platform Partners */}
-              {(selectedCategoryFilter === 'All' || selectedCategoryFilter === 'Competing Platform Partner') && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-purple-500" />
-                    <h3 className="text-sm font-semibold text-slate-800">
-                      Competing Platform Partners
-                    </h3>
-                    <span className="text-[11px] text-slate-500">({platformPartners.length})</span>
-                    <span className="text-[11px] text-slate-500 ml-1">— different platforms, same ITSM budget</span>
+              {saSubTab === 'platform-sis' && (
+                platformPartners.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {platformPartners.map(partner => (
+                      <SAPartnerCard
+                        key={partner.id}
+                        partner={partner}
+                        isSelected={selectedPartner?.id === partner.id}
+                        onClick={() => setSelectedPartner(partner)}
+                      />
+                    ))}
                   </div>
-                  {platformPartners.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {platformPartners.map(partner => (
-                        <SAPartnerCard
-                          key={partner.id}
-                          partner={partner}
-                          isSelected={selectedPartner?.id === partner.id}
-                          onClick={() => setSelectedPartner(partner)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-slate-500 text-sm py-4 text-center">No platform partners match your search</p>
-                  )}
-                </div>
+                ) : (
+                  <p className="text-slate-500 text-sm py-8 text-center">No platform SIs match your search</p>
+                )
               )}
             </div>
 
