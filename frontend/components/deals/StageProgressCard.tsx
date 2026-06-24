@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StageChecklist from './StageChecklist';
 import ActivityTimeline from '@/components/activity/ActivityTimeline';
 import { getStageDef } from '@/lib/deals/stage-definitions';
@@ -23,21 +23,25 @@ export default function StageProgressCard({
   activities,
 }: StageProgressCardProps) {
   const stageDef = getStageDef(currentStage);
-  const [stageActions, setStageActions] = useState<Array<{
-    id: string;
-    title: string;
-    description?: string;
-    required: boolean;
-    completed: boolean;
-    completedAt?: string;
-  }>>(stageDef?.actions.map((a) => ({
-    id: a.id,
-    title: a.title,
-    description: a.description,
-    required: a.required,
-    completed: false,
-  })) || []);
+  const buildActions = (stage: string) => {
+    const def = getStageDef(stage);
+    return def?.actions.map((a) => ({
+      id: a.id,
+      title: a.title,
+      description: a.description,
+      required: a.required,
+      completed: false,
+      completedAt: undefined as string | undefined,
+    })) ?? [];
+  };
+
+  const [stageActions, setStageActions] = useState(() => buildActions(currentStage));
   const [isLoading, setIsLoading] = useState(false);
+
+  // Reset checklist whenever the stage changes (useState initializer only runs once)
+  useEffect(() => {
+    setStageActions(buildActions(currentStage));
+  }, [currentStage]);
   const [isAdvancing, setIsAdvancing] = useState(false);
 
   // Calculate readiness based on completed required actions
@@ -151,9 +155,9 @@ export default function StageProgressCard({
             events={stageActivities.map((a) => ({
               id: a.id,
               type: a.type,
-              timestamp: a.timestamp,
-              summary: a.summary,
-              details: a.details,
+              timestamp: a.createdAt,
+              summary: a.content,
+              details: a.metadata ? JSON.stringify(a.metadata) : undefined,
             }))}
           />
         </div>

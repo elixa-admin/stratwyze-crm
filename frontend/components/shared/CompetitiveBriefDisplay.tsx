@@ -14,6 +14,8 @@ interface Brief {
 
 interface CompetitiveBriefDisplayProps {
   dealId: string;
+  dealTitle?: string;
+  accountInfo?: { name?: string; industry?: string; annualRevenue?: number };
   incumbentPlatform?: string;
   incumbentProvider?: string;
   brief?: Brief;
@@ -22,6 +24,8 @@ interface CompetitiveBriefDisplayProps {
 
 export default function CompetitiveBriefDisplay({
   dealId,
+  dealTitle,
+  accountInfo,
   incumbentPlatform,
   incumbentProvider,
   brief,
@@ -36,9 +40,10 @@ export default function CompetitiveBriefDisplay({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: '', // Would need to pass from parent
+          title: dealTitle ?? 'HaloITSM Opportunity',
           incumbentPlatform,
           saPartner: incumbentProvider,
+          accountInfo: accountInfo ?? undefined,
         }),
       });
 
@@ -68,11 +73,12 @@ export default function CompetitiveBriefDisplay({
         <h3 className="text-sm font-semibold text-slate-900 mb-3">Competitive Context</h3>
         <p className="text-sm text-slate-500">No brief generated yet</p>
         <button
+          id="competitive-brief-generate-btn"
           onClick={handleRegenerate}
           disabled={regenerating}
           className="mt-3 text-sm font-medium text-blue-600 hover:text-blue-700"
         >
-          🔄 Generate Brief
+          {regenerating ? 'Generating…' : '🔄 Generate Brief'}
         </button>
       </div>
     );
@@ -83,6 +89,7 @@ export default function CompetitiveBriefDisplay({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900">Competitive Brief</h3>
         <button
+          id="competitive-brief-generate-btn"
           onClick={handleRegenerate}
           disabled={regenerating}
           className="text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
