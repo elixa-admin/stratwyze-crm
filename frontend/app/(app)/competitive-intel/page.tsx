@@ -16,6 +16,53 @@ import { SAPartner, PartnerCategory } from '@/lib/types/sa-partners';
 const RISK_LEVELS: RiskLevel[] = ['Critical', 'High', 'Medium', 'Low'];
 type ActiveTab = 'global' | 'sa' | 'pursuit' | 'proposal';
 
+const SUB_NAV: { id: ActiveTab; label: string; count?: number; badge?: string; description: string; icon: JSX.Element }[] = [
+  {
+    id: 'global',
+    label: 'Platforms',
+    count: COMPETITORS.length,
+    description: 'Global ITSM platform positioning',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 2 9 5-9 5-9-5 9-5z" /><path d="m3 12 9 5 9-5" /><path d="m3 17 9 5 9-5" />
+      </svg>
+    ),
+  },
+  {
+    id: 'sa',
+    label: 'System Integrators',
+    count: SA_PARTNERS.length,
+    description: 'SA channel & platform SIs',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+      </svg>
+    ),
+  },
+  {
+    id: 'pursuit',
+    label: 'Pursuit Builder',
+    description: 'Unified battle card generator',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+      </svg>
+    ),
+  },
+  {
+    id: 'proposal',
+    label: 'Proposal Builder',
+    badge: 'AI',
+    description: 'Stream a full HaloITSM proposal',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+      </svg>
+    ),
+  },
+];
+
 interface VerificationReportInterface {
   freshnessScore: string;
   freshnessRationale: string;
@@ -97,56 +144,50 @@ export default function CompetitiveIntelPage() {
         subtitle="Platform positioning, SA landscape, and flanking strategies for pursuit opportunities"
       />
 
-      {/* Tab bar */}
-      <div className="flex items-center gap-1 border-b border-slate-200">
-        <button
-          onClick={() => setActiveTab('global')}
-          className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
-            activeTab === 'global'
-              ? 'text-blue-600 border-blue-500'
-              : 'text-slate-500 border-transparent hover:text-slate-700'
-          }`}
-        >
-          Platforms
-          <span className="ml-2 text-[11px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full">
-            {COMPETITORS.length}
-          </span>
-        </button>
-        <button
-          onClick={() => setActiveTab('sa')}
-          className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
-            activeTab === 'sa'
-              ? 'text-blue-600 border-blue-500'
-              : 'text-slate-500 border-transparent hover:text-slate-700'
-          }`}
-        >
-          System Integrators
-          <span className="ml-2 text-[11px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full">
-            {SA_PARTNERS.length}
-          </span>
-        </button>
-        <button
-          onClick={() => setActiveTab('pursuit')}
-          className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
-            activeTab === 'pursuit'
-              ? 'text-blue-600 border-blue-500'
-              : 'text-slate-500 border-transparent hover:text-slate-700'
-          }`}
-        >
-          Pursuit Builder
-        </button>
-        <button
-          onClick={() => setActiveTab('proposal')}
-          className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
-            activeTab === 'proposal'
-              ? 'text-blue-600 border-blue-500'
-              : 'text-slate-500 border-transparent hover:text-slate-700'
-          }`}
-        >
-          Proposal Builder
-          <span className="ml-2 text-[10px] font-bold text-white bg-blue-600 px-1.5 py-0.5 rounded-full">AI</span>
-        </button>
-      </div>
+      {/* Section navigation + content */}
+      <div className="flex flex-col lg:flex-row gap-6">
+
+        {/* Left sub-navigation */}
+        <aside className="lg:w-60 flex-shrink-0">
+          <nav className="lg:sticky lg:top-4 bg-white rounded-xl border border-slate-200 shadow-xs p-2 space-y-1">
+            <p className="px-2 pt-1 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Sections</p>
+            {SUB_NAV.map(item => {
+              const active = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-start gap-2.5 py-2.5 pr-3 pl-[9px] rounded-lg text-left transition-all border-l-[3px] ${
+                    active
+                      ? 'bg-blue-50 text-blue-700 border-blue-600'
+                      : 'text-slate-600 border-transparent hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <span className={`mt-0.5 flex-shrink-0 ${active ? 'text-blue-600' : 'text-slate-400'}`}>{item.icon}</span>
+                  <span className="flex-1 min-w-0">
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-sm font-medium">{item.label}</span>
+                      {item.count !== undefined && (
+                        <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${active ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
+                          {item.count}
+                        </span>
+                      )}
+                      {item.badge && (
+                        <span className="text-[10px] font-bold text-white bg-blue-600 px-1.5 py-0.5 rounded-full">{item.badge}</span>
+                      )}
+                    </span>
+                    <span className={`block text-[11px] mt-0.5 leading-tight ${active ? 'text-blue-500' : 'text-slate-400'}`}>
+                      {item.description}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* Content area */}
+        <div className="flex-1 min-w-0">
 
       {/* ─── GLOBAL PLATFORMS TAB ─── */}
       {activeTab === 'global' && (
@@ -398,6 +439,8 @@ export default function CompetitiveIntelPage() {
           />
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }
