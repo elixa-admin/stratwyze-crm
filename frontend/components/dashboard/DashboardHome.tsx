@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { toast } from '@/lib/toast';
 
 interface Task {
   id: string;
@@ -21,7 +20,6 @@ interface Deal {
 }
 
 export default function DashboardHome() {
-  const [newDealModalOpen, setNewDealModalOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);

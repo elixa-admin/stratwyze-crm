@@ -12,13 +12,13 @@ import SaveAsTemplateModal from '@/components/shared/SaveAsTemplateModal';
 import CompetitiveBriefDisplay from '@/components/shared/CompetitiveBriefDisplay';
 import CompanyIntelligencePanel from '@/components/shared/CompanyIntelligencePanel';
 import Breadcrumbs from '@/components/shared/Breadcrumbs';
-
 import StageProgressCard from '@/components/deals/StageProgressCard';
 import StageCTACard from '@/components/deals/StageCTACard';
 import DealTasksPanel from '@/components/deals/DealTasksPanel';
 import { calculateDaysInStage } from '@/lib/deals/kanban';
 import GenerateProposalModal from '@/components/proposals/GenerateProposalModal';
 import EmailComposeModal from '@/components/email/EmailComposeModal';
+
 interface Activity {
   id: string;
   type: string;
@@ -125,6 +125,32 @@ function timeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
 }
 
+function CollapseSection({ title, badge, defaultOpen = false, children }: {
+  title: string; badge?: string; defaultOpen?: boolean; children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-slate-900">{title}</span>
+          {badge && <span className="text-xs text-slate-500 font-normal">{badge}</span>}
+        </div>
+        <svg
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+          className={`text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+        >
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      {open && <div className="border-t border-slate-100">{children}</div>}
+    </div>
+  );
+}
+
 function DetailSkeleton() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
@@ -135,14 +161,12 @@ function DetailSkeleton() {
         <div className="flex gap-1 mt-4">
           {Array.from({ length: 5 }).map((_, i) => <div key={i} className="flex-1 h-8 bg-slate-100 rounded" />)}
         </div>
-        <div className="grid grid-cols-2 gap-4 mt-2">
-          <div className="h-12 bg-slate-100 rounded-lg" />
-          <div className="h-12 bg-slate-100 rounded-lg" />
-        </div>
       </div>
     </div>
   );
 }
+
+type SidebarTab = 'tasks' | 'contact' | 'info';
 
 export default function DealDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -159,6 +183,7 @@ export default function DealDetailPage() {
   const [proposalModalOpen, setProposalModalOpen] = useState(false);
   const [taskRefreshKey, setTaskRefreshKey] = useState(0);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('tasks');
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -240,6 +265,10 @@ export default function DealDetailPage() {
 
   const stageIndex = STAGES.indexOf(editStage);
   const activities = deal.activities ?? [];
+  const isClosed = editStage === 'Closed Won' || editStage === 'Closed Lost';
+  const hasCompetitiveContext = !!(deal.incumbentPlatform || deal.incumbentProvider || deal.competitiveBrief);
+  const showAccountOpenByDefault = editStage === 'Prospecting' || editStage === 'Qualification';
+  const showCompetitiveOpenByDefault = editStage === 'Proposal' || editStage === 'Negotiation';
 
   return (
     <div className="max-w-7xl mx-auto pb-20">
@@ -248,358 +277,396 @@ export default function DealDetailPage() {
         { label: deal.title }
       ]} />
 
-      {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left column (2/3 width) */}
-        <div className="lg:col-span-2 space-y-5">
 
-      {/* Header card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-        <div className="flex items-start justify-between gap-4 mb-1">
-          <input
-            type="text"
-            value={editTitle}
-            onChange={e => { setEditTitle(e.target.value); setDirty(true); }}
-            className="flex-1 text-2xl font-bold text-slate-900 bg-transparent border-0 focus:outline-none focus:ring-0 p-0 min-w-0"
-            placeholder="Deal title"
-          />
-          <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${STAGE_ACCENT[editStage]?.badge}`}>
-            {editStage}
-          </span>
-        </div>
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-xs text-slate-400">
-            Created {new Date(deal.createdAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}
-            {saving && <span className="ml-2 text-blue-500">Saving…</span>}
-          </p>
-          <button
-            onClick={() => setTemplateModalOpen(true)}
-            className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            💾 Save as Template
-          </button>
-        </div>
+        {/* ── LEFT COLUMN ── */}
+        <div className="lg:col-span-2 space-y-4">
 
-        {/* Stage progression */}
-        <div className="mb-5">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Stage</p>
-          <div className="flex gap-1">
-            {STAGES.map((s, i) => {
-              const active = i <= stageIndex;
-              const isCurrent = s === editStage;
-              return (
-                <button
-                  key={s}
-                  onClick={() => handleStageChange(s)}
-                  className={`flex-1 py-2 rounded-md text-[11px] font-semibold transition-all relative ${
-                    active
-                      ? `${STAGE_ACCENT[editStage]?.bar ?? 'bg-blue-600'} text-white shadow-sm`
-                      : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
-                  }`}
-                >
-                  {s === 'Closed Won' ? 'Won' : s}
-                  {isCurrent && <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full opacity-80" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Value + Account */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Deal Value</label>
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-              <span className="text-slate-400 text-sm font-medium">R</span>
+          {/* Header card */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+            <div className="flex items-start justify-between gap-4 mb-1">
               <input
-                type="number"
-                value={editValue}
-                onChange={e => { setEditValue(e.target.value); setDirty(true); }}
-                className="flex-1 text-lg font-bold text-slate-900 bg-transparent border-0 focus:outline-none p-0 w-full"
+                type="text"
+                value={editTitle}
+                onChange={e => { setEditTitle(e.target.value); setDirty(true); }}
+                className="flex-1 text-2xl font-bold text-slate-900 bg-transparent border-0 focus:outline-none focus:ring-0 p-0 min-w-0"
+                placeholder="Deal title"
               />
+              <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${STAGE_ACCENT[editStage]?.badge}`}>
+                {editStage}
+              </span>
             </div>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Account</label>
-            {deal.account ? (
-              <Link href={`/accounts/${deal.account.id}`}
-                className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 hover:border-blue-300 hover:bg-blue-50 transition-all group min-h-[42px]">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900 group-hover:text-blue-700">{deal.account.name}</p>
-                  {deal.account.industry && <p className="text-xs text-slate-400">{deal.account.industry}</p>}
-                </div>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-300 group-hover:text-blue-400 flex-shrink-0">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </Link>
-            ) : (
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 min-h-[42px]">
-                <span className="text-sm text-slate-400">No account linked</span>
+
+            <p className="text-xs text-slate-400 mb-4">
+              Created {new Date(deal.createdAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {saving && <span className="ml-2 text-blue-500">Saving…</span>}
+            </p>
+
+            {/* Stage progression */}
+            <div className="mb-4">
+              <div className="flex gap-1">
+                {STAGES.map((s, i) => {
+                  const active = i <= stageIndex;
+                  const isCurrent = s === editStage;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => handleStageChange(s)}
+                      className={`flex-1 py-2 rounded-md text-[11px] font-semibold transition-all relative ${
+                        active
+                          ? `${STAGE_ACCENT[editStage]?.bar ?? 'bg-blue-600'} text-white shadow-sm`
+                          : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
+                      }`}
+                    >
+                      {s === 'Closed Won' ? 'Won' : s}
+                      {isCurrent && <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full opacity-80" />}
+                    </button>
+                  );
+                })}
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Account detail panel (if linked) */}
-
-      {/* Stage Progress Card - Wave 35 */}
-      <StageProgressCard
-        dealId={deal.id}
-        currentStage={editStage}
-        daysInStage={calculateDaysInStage(deal.stageWorkflow?.stageHistory)}
-        activities={activities}
-        onDebriefComplete={() => setTaskRefreshKey(k => k + 1)}
-      />
-
-      {/* Stage-specific CTA card — changes per stage */}
-      <StageCTACard
-        stage={editStage}
-        dealId={deal.id}
-        accountId={deal.accountId ?? undefined}
-        primaryContactId={deal.primaryContactId ?? undefined}
-        onGenerateProposal={() => setProposalModalOpen(true)}
-        onGenerateBrief={() => {
-          // Trigger brief generation via CompetitiveBriefDisplay ref or re-render trick
-          const btn = document.getElementById('competitive-brief-generate-btn') as HTMLButtonElement | null;
-          btn?.click();
-        }}
-      />
-      {deal.account && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-slate-900">Account Overview</h3>
-            <Link href={`/accounts/${deal.account.id}`} className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-              View account →
-            </Link>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <p className="text-xs text-slate-400 mb-0.5">Industry</p>
-              <p className="text-sm font-medium text-slate-900">{deal.account.industry || '—'}</p>
             </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-0.5">ARR</p>
-              <p className="text-sm font-medium text-slate-900">
-                {deal.account.annualRevenue ? formatCurrency(deal.account.annualRevenue) : '—'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-0.5">Location</p>
-              <p className="text-sm font-medium text-slate-900">{(deal.account as any).headquarters || '—'}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Primary contact (if linked) */}
-      {deal.primaryContact && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Primary Contact</h3>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-slate-900">{deal.primaryContact.name}</p>
-            {deal.primaryContact.title && <p className="text-xs text-slate-600">{deal.primaryContact.title}</p>}
-            {deal.primaryContact.email && (
-              <a href={`mailto:${deal.primaryContact.email}`} className="text-xs text-blue-600 hover:underline block">
-                {deal.primaryContact.email}
-              </a>
-            )}
-            {deal.primaryContact.phone && <p className="text-xs text-slate-600">{deal.primaryContact.phone}</p>}
-          </div>
-        </div>
-      )}
-
-      {/* Company Intelligence from research */}
-      {deal.enrichmentData && (
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <span>🔍 Company Intelligence</span>
-            <span className="text-[10px] text-slate-400 font-normal">From AI research</span>
-          </h3>
-          <CompanyIntelligencePanel enrichmentData={deal.enrichmentData} />
-        </div>
-      )}
-
-      {/* Competitive context */}
-      {(deal.incumbentPlatform || deal.incumbentProvider || deal.competitiveBrief) && (
-        <div className="space-y-4">
-          {(deal.incumbentPlatform || deal.incumbentProvider) && (
-            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">Incumbent Info</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {deal.incumbentPlatform && (
-                  <div className="bg-red-50 border border-red-100 rounded-lg p-3">
-                    <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wide mb-1">Incumbent Platform</p>
-                    <p className="text-sm font-semibold text-red-700">{deal.incumbentPlatform}</p>
+            {/* Value + Account */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Deal Value</label>
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                  <span className="text-slate-400 text-sm font-medium">R</span>
+                  <input
+                    type="number"
+                    value={editValue}
+                    onChange={e => { setEditValue(e.target.value); setDirty(true); }}
+                    className="flex-1 text-lg font-bold text-slate-900 bg-transparent border-0 focus:outline-none p-0 w-full"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Account</label>
+                {deal.account ? (
+                  <Link href={`/accounts/${deal.account.id}`}
+                    className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 hover:border-blue-300 hover:bg-blue-50 transition-all group min-h-[42px]">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 group-hover:text-blue-700">{deal.account.name}</p>
+                      {deal.account.industry && <p className="text-xs text-slate-400">{deal.account.industry}</p>}
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-300 group-hover:text-blue-400 flex-shrink-0">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </Link>
+                ) : (
+                  <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 min-h-[42px]">
+                    <span className="text-sm text-slate-400">No account linked</span>
                   </div>
+                )}
+              </div>
+            </div>
+
+            {/* Incumbent quick tags — always visible when set */}
+            {(deal.incumbentPlatform || deal.incumbentProvider) && (
+              <div className="flex gap-2 mt-3 flex-wrap">
+                {deal.incumbentPlatform && (
+                  <span className="text-xs bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-full font-medium">
+                    vs {deal.incumbentPlatform}
+                  </span>
                 )}
                 {deal.incumbentProvider && (
-                  <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
-                    <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wide mb-1">SI Partner</p>
-                    <p className="text-sm font-semibold text-amber-700">{deal.incumbentProvider}</p>
-                  </div>
+                  <span className="text-xs bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-full font-medium">
+                    SI: {deal.incumbentProvider}
+                  </span>
                 )}
               </div>
-            </div>
-          )}
-          <CompetitiveBriefDisplay
-            dealId={deal.id}
-            dealTitle={deal.title}
-            accountInfo={deal.account ? { name: deal.account.name, industry: deal.account.industry ?? undefined, annualRevenue: deal.account.annualRevenue ?? undefined } : undefined}
-            incumbentPlatform={deal.incumbentPlatform}
-            incumbentProvider={deal.incumbentProvider}
-            brief={deal.competitiveBrief}
-            onBriefUpdated={brief => setDeal({...deal, competitiveBrief: brief})}
-          />
-        </div>
-      )}
-
-      {/* Activity Timeline + Note composer */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-900">Activity</h3>
-          <button
-            onClick={() => setEmailModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all"
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-              <polyline points="22,6 12,13 2,6"/>
-            </svg>
-            Send Email
-          </button>
-        </div>
-
-        {/* Note composer */}
-        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
-          <textarea
-            ref={noteRef}
-            value={noteInput}
-            onChange={e => {
-              setNoteInput(e.target.value);
-              if (noteRef.current) {
-                noteRef.current.style.height = 'auto';
-                noteRef.current.style.height = noteRef.current.scrollHeight + 'px';
-              }
-            }}
-            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handlePostNote(); }}
-            placeholder="Add a note… (Cmd+Enter to save)"
-            rows={2}
-            className="w-full text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none placeholder:text-slate-400 overflow-hidden"
-          />
-          <div className="flex justify-end mt-2">
-            <button
-              onClick={handlePostNote}
-              disabled={!noteInput.trim() || postingNote}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {postingNote ? 'Saving…' : 'Add Note'}
-            </button>
+            )}
           </div>
-        </div>
 
-        {/* Timeline */}
-        <div className="divide-y divide-slate-50">
-          {/* Created event always shown */}
-          {[
-            ...activities,
-            { id: '__created__', type: 'created', content: 'Deal created', createdAt: deal.createdAt, metadata: null },
-          ].map((act, idx) => {
-            const isDebrief = act.type === 'debrief';
-            const isStageChange = act.type === 'stage_change';
-            const iconBg = isDebrief
-              ? 'bg-indigo-100 text-indigo-600'
-              : isStageChange ? 'bg-blue-100 text-blue-600'
-              : act.type === 'created' ? 'bg-slate-100 text-slate-500'
-              : 'bg-emerald-50 text-emerald-600';
+          {/* ─ STAGE WORKFLOW ─ (promoted to top — most important for daily work) */}
+          <StageProgressCard
+            dealId={deal.id}
+            currentStage={editStage}
+            daysInStage={calculateDaysInStage(deal.stageWorkflow?.stageHistory)}
+            activities={activities}
+            onDebriefComplete={() => setTaskRefreshKey(k => k + 1)}
+          />
 
-            if (isDebrief && act.metadata) {
-              const m = act.metadata as any;
-              const sentimentStyle: Record<string, string> = {
-                positive: 'bg-emerald-100 text-emerald-700',
-                neutral:  'bg-amber-100 text-amber-700',
-                at_risk:  'bg-red-100 text-red-700',
-              };
-              return (
-                <div key={act.id ?? idx} className="px-5 py-4 border-b border-slate-50">
-                  <div className="flex gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${iconBg}`}>
-                      {ACTIVITY_ICONS.debrief}
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold text-indigo-600">AI Debrief</span>
-                        {m.sentiment && (
-                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${sentimentStyle[m.sentiment] ?? 'bg-slate-100 text-slate-600'}`}>
-                            {m.sentiment === 'at_risk' ? 'At risk' : m.sentiment}
-                          </span>
-                        )}
-                        <span className="text-xs text-slate-400">{timeAgo(act.createdAt)}</span>
-                      </div>
-                      <p className="text-sm text-slate-700 leading-relaxed">{act.content.replace(/^\[AI Debrief[^\]]*\]\s*/, '')}</p>
-                      {m.actionItems?.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-1">
-                          {m.actionItems.slice(0, 3).map((item: any, i: number) => (
-                            <span key={i} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">
-                              ✓ {item.content.length > 40 ? item.content.slice(0, 40) + '…' : item.content}
-                            </span>
-                          ))}
-                          {m.actionItems.length > 3 && (
-                            <span className="text-xs text-slate-400">+{m.actionItems.length - 3} more</span>
-                          )}
-                        </div>
-                      )}
-                      {m.objections?.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {m.objections.map((obj: any, i: number) => (
-                            <span key={i} className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100">
-                              ⚠ {obj.category}{obj.competitor ? ` (${obj.competitor})` : ''}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+          {/* ─ STAGE CTA ─ */}
+          <StageCTACard
+            stage={editStage}
+            dealId={deal.id}
+            accountId={deal.accountId ?? undefined}
+            primaryContactId={deal.primaryContactId ?? undefined}
+            onGenerateProposal={() => setProposalModalOpen(true)}
+            onGenerateBrief={() => {
+              const btn = document.getElementById('competitive-brief-generate-btn') as HTMLButtonElement | null;
+              btn?.click();
+            }}
+          />
+
+          {/* ─ ACCOUNT OVERVIEW (collapsible) ─ */}
+          {deal.account && (
+            <CollapseSection
+              title="Account Overview"
+              badge={deal.account.name}
+              defaultOpen={showAccountOpenByDefault}
+            >
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-0.5">Industry</p>
+                    <p className="text-sm font-medium text-slate-900">{deal.account.industry || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-0.5">ARR</p>
+                    <p className="text-sm font-medium text-slate-900">
+                      {deal.account.annualRevenue ? formatCurrency(deal.account.annualRevenue) : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-0.5">Location</p>
+                    <p className="text-sm font-medium text-slate-900">{(deal.account as any).headquarters || '—'}</p>
                   </div>
                 </div>
-              );
-            }
-
-            return (
-              <div key={act.id ?? idx} className="flex gap-3 px-5 py-4">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${iconBg}`}>
-                  {ACTIVITY_ICONS[act.type] ?? ACTIVITY_ICONS.note}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-700 leading-relaxed">{act.content}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{timeAgo(act.createdAt)}</p>
-                </div>
+                {deal.enrichmentData && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">AI Company Research</p>
+                    <CompanyIntelligencePanel enrichmentData={deal.enrichmentData} />
+                  </div>
+                )}
+                <Link href={`/accounts/${deal.account.id}`} className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                  View full account →
+                </Link>
               </div>
-            );
-          })}
-        </div>
+            </CollapseSection>
+          )}
 
-        {activities.length === 0 && (
-          <div className="px-5 pb-5 text-center">
-            <p className="text-xs text-slate-400">No activity yet — add a note or update the stage to get started.</p>
+          {/* ─ COMPETITIVE CONTEXT (collapsible) ─ */}
+          {hasCompetitiveContext && (
+            <CollapseSection
+              title="Competitive Context"
+              badge={deal.incumbentPlatform ?? undefined}
+              defaultOpen={showCompetitiveOpenByDefault}
+            >
+              <div className="p-5 space-y-4">
+                <CompetitiveBriefDisplay
+                  dealId={deal.id}
+                  dealTitle={deal.title}
+                  accountInfo={deal.account ? { name: deal.account.name, industry: deal.account.industry ?? undefined, annualRevenue: deal.account.annualRevenue ?? undefined } : undefined}
+                  incumbentPlatform={deal.incumbentPlatform}
+                  incumbentProvider={deal.incumbentProvider}
+                  brief={deal.competitiveBrief}
+                  onBriefUpdated={brief => setDeal({ ...deal, competitiveBrief: brief })}
+                />
+              </div>
+            </CollapseSection>
+          )}
+
+          {/* ─ ACTIVITY TIMELINE ─ */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Activity
+                {activities.length > 0 && (
+                  <span className="ml-2 text-xs text-slate-400 font-normal">{activities.length} entries</span>
+                )}
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setTemplateModalOpen(true)}
+                  className="text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  Save as Template
+                </button>
+                <button
+                  onClick={() => setEmailModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                  Send Email
+                </button>
+              </div>
+            </div>
+
+            {/* Note composer */}
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
+              <textarea
+                ref={noteRef}
+                value={noteInput}
+                onChange={e => {
+                  setNoteInput(e.target.value);
+                  if (noteRef.current) {
+                    noteRef.current.style.height = 'auto';
+                    noteRef.current.style.height = noteRef.current.scrollHeight + 'px';
+                  }
+                }}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handlePostNote(); }}
+                placeholder="Add a note… (Cmd+Enter to save)"
+                rows={2}
+                className="w-full text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none placeholder:text-slate-400 overflow-hidden"
+              />
+              <div className="flex justify-end mt-2">
+                <button
+                  onClick={handlePostNote}
+                  disabled={!noteInput.trim() || postingNote}
+                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {postingNote ? 'Saving…' : 'Add Note'}
+                </button>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="divide-y divide-slate-50">
+              {[
+                ...activities,
+                { id: '__created__', type: 'created', content: 'Deal created', createdAt: deal.createdAt, metadata: null },
+              ].map((act, idx) => {
+                const isDebrief = act.type === 'debrief';
+                const isStageChange = act.type === 'stage_change';
+                const iconBg = isDebrief
+                  ? 'bg-indigo-100 text-indigo-600'
+                  : isStageChange ? 'bg-blue-100 text-blue-600'
+                  : act.type === 'created' ? 'bg-slate-100 text-slate-500'
+                  : 'bg-emerald-50 text-emerald-600';
+
+                if (isDebrief && act.metadata) {
+                  const m = act.metadata as any;
+                  const sentimentStyle: Record<string, string> = {
+                    positive: 'bg-emerald-100 text-emerald-700',
+                    neutral:  'bg-amber-100 text-amber-700',
+                    at_risk:  'bg-red-100 text-red-700',
+                  };
+                  return (
+                    <div key={act.id ?? idx} className="px-5 py-4 border-b border-slate-50">
+                      <div className="flex gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${iconBg}`}>
+                          {ACTIVITY_ICONS.debrief}
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-semibold text-indigo-600">AI Debrief</span>
+                            {m.sentiment && (
+                              <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${sentimentStyle[m.sentiment] ?? 'bg-slate-100 text-slate-600'}`}>
+                                {m.sentiment === 'at_risk' ? 'At risk' : m.sentiment}
+                              </span>
+                            )}
+                            <span className="text-xs text-slate-400">{timeAgo(act.createdAt)}</span>
+                          </div>
+                          <p className="text-sm text-slate-700 leading-relaxed">{act.content.replace(/^\[AI Debrief[^\]]*\]\s*/, '')}</p>
+                          {m.actionItems?.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-1">
+                              {m.actionItems.slice(0, 3).map((item: any, i: number) => (
+                                <span key={i} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">
+                                  ✓ {item.content.length > 40 ? item.content.slice(0, 40) + '…' : item.content}
+                                </span>
+                              ))}
+                              {m.actionItems.length > 3 && (
+                                <span className="text-xs text-slate-400">+{m.actionItems.length - 3} more</span>
+                              )}
+                            </div>
+                          )}
+                          {m.objections?.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {m.objections.map((obj: any, i: number) => (
+                                <span key={i} className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100">
+                                  ⚠ {obj.category}{obj.competitor ? ` (${obj.competitor})` : ''}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={act.id ?? idx} className="flex gap-3 px-5 py-4">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${iconBg}`}>
+                      {ACTIVITY_ICONS[act.type] ?? ACTIVITY_ICONS.note}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-700 leading-relaxed">{act.content}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{timeAgo(act.createdAt)}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {activities.length === 0 && (
+              <div className="px-5 pb-5 text-center">
+                <p className="text-xs text-slate-400">No activity yet — log a call, run AI Debrief, or add a note above.</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
         </div>
 
-        {/* Right column (1/3 width) */}
-        <div className="space-y-5">
-          <ContactPanel contact={deal.primaryContact} />
-          <DealTasksPanel key={taskRefreshKey} dealId={deal.id} />
-          <FollowUpScheduling dealId={deal.id} dueDate={deal.dueDate} nextAction={deal.nextAction} />
-          {editStage === 'Closed Won' || editStage === 'Closed Lost' ? (
-            <DealClosureSection
-              dealId={deal.id}
-              stage={editStage}
-              closureReason={deal.closureReason}
-              lossReason={deal.lossReason}
-              onUpdate={() => window.location.reload()}
-            />
-          ) : null}
+        {/* ── RIGHT COLUMN — tabbed sidebar ── */}
+        <div className="space-y-0">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden sticky top-4">
+
+            {/* Tab bar */}
+            <div className="flex border-b border-slate-100">
+              {([
+                { id: 'tasks',   label: 'Tasks' },
+                { id: 'contact', label: 'Contact' },
+                { id: 'info',    label: 'Info' },
+              ] as { id: SidebarTab; label: string }[]).map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSidebarTab(tab.id)}
+                  className={`flex-1 py-3 text-xs font-semibold transition-all border-b-2 ${
+                    sidebarTab === tab.id
+                      ? 'text-blue-600 border-blue-600 bg-blue-50/50'
+                      : 'text-slate-500 border-transparent hover:text-slate-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tasks tab */}
+            {sidebarTab === 'tasks' && (
+              <DealTasksPanel key={taskRefreshKey} dealId={deal.id} />
+            )}
+
+            {/* Contact tab */}
+            {sidebarTab === 'contact' && (
+              <div className="p-4 space-y-4">
+                <ContactPanel contact={deal.primaryContact} />
+                {deal.primaryContact?.email && (
+                  <button
+                    onClick={() => setEmailModalOpen(true)}
+                    className="w-full py-2.5 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                      <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    Send Email
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Info tab */}
+            {sidebarTab === 'info' && (
+              <div className="divide-y divide-slate-50">
+                <FollowUpScheduling dealId={deal.id} dueDate={deal.dueDate} nextAction={deal.nextAction} />
+                {isClosed && (
+                  <DealClosureSection
+                    dealId={deal.id}
+                    stage={editStage}
+                    closureReason={deal.closureReason}
+                    lossReason={deal.lossReason}
+                    onUpdate={() => window.location.reload()}
+                  />
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -623,7 +690,6 @@ export default function DealDetailPage() {
         </div>
       )}
 
-      {/* Save as Template Modal */}
       {deal && (
         <SaveAsTemplateModal
           isOpen={templateModalOpen}
