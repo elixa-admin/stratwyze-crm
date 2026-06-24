@@ -11,6 +11,7 @@ interface StageProgressCardProps {
   currentStage: string;
   daysInStage: number;
   activities: any[];
+  onDebriefComplete?: () => void;
 }
 
 type ActionState = {
@@ -58,6 +59,7 @@ export default function StageProgressCard({
   dealId,
   currentStage,
   daysInStage,
+  onDebriefComplete,
 }: StageProgressCardProps) {
   const stageDef = getStageDef(currentStage);
   const [stageActions, setStageActions] = useState<ActionState[]>(() => buildActions(currentStage));
@@ -183,6 +185,7 @@ export default function StageProgressCard({
         stage={currentStage}
         actions={stageActions}
         onActionLogged={handleActionLogged}
+        onDebriefComplete={onDebriefComplete}
       />
 
       {/* Readiness score strip */}

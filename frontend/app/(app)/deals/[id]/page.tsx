@@ -15,6 +15,7 @@ import Breadcrumbs from '@/components/shared/Breadcrumbs';
 
 import StageProgressCard from '@/components/deals/StageProgressCard';
 import StageCTACard from '@/components/deals/StageCTACard';
+import DealTasksPanel from '@/components/deals/DealTasksPanel';
 import { calculateDaysInStage } from '@/lib/deals/kanban';
 import GenerateProposalModal from '@/components/proposals/GenerateProposalModal';
 interface Activity {
@@ -89,6 +90,26 @@ const ACTIVITY_ICONS: Record<string, JSX.Element> = {
       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
     </svg>
   ),
+  debrief: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+    </svg>
+  ),
+  call: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.08 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/>
+    </svg>
+  ),
+  email: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+    </svg>
+  ),
+  meeting: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  ),
 };
 
 function timeAgo(dateStr: string): string {
@@ -135,6 +156,7 @@ export default function DealDetailPage() {
   const [dirty, setDirty] = useState(false);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [proposalModalOpen, setProposalModalOpen] = useState(false);
+  const [taskRefreshKey, setTaskRefreshKey] = useState(0);
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -325,6 +347,7 @@ export default function DealDetailPage() {
         currentStage={editStage}
         daysInStage={calculateDaysInStage(deal.stageWorkflow?.stageHistory)}
         activities={activities}
+        onDebriefComplete={() => setTaskRefreshKey(k => k + 1)}
       />
 
       {/* Stage-specific CTA card — changes per stage */}
@@ -468,10 +491,67 @@ export default function DealDetailPage() {
           {/* Created event always shown */}
           {[
             ...activities,
-            { id: '__created__', type: 'created', content: 'Deal created', createdAt: deal.createdAt },
+            { id: '__created__', type: 'created', content: 'Deal created', createdAt: deal.createdAt, metadata: null },
           ].map((act, idx) => {
+            const isDebrief = act.type === 'debrief';
             const isStageChange = act.type === 'stage_change';
-            const iconBg = isStageChange ? 'bg-blue-100 text-blue-600' : act.type === 'created' ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-600';
+            const iconBg = isDebrief
+              ? 'bg-indigo-100 text-indigo-600'
+              : isStageChange ? 'bg-blue-100 text-blue-600'
+              : act.type === 'created' ? 'bg-slate-100 text-slate-500'
+              : 'bg-emerald-50 text-emerald-600';
+
+            if (isDebrief && act.metadata) {
+              const m = act.metadata as any;
+              const sentimentStyle: Record<string, string> = {
+                positive: 'bg-emerald-100 text-emerald-700',
+                neutral:  'bg-amber-100 text-amber-700',
+                at_risk:  'bg-red-100 text-red-700',
+              };
+              return (
+                <div key={act.id ?? idx} className="px-5 py-4 border-b border-slate-50">
+                  <div className="flex gap-3">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${iconBg}`}>
+                      {ACTIVITY_ICONS.debrief}
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-semibold text-indigo-600">AI Debrief</span>
+                        {m.sentiment && (
+                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${sentimentStyle[m.sentiment] ?? 'bg-slate-100 text-slate-600'}`}>
+                            {m.sentiment === 'at_risk' ? 'At risk' : m.sentiment}
+                          </span>
+                        )}
+                        <span className="text-xs text-slate-400">{timeAgo(act.createdAt)}</span>
+                      </div>
+                      <p className="text-sm text-slate-700 leading-relaxed">{act.content.replace(/^\[AI Debrief[^\]]*\]\s*/, '')}</p>
+                      {m.actionItems?.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {m.actionItems.slice(0, 3).map((item: any, i: number) => (
+                            <span key={i} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">
+                              ✓ {item.content.length > 40 ? item.content.slice(0, 40) + '…' : item.content}
+                            </span>
+                          ))}
+                          {m.actionItems.length > 3 && (
+                            <span className="text-xs text-slate-400">+{m.actionItems.length - 3} more</span>
+                          )}
+                        </div>
+                      )}
+                      {m.objections?.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {m.objections.map((obj: any, i: number) => (
+                            <span key={i} className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100">
+                              ⚠ {obj.category}{obj.competitor ? ` (${obj.competitor})` : ''}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div key={act.id ?? idx} className="flex gap-3 px-5 py-4">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${iconBg}`}>
@@ -497,6 +577,7 @@ export default function DealDetailPage() {
         {/* Right column (1/3 width) */}
         <div className="space-y-5">
           <ContactPanel contact={deal.primaryContact} />
+          <DealTasksPanel key={taskRefreshKey} dealId={deal.id} />
           <FollowUpScheduling dealId={deal.id} dueDate={deal.dueDate} nextAction={deal.nextAction} />
           {editStage === 'Closed Won' || editStage === 'Closed Lost' ? (
             <DealClosureSection

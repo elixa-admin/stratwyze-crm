@@ -54,6 +54,7 @@ model Deal {
   stageWorkflow     DealStageWorkflow?
   opportunityProfile OpportunityProfile?
   proposals         Proposal[]
+  tasks             Task[]
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }
@@ -269,4 +270,18 @@ model Proposal {
   status           String   @default("draft")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  dealId      String
+  deal        Deal      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  content     String
+  dueDate     DateTime?
+  assignedTo  String?
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  source      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
