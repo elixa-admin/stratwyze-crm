@@ -30,14 +30,23 @@ export function computeBattleCard(
 
   const siWeaknesses: string[] = partner ? partner.weaknesses : [];
 
-  const combinedNarrative =
+  // Narrative split into discrete plays for readable on-screen display.
+  const narrativePoints: string[] =
     competitor && partner
-      ? `${competitor.salesRebuttal.keyMessage} ${partner.flankingStrategy.approach} When ${competitor.name} and ${partner.name} appear together in a pursuit, address platform risk first (TCO, implementation timeline, POPIA data residency), then SI credibility (track record, pure-play HaloITSM focus, absence of competing platforms). This sequence prevents the prospect from anchoring on brand recognition before hearing your cost and speed story.`
+      ? [
+          competitor.salesRebuttal.keyMessage,
+          partner.flankingStrategy.approach,
+          `When ${competitor.name} and ${partner.name} appear together, sequence the pursuit: lead with platform risk — TCO, implementation timeline, POPIA data residency — then SI credibility — track record, pure-play HaloITSM focus, no competing platforms.`,
+          `This order stops the prospect anchoring on brand recognition before they hear your cost and speed story.`,
+        ]
       : competitor
-      ? competitor.salesRebuttal.keyMessage
+      ? [competitor.salesRebuttal.keyMessage]
       : partner
-      ? partner.flankingStrategy.approach
-      : '';
+      ? [partner.flankingStrategy.approach]
+      : [];
+
+  // Joined form kept for export / copy-to-clipboard consumers.
+  const combinedNarrative = narrativePoints.join(' ');
 
   const winStatement =
     competitor && partner
@@ -125,6 +134,7 @@ export function computeBattleCard(
     platformWeaknesses,
     siWeaknesses,
     combinedNarrative,
+    narrativePoints,
     stakeholderAngles,
     winStatement,
     watchOuts,

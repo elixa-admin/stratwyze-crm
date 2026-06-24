@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import BattleCardExport from '@/components/competitive/BattleCardExport';
+import NarrativeBlocks from '@/components/competitive/NarrativeBlocks';
 import { PursuitBattleCard } from '@/lib/types/pursuit';
 
 interface AIBrief {
@@ -57,6 +58,7 @@ function briefToBattleCard(brief: AIBrief, competitorName: string | null, siName
     platformWeaknesses: brief.platformRisks,
     siWeaknesses: brief.siRisks,
     combinedNarrative: brief.combinedNarrative,
+    narrativePoints: brief.combinedNarrative ? [brief.combinedNarrative] : [],
     winStatement: brief.winStatement,
     stakeholderAngles: brief.stakeholderAngles,
     watchOuts: brief.watchOuts,
@@ -232,7 +234,7 @@ export default function AIBriefPanel({
       {/* Winning play */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <p className="text-[10px] font-bold uppercase tracking-wide text-blue-700 mb-2">The Winning Play</p>
-        <p className="text-xs text-slate-800 leading-relaxed">{brief.combinedNarrative}</p>
+        <NarrativeBlocks text={brief.combinedNarrative} compact />
         {brief.winStatement && (
           <p className="text-xs font-semibold text-blue-900 border-l-4 border-blue-500 pl-3 mt-3 leading-snug">{brief.winStatement}</p>
         )}

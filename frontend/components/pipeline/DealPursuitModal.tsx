@@ -6,6 +6,7 @@ import { SA_PARTNERS } from '@/lib/data/sa-partners';
 import { computeBattleCard } from '@/lib/utils/battle-card';
 import { PursuitBattleCard } from '@/lib/types/pursuit';
 import BattleCardExport from '@/components/competitive/BattleCardExport';
+import NarrativeBlocks from '@/components/competitive/NarrativeBlocks';
 
 export interface DealContext {
   id: string;
@@ -218,7 +219,7 @@ export default function DealPursuitModal({ deal, onClose, onSave }: Props) {
                 {/* Winning Play */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-blue-700 mb-2">The Winning Play</p>
-                  <p className="text-xs text-slate-800 leading-relaxed">{battleCard.combinedNarrative}</p>
+                  <NarrativeBlocks points={battleCard.narrativePoints} compact />
                   {battleCard.winStatement && (
                     <p className="text-xs font-semibold text-blue-900 border-l-4 border-blue-500 pl-3 mt-3 leading-snug">{battleCard.winStatement}</p>
                   )}

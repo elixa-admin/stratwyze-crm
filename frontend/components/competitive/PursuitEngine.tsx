@@ -7,6 +7,7 @@ import { PursuitBattleCard } from '@/lib/types/pursuit';
 import BattleCardExport from '@/components/competitive/BattleCardExport';
 import AIBriefPanel from '@/components/competitive/AIBriefPanel';
 import IntelVerificationPanel from '@/components/competitive/IntelVerificationPanel';
+import NarrativeBlocks from '@/components/competitive/NarrativeBlocks';
 import { computeBattleCard } from '@/lib/utils/battle-card';
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
@@ -375,7 +376,7 @@ export default function PursuitEngine({ onNavigateToProposal }: Props) {
                     <IconLightning />
                     <span className="text-xs font-bold uppercase tracking-wide">The Winning Play</span>
                   </div>
-                  <p className="text-sm text-slate-800 leading-relaxed">{battleCard.combinedNarrative}</p>
+                  <NarrativeBlocks points={battleCard.narrativePoints} />
                   {battleCard.winStatement && (
                     <p className="text-sm font-semibold text-blue-900 border-l-4 border-blue-500 pl-3 mt-3 leading-snug">
                       {battleCard.winStatement}

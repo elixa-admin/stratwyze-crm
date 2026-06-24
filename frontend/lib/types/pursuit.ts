@@ -11,7 +11,10 @@ export interface PursuitBattleCard {
   openingStatement: string;
   platformWeaknesses: string[];
   siWeaknesses: string[];
+  /** Full narrative as a single string — used for export / copy. */
   combinedNarrative: string;
+  /** Narrative broken into discrete, readable plays — used for on-screen display. */
+  narrativePoints: string[];
   stakeholderAngles: StakeholderAngle[];
   winStatement: string;
   watchOuts: string[];
