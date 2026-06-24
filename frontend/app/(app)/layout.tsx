@@ -270,26 +270,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 h-16 flex-shrink-0">
+        <header className="sticky top-0 z-30 bg-slate-900 border-b border-slate-800 h-16 flex-shrink-0">
           <div className="flex items-center h-full px-6 gap-4">
             <button
               onClick={() => setCollapsed(c => !c)}
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all"
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {collapsed ? <IconChevronsRight /> : <IconChevronsLeft />}
             </button>
 
-            <GlobalSearch />
+            <GlobalSearch dark />
 
             <div className="flex items-center gap-2 ml-auto">
-              <button className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all relative">
+              <button className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all relative">
                 <IconBell />
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-400 rounded-full" />
               </button>
               <button
                 onClick={() => setShowNewDealModal(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-sm"
               >
                 <IconPlus />
                 <span>New</span>
@@ -299,7 +299,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-8">
+        <main
+          className="flex-1 overflow-auto px-8 pt-5 pb-8"
+          style={{ background: 'linear-gradient(to bottom, #0f172a 68px, #f8fafc 68px)' }}
+        >
           {children}
         </main>
       </div>

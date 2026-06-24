@@ -27,20 +27,20 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   if (items.length === 0) return null;
 
   return (
-    <nav className="mb-6 flex items-center gap-1.5">
-      <Link href="/dashboard" className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+    <nav className="mb-5 flex items-center gap-1.5">
+      <Link href="/dashboard" className="flex items-center gap-1 text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors">
         <IconHome />
       </Link>
 
       {items.map((item, idx) => (
         <div key={idx} className="flex items-center gap-1.5">
-          <span className="text-slate-400"><IconChevronRight /></span>
+          <span className="text-slate-600"><IconChevronRight /></span>
           {item.href ? (
-            <Link href={item.href} className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+            <Link href={item.href} className="text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors">
               {item.label}
             </Link>
           ) : (
-            <span className="text-sm font-medium text-slate-900">{item.label}</span>
+            <span className="text-sm font-medium text-slate-200">{item.label}</span>
           )}
         </div>
       ))}
