@@ -23,13 +23,19 @@ export default function StageProgressCard({
   activities,
 }: StageProgressCardProps) {
   const stageDef = getStageDef(currentStage);
-  const [stageActions, setStageActions] = useState(stageDef?.actions.map((a) => ({
+  const [stageActions, setStageActions] = useState<Array<{
+    id: string;
+    title: string;
+    description?: string;
+    required: boolean;
+    completed: boolean;
+    completedAt?: string;
+  }>>(stageDef?.actions.map((a) => ({
     id: a.id,
     title: a.title,
     description: a.description,
     required: a.required,
     completed: false,
-    completedAt: undefined,
   })) || []);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);

@@ -51,7 +51,7 @@ export const STAGE_DEFINITIONS: Record<string, StageDef> = {
     conversationStarters: [
       "What's your biggest operational challenge right now?",
       'How many locations/teams do you operate?',
-      'What's your tech stack for [key domain]?',
+      "What's your tech stack for [key domain]?",
       'Who typically leads these kinds of decisions?',
     ],
   },
