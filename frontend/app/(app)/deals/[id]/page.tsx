@@ -16,6 +16,7 @@ import Breadcrumbs from '@/components/shared/Breadcrumbs';
 
 import StageProgressCard from '@/components/deals/StageProgressCard';
 import { calculateDaysInStage } from '@/lib/deals/kanban';
+import GenerateProposalModal from '@/components/proposals/GenerateProposalModal';
 interface Activity {
   id: string;
   type: string;
@@ -133,6 +134,7 @@ export default function DealDetailPage() {
   const [postingNote, setPostingNote] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const [proposalModalOpen, setProposalModalOpen] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -324,6 +326,34 @@ export default function DealDetailPage() {
         daysInStage={calculateDaysInStage(deal.stageWorkflow?.stageHistory)}
         activities={activities}
       />
+
+      {/* Generate Proposal CTA — visible from Proposal stage onward */}
+      {(editStage === 'Proposal' || editStage === 'Negotiation' || editStage === 'Closed Won') && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold tracking-widest uppercase mb-0.5" style={{ color: '#2A7FD4' }}>
+                S T R A T W Y Z E &nbsp; S O L U T I O N S
+              </p>
+              <h3 className="text-sm font-semibold text-slate-900">Budgetary Proposal</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Generate a HaloITSM proposal using deal intelligence</p>
+            </div>
+            <button
+              onClick={() => setProposalModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all shadow-sm hover:opacity-90"
+              style={{ backgroundColor: '#2A7FD4' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+              Generate Proposal
+            </button>
+          </div>
+        </div>
+      )}
       {deal.account && (
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
           <div className="flex items-center justify-between mb-3">
@@ -524,6 +554,14 @@ export default function DealDetailPage() {
           incumbentProvider={deal.incumbentProvider}
           onClose={() => setTemplateModalOpen(false)}
           onSaved={() => {}}
+        />
+      )}
+
+      {proposalModalOpen && deal && (
+        <GenerateProposalModal
+          dealId={deal.id}
+          dealTitle={deal.title}
+          onClose={() => setProposalModalOpen(false)}
         />
       )}
     </div>
