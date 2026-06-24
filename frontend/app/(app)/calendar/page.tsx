@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 15));
@@ -29,15 +30,15 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Calendar</h1>
-          <p className="text-slate-600 mt-1">Manage your sales activities and meetings</p>
-        </div>
-        <button className="px-4 py-2.5 rounded-lg text-sm font-600 bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm">
-          + Schedule Activity
-        </button>
-      </div>
+      <PageHeader
+        title="Calendar"
+        subtitle="Manage your sales activities and meetings"
+        action={
+          <button className="px-4 py-2 rounded-lg text-sm font-semibold bg-white/20 hover:bg-white/30 text-white transition-all border border-white/30">
+            + Schedule Activity
+          </button>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}

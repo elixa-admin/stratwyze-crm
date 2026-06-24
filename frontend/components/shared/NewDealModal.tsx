@@ -68,7 +68,10 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
   const [value, setValue] = useState('');
   const [accountId, setAccountId] = useState('');
   const [stageName, setStageName] = useState('Prospecting');
-  const [accounts, setAccounts] = useState<{ id: string; name: string; industry?: string; annualRevenue?: number }[]>([]);
+  const [accounts, setAccounts] = useState<{
+    id: string; name: string; industry?: string; annualRevenue?: number;
+    website?: string; employees?: number; headquarters?: string;
+  }[]>([]);
   // Step 2 — Company profile
   const [companyName, setCompanyName] = useState('');
   const [website, setWebsite] = useState('');
@@ -88,6 +91,19 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
     if (!isOpen) return;
     fetch('/api/accounts').then(r => r.json()).then(d => { if (d.accounts) setAccounts(d.accounts); }).catch(() => {});
   }, [isOpen]);
+
+  // Auto-fill step 2 when an account is selected in step 1
+  useEffect(() => {
+    if (!accountId) return;
+    const acct = accounts.find(a => a.id === accountId);
+    if (!acct) return;
+    if (!companyName) setCompanyName(acct.name);
+    if (!website && acct.website) setWebsite(acct.website);
+    if (!industry && acct.industry) setIndustry(acct.industry);
+    if (!employees && acct.employees) setEmployees(String(acct.employees));
+    if (!location && acct.headquarters) setLocation(acct.headquarters);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountId]);
 
   const resetAll = () => {
     setStep('details');

@@ -10,6 +10,7 @@ import ProposalBuilder from '@/components/competitive/ProposalBuilder';
 import { COMPETITORS } from '@/lib/data/competitors';
 import { SA_PARTNERS } from '@/lib/data/sa-partners';
 import { Competitor, RiskLevel } from '@/lib/types/competitive';
+import PageHeader from '@/components/shared/PageHeader';
 import { SAPartner, PartnerCategory } from '@/lib/types/sa-partners';
 
 const RISK_LEVELS: RiskLevel[] = ['Critical', 'High', 'Medium', 'Low'];
@@ -91,13 +92,10 @@ export default function CompetitiveIntelPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Competitive Intelligence</h1>
-        <p className="text-slate-600 text-sm mt-1">
-          Platform positioning, SA landscape, and flanking strategies for pursuit opportunities
-        </p>
-      </div>
+      <PageHeader
+        title="Competitive Intelligence"
+        subtitle="Platform positioning, SA landscape, and flanking strategies for pursuit opportunities"
+      />
 
       {/* Tab bar */}
       <div className="flex items-center gap-1 border-b border-slate-200">

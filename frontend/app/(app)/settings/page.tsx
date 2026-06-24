@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
@@ -14,10 +15,10 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
-        <p className="text-slate-600 mt-1">Manage workspace configuration</p>
-      </div>
+      <PageHeader
+        title="Settings"
+        subtitle="Manage workspace configuration and team access"
+      />
 
       {/* Tabs */}
       <div className="flex gap-4 border-b border-slate-200">
