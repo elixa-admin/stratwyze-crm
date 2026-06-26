@@ -31,16 +31,14 @@ export default function DashboardHome() {
     ]).then(async ([dealsRes]) => {
       if (dealsRes.deals) {
         setDeals(dealsRes.deals);
-        // Fetch tasks for each deal and aggregate
-        const allTasks: Task[] = [];
-        for (const deal of dealsRes.deals) {
-          const tasksRes = await fetch(`/api/deals/tasks?dealId=${deal.id}`)
+        // Fetch tasks for all deals in parallel
+        const taskPromises = dealsRes.deals.map((deal: any) =>
+          fetch(`/api/deals/tasks?dealId=${deal.id}`)
             .then(r => r.json())
-            .catch(() => ({ tasks: [] }));
-          if (tasksRes.tasks) {
-            allTasks.push(...tasksRes.tasks);
-          }
-        }
+            .catch(() => ({ tasks: [] }))
+        );
+        const tasksResults = await Promise.all(taskPromises);
+        const allTasks = tasksResults.flatMap(res => res.tasks ?? []);
         setTasks(allTasks);
       }
       setTasksLoading(false);
