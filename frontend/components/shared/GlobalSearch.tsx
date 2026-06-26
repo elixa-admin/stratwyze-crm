@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { formatCurrency } from '@/lib/format';
 
 interface LocalResult {
-  type: 'account' | 'deal';
+  type: 'account' | 'deal' | 'contact';
   id: string;
   title: string;
   subtitle: string;
@@ -15,14 +15,17 @@ interface LocalResult {
 const TYPE_COLORS: Record<string, string> = {
   deal:    'bg-blue-50 text-blue-600',
   account: 'bg-emerald-50 text-emerald-600',
+  contact: 'bg-purple-50 text-purple-600',
 };
 const TYPE_LABELS: Record<string, string> = {
   deal: 'Deal',
   account: 'Account',
+  contact: 'Contact',
 };
 const TYPE_LETTERS: Record<string, string> = {
   deal: 'D',
   account: 'A',
+  contact: 'C',
 };
 
 export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
@@ -31,15 +34,23 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
   const [allItems, setAllItems] = useState<LocalResult[]>([]);
   const [results, setResults] = useState<LocalResult[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Load recent items from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('recent_items');
+    setRecentIds(stored ? JSON.parse(stored) : []);
+  }, []);
 
   // Load real data from API on mount
   useEffect(() => {
     Promise.all([
       fetch('/api/deals').then(r => r.json()).catch(() => ({ deals: [] })),
       fetch('/api/accounts').then(r => r.json()).catch(() => ({ accounts: [] })),
-    ]).then(([dealsData, accountsData]) => {
+      fetch('/api/contacts').then(r => r.json()).catch(() => ({ contacts: [] })),
+    ]).then(([dealsData, accountsData, contactsData]) => {
       const deals: LocalResult[] = (dealsData.deals ?? []).map((d: any) => ({
         type: 'deal' as const,
         id: d.id,
@@ -54,17 +65,25 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
         subtitle: [a.industry, a.annualRevenue ? formatCurrency(a.annualRevenue) : null].filter(Boolean).join(' · ') || 'Account',
         href: `/accounts/${a.id}`,
       }));
-      setAllItems([...deals, ...accounts]);
+      const contacts: LocalResult[] = (contactsData.contacts ?? []).map((c: any) => ({
+        type: 'contact' as const,
+        id: c.id,
+        title: c.name,
+        subtitle: [c.title, c.accountName].filter(Boolean).join(' · ') || 'Contact',
+        href: `/contacts/${c.id}`,
+      }));
+      setAllItems([...deals, ...accounts, ...contacts]);
     });
   }, []);
 
-  // Re-fetch when a deal/account is created
+  // Re-fetch when a deal/account/contact is created
   useEffect(() => {
     const refresh = () => {
       Promise.all([
         fetch('/api/deals').then(r => r.json()).catch(() => ({ deals: [] })),
         fetch('/api/accounts').then(r => r.json()).catch(() => ({ accounts: [] })),
-      ]).then(([dealsData, accountsData]) => {
+        fetch('/api/contacts').then(r => r.json()).catch(() => ({ contacts: [] })),
+      ]).then(([dealsData, accountsData, contactsData]) => {
         const deals: LocalResult[] = (dealsData.deals ?? []).map((d: any) => ({
           type: 'deal' as const,
           id: d.id,
@@ -79,14 +98,23 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
           subtitle: [a.industry, a.annualRevenue ? formatCurrency(a.annualRevenue) : null].filter(Boolean).join(' · ') || 'Account',
           href: `/accounts/${a.id}`,
         }));
-        setAllItems([...deals, ...accounts]);
+        const contacts: LocalResult[] = (contactsData.contacts ?? []).map((c: any) => ({
+          type: 'contact' as const,
+          id: c.id,
+          title: c.name,
+          subtitle: [c.title, c.accountName].filter(Boolean).join(' · ') || 'Contact',
+          href: `/contacts/${c.id}`,
+        }));
+        setAllItems([...deals, ...accounts, ...contacts]);
       });
     };
     window.addEventListener('dealCreated', refresh);
     window.addEventListener('accountCreated', refresh);
+    window.addEventListener('contactCreated', refresh);
     return () => {
       window.removeEventListener('dealCreated', refresh);
       window.removeEventListener('accountCreated', refresh);
+      window.removeEventListener('contactCreated', refresh);
     };
   }, []);
 
@@ -142,7 +170,13 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
     return acc;
   }, {});
 
-  const showDropdown = open && query.length >= 1;
+  const trackRecent = (id: string) => {
+    const updated = [id, ...recentIds.filter(rid => rid !== id)].slice(0, 10);
+    setRecentIds(updated);
+    localStorage.setItem('recent_items', JSON.stringify(updated));
+  };
+
+  const showDropdown = open && (query.length >= 1 || !query.trim());
   let flatIndex = -1;
 
   return (
@@ -160,7 +194,7 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
           onChange={e => { setQuery(e.target.value); setOpen(true); setActiveIndex(-1); }}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search deals & accounts…"
+          placeholder="Search deals, accounts, contacts…"
           className={`w-full pl-9 pr-16 py-2.5 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
             dark
               ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500 focus:bg-slate-800 focus:border-slate-600'
@@ -183,16 +217,46 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
       </div>
 
       {showDropdown && (
-        <div className="absolute top-full mt-1.5 left-0 right-0 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
+        <div className="absolute top-full mt-1.5 left-0 right-0 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden max-h-96 overflow-y-auto">
+          {!query && recentIds.length > 0 ? (
+            <>
+              <div className="px-4 pt-3 pb-1.5 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
+                Recent
+              </div>
+              {recentIds.slice(0, 5).map(id => {
+                const item = allItems.find(i => i.id === id);
+                if (!item) return null;
+                flatIndex++;
+                const idx = flatIndex;
+                return (
+                  <Link
+                    key={`recent-${item.type}-${item.id}`}
+                    href={item.href}
+                    onClick={() => { trackRecent(item.id); setOpen(false); setQuery(''); }}
+                    className={`flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors ${activeIndex === idx ? 'bg-blue-50' : ''}`}
+                  >
+                    <span className={`w-6 h-6 rounded text-xs font-bold flex-shrink-0 text-slate-400`}>
+                      🕐
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{item.title}</p>
+                      <p className="text-xs text-slate-400 truncate">{item.subtitle}</p>
+                    </div>
+                  </Link>
+                );
+              })}
+              <div className="border-t border-slate-100 mt-1" />
+            </>
+          ) : null}
           {results.length > 0 ? (
             <>
-              {(['deal', 'account'] as const).map(type => {
+              {(['deal', 'account', 'contact'] as const).map(type => {
                 const group = grouped[type];
                 if (!group?.length) return null;
                 return (
                   <div key={type}>
                     <p className="px-4 pt-3 pb-1.5 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
-                      {TYPE_LABELS[type]}s
+                      {TYPE_LABELS[type]}s ({group.length})
                     </p>
                     {group.map(r => {
                       flatIndex++;
@@ -201,7 +265,7 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
                         <Link
                           key={`${r.type}-${r.id}`}
                           href={r.href}
-                          onClick={() => { setOpen(false); setQuery(''); }}
+                          onClick={() => { trackRecent(r.id); setOpen(false); setQuery(''); }}
                           className={`flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors ${activeIndex === idx ? 'bg-blue-50' : ''}`}
                         >
                           <span className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold flex-shrink-0 ${TYPE_COLORS[r.type]}`}>
