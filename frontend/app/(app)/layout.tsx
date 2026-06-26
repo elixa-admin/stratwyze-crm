@@ -296,12 +296,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-900 border-t border-slate-800 flex items-center justify-around z-40">
-        {NAV[0].items.map(({ href, label, Icon }) => {
+        {NAV[0]?.items?.map(({ href, label, Icon: IconComponent }) => {
           const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
           return (
             <Link key={href} href={href} className="flex flex-col items-center justify-center gap-1 flex-1 h-full">
-              <span className={active ? 'text-blue-400' : 'text-slate-400'}><Icon /></span>
-              <span className={`text-[10px] ${active ? 'text-blue-400 font-medium' : 'text-slate-400'}`}>{label.split(' ')[0]}</span>
+              <span className={active ? 'text-blue-400' : 'text-slate-400'}>{IconComponent && <IconComponent />}</span>
+              <span className={`text-[10px] ${active ? 'text-blue-400 font-medium' : 'text-slate-400'}`}>{label?.split(' ')?.[0]}</span>
             </Link>
           );
         })}
