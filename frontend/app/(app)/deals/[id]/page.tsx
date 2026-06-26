@@ -305,7 +305,6 @@ export default function DealDetailPage() {
     activityDateFilter !== 'all',
     activitySearch.trim() !== '',
   ].filter(Boolean).length;
-  const hasCompetitiveContext = !!(deal.incumbentPlatform || deal.incumbentProvider || deal.competitiveBrief);
   const showAccountOpenByDefault = editStage === 'Prospecting' || editStage === 'Qualification';
   const showCompetitiveOpenByDefault = editStage === 'Proposal' || editStage === 'Negotiation';
 
@@ -477,12 +476,12 @@ export default function DealDetailPage() {
           )}
 
           {/* ─ COMPETITIVE CONTEXT (collapsible) ─ */}
-          {hasCompetitiveContext && (
-            <CollapseSection
-              title="Competitive Context"
-              badge={deal.incumbentPlatform ?? undefined}
-              defaultOpen={showCompetitiveOpenByDefault}
-            >
+          {/* Always show to allow brief generation, even without incumbent set */}
+          <CollapseSection
+            title="Competitive Context"
+            badge={deal.incumbentPlatform ?? (deal.competitiveBrief ? 'Brief available' : undefined)}
+            defaultOpen={showCompetitiveOpenByDefault || !deal.competitiveBrief}
+          >
               <div className="p-5 space-y-4">
                 <CompetitiveBriefDisplay
                   dealId={deal.id}
@@ -495,7 +494,6 @@ export default function DealDetailPage() {
                 />
               </div>
             </CollapseSection>
-          )}
 
           {/* ─ ACTIVITY TIMELINE ─ */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
