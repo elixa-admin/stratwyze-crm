@@ -266,6 +266,45 @@ export default function DealDetailPage() {
   const stageIndex = STAGES.indexOf(editStage);
   const activities = deal.activities ?? [];
   const isClosed = editStage === 'Closed Won' || editStage === 'Closed Lost';
+
+  // Activity filter state
+  const [activitySearch, setActivitySearch] = useState('');
+  const [activityTypeFilter, setActivityTypeFilter] = useState<string>('all');
+  const [activityDateFilter, setActivityDateFilter] = useState<string>('all');
+
+  const ACTIVITY_TYPE_TABS = [
+    { id: 'all',         label: 'All' },
+    { id: 'note',        label: 'Notes' },
+    { id: 'call',        label: 'Calls' },
+    { id: 'email',       label: 'Emails' },
+    { id: 'debrief',     label: 'Debriefs' },
+    { id: 'stage_change',label: 'Stage' },
+  ];
+
+  const activityDateBoundary = (filter: string): Date | null => {
+    const now = new Date();
+    if (filter === 'today') { const d = new Date(now); d.setHours(0,0,0,0); return d; }
+    if (filter === 'week')  { const d = new Date(now); d.setDate(d.getDate() - 7); return d; }
+    if (filter === 'month') { const d = new Date(now); d.setMonth(d.getMonth() - 1); return d; }
+    return null;
+  };
+
+  const filteredActivities = activities.filter(act => {
+    if (activityTypeFilter !== 'all' && act.type !== activityTypeFilter) return false;
+    const boundary = activityDateBoundary(activityDateFilter);
+    if (boundary && new Date(act.createdAt) < boundary) return false;
+    if (activitySearch.trim()) {
+      const q = activitySearch.toLowerCase();
+      if (!act.content.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  const activeFilterCount = [
+    activityTypeFilter !== 'all',
+    activityDateFilter !== 'all',
+    activitySearch.trim() !== '',
+  ].filter(Boolean).length;
   const hasCompetitiveContext = !!(deal.incumbentPlatform || deal.incumbentProvider || deal.competitiveBrief);
   const showAccountOpenByDefault = editStage === 'Prospecting' || editStage === 'Qualification';
   const showCompetitiveOpenByDefault = editStage === 'Proposal' || editStage === 'Negotiation';
@@ -464,7 +503,16 @@ export default function DealDetailPage() {
               <h3 className="text-sm font-semibold text-slate-900">
                 Activity
                 {activities.length > 0 && (
-                  <span className="ml-2 text-xs text-slate-400 font-normal">{activities.length} entries</span>
+                  <span className="ml-2 text-xs text-slate-400 font-normal">
+                    {activeFilterCount > 0
+                      ? `${filteredActivities.length} of ${activities.length}`
+                      : `${activities.length} entries`}
+                  </span>
+                )}
+                {activeFilterCount > 0 && (
+                  <span className="ml-2 text-[10px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                    {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} on
+                  </span>
                 )}
               </h3>
               <div className="flex items-center gap-2">
@@ -486,6 +534,75 @@ export default function DealDetailPage() {
                 </button>
               </div>
             </div>
+
+            {/* Activity filters */}
+            {activities.length > 3 && (
+              <div className="px-5 py-3 border-b border-slate-100 space-y-2.5 bg-slate-50/50">
+                {/* Search */}
+                <div className="relative">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                    <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={activitySearch}
+                    onChange={e => setActivitySearch(e.target.value)}
+                    placeholder="Search activity…"
+                    className="w-full pl-8 pr-8 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
+                  />
+                  {activitySearch && (
+                    <button onClick={() => setActivitySearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
+                  )}
+                </div>
+                {/* Type + date pills */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {ACTIVITY_TYPE_TABS.map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActivityTypeFilter(tab.id)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
+                          activityTypeFilter === tab.id
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="h-3 w-px bg-slate-200 mx-1" />
+                  <div className="flex items-center gap-1">
+                    {[
+                      { id: 'all',   label: 'Any time' },
+                      { id: 'today', label: 'Today' },
+                      { id: 'week',  label: 'This week' },
+                      { id: 'month', label: 'This month' },
+                    ].map(opt => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setActivityDateFilter(opt.id)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
+                          activityDateFilter === opt.id
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={() => { setActivitySearch(''); setActivityTypeFilter('all'); setActivityDateFilter('all'); }}
+                      className="ml-auto text-[11px] text-slate-500 hover:text-slate-700 underline underline-offset-2"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Note composer */}
             <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
@@ -518,8 +635,8 @@ export default function DealDetailPage() {
             {/* Timeline */}
             <div className="divide-y divide-slate-50">
               {[
-                ...activities,
-                { id: '__created__', type: 'created', content: 'Deal created', createdAt: deal.createdAt, metadata: null },
+                ...filteredActivities,
+                ...(activityTypeFilter === 'all' || activityTypeFilter === 'created' ? [{ id: '__created__', type: 'created', content: 'Deal created', createdAt: deal.createdAt, metadata: null }] : []),
               ].map((act, idx) => {
                 const isDebrief = act.type === 'debrief';
                 const isStageChange = act.type === 'stage_change';
@@ -597,6 +714,17 @@ export default function DealDetailPage() {
             {activities.length === 0 && (
               <div className="px-5 pb-5 text-center">
                 <p className="text-xs text-slate-400">No activity yet — log a call, run AI Debrief, or add a note above.</p>
+              </div>
+            )}
+            {activities.length > 0 && filteredActivities.length === 0 && (
+              <div className="px-5 py-8 text-center">
+                <p className="text-xs text-slate-500 font-medium mb-1">No activities match your filters</p>
+                <button
+                  onClick={() => { setActivitySearch(''); setActivityTypeFilter('all'); setActivityDateFilter('all'); }}
+                  className="text-[11px] text-blue-600 hover:text-blue-700 underline underline-offset-2"
+                >
+                  Clear filters
+                </button>
               </div>
             )}
           </div>

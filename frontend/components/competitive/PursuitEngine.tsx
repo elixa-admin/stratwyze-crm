@@ -315,7 +315,8 @@ export default function PursuitEngine({ onNavigateToProposal }: Props) {
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-5 text-white">
                   <div className="flex items-center gap-2 flex-wrap mb-2">
                     {battleCard.platformName && (
-                      <span className="text-sm font-bold bg-red-500/30 text-red-200 border border-red-500/30 px-2.5 py-1 rounded-lg">
+                      <span className="text-sm font-bold bg-white/15 text-white border border-white/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
                         {battleCard.platformName}
                       </span>
                     )}
@@ -323,7 +324,8 @@ export default function PursuitEngine({ onNavigateToProposal }: Props) {
                       <span className="text-slate-400 text-sm font-medium">+</span>
                     )}
                     {battleCard.siName && (
-                      <span className="text-sm font-bold bg-orange-500/30 text-orange-200 border border-orange-500/30 px-2.5 py-1 rounded-lg">
+                      <span className="text-sm font-bold bg-white/15 text-white border border-white/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
                         {battleCard.siName}
                       </span>
                     )}
@@ -336,8 +338,8 @@ export default function PursuitEngine({ onNavigateToProposal }: Props) {
                 {(battleCard.platformWeaknesses.length > 0 || battleCard.siWeaknesses.length > 0) && (
                   <div className={`grid gap-4 ${battleCard.platformWeaknesses.length > 0 && battleCard.siWeaknesses.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                     {battleCard.platformWeaknesses.length > 0 && (
-                      <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                        <div className="flex items-center gap-1.5 mb-3 text-red-700">
+                      <div className="bg-white border border-slate-200 border-l-4 border-l-red-400 rounded-xl p-4">
+                        <div className="flex items-center gap-1.5 mb-3 text-red-600">
                           <IconAlert />
                           <span className="text-xs font-bold uppercase tracking-wide">Platform Risk — {battleCard.platformName}</span>
                         </div>
@@ -345,23 +347,23 @@ export default function PursuitEngine({ onNavigateToProposal }: Props) {
                           {battleCard.platformWeaknesses.slice(0, 5).map((w, i) => (
                             <div key={i} className="flex items-start gap-1.5">
                               <span className="text-[11px] font-bold text-red-400 flex-shrink-0 mt-0.5">{i + 1}</span>
-                              <p className="text-[11px] text-red-800 leading-snug">{w}</p>
+                              <p className="text-[11px] text-slate-700 leading-snug">{w}</p>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
                     {battleCard.siWeaknesses.length > 0 && (
-                      <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                        <div className="flex items-center gap-1.5 mb-3 text-orange-700">
+                      <div className="bg-white border border-slate-200 border-l-4 border-l-amber-400 rounded-xl p-4">
+                        <div className="flex items-center gap-1.5 mb-3 text-amber-600">
                           <IconAlert />
                           <span className="text-xs font-bold uppercase tracking-wide">SI Risk — {battleCard.siName}</span>
                         </div>
                         <div className="space-y-1.5">
                           {battleCard.siWeaknesses.slice(0, 5).map((w, i) => (
                             <div key={i} className="flex items-start gap-1.5">
-                              <span className="text-[11px] font-bold text-orange-400 flex-shrink-0 mt-0.5">{i + 1}</span>
-                              <p className="text-[11px] text-orange-800 leading-snug">{w}</p>
+                              <span className="text-[11px] font-bold text-amber-500 flex-shrink-0 mt-0.5">{i + 1}</span>
+                              <p className="text-[11px] text-slate-700 leading-snug">{w}</p>
                             </div>
                           ))}
                         </div>

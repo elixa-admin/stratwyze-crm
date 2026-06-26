@@ -72,8 +72,11 @@ export default function DashboardHome() {
     <div className="space-y-6">
       {/* CTA Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link href="/deals/new" className="group">
-          <div className="bg-white rounded-xl border-2 border-dashed border-blue-300 hover:border-blue-500 hover:shadow-md transition-all p-6 text-center cursor-pointer">
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('openNewDealModal'))}
+          className="group text-left w-full"
+        >
+          <div className="bg-white rounded-xl border-2 border-dashed border-blue-300 group-hover:border-blue-500 group-hover:shadow-md transition-all p-6 text-center cursor-pointer">
             <div className="w-12 h-12 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center mx-auto mb-3 transition-colors">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-blue-600">
                 <polyline points="12 5 12 19M5 12h14"/>
@@ -82,7 +85,7 @@ export default function DashboardHome() {
             <h3 className="font-bold text-slate-900 mb-1">Create Deal</h3>
             <p className="text-xs text-slate-500">Start a new opportunity</p>
           </div>
-        </Link>
+        </button>
 
         <Link href="/pipeline" className="group">
           <div className="bg-white rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all p-6 text-center cursor-pointer">
