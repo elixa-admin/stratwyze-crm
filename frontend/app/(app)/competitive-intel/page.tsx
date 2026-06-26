@@ -147,9 +147,10 @@ export default function CompetitiveIntelPage() {
       {/* Section navigation + content */}
       <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* Left sub-navigation */}
+        {/* Left sub-navigation — desktop vertical, mobile horizontal pills */}
         <aside className="lg:w-60 flex-shrink-0">
-          <nav className="lg:sticky lg:top-4 bg-white rounded-xl border border-slate-200 shadow-xs p-2 space-y-1">
+          {/* Desktop nav */}
+          <nav className="hidden lg:block lg:sticky lg:top-4 bg-white rounded-xl border border-slate-200 shadow-xs p-2 space-y-1">
             <p className="px-2 pt-1 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Sections</p>
             {SUB_NAV.map(item => {
               const active = activeTab === item.id;
@@ -184,6 +185,34 @@ export default function CompetitiveIntelPage() {
               );
             })}
           </nav>
+
+          {/* Mobile horizontal pills */}
+          <div className="lg:hidden overflow-x-auto pb-2">
+            <div className="flex gap-2 min-w-min">
+              {SUB_NAV.map(item => {
+                const active = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                      active
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="flex-shrink-0">{item.icon}</span>
+                    <span>{item.label}</span>
+                    {item.count !== undefined && (
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${active ? 'bg-white/30' : 'bg-slate-100'}`}>
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </aside>
 
         {/* Content area */}

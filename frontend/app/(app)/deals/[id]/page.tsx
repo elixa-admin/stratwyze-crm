@@ -323,7 +323,7 @@ export default function DealDetailPage() {
 
           {/* Header card */}
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-            <div className="flex items-start justify-between gap-4 mb-1">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-1">
               <input
                 type="text"
                 value={editTitle}
@@ -331,7 +331,7 @@ export default function DealDetailPage() {
                 className="flex-1 text-2xl font-bold text-slate-900 bg-transparent border-0 focus:outline-none focus:ring-0 p-0 min-w-0"
                 placeholder="Deal title"
               />
-              <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${STAGE_ACCENT[editStage]?.badge}`}>
+              <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold w-fit ${STAGE_ACCENT[editStage]?.badge}`}>
                 {editStage}
               </span>
             </div>
@@ -730,8 +730,8 @@ export default function DealDetailPage() {
           </div>
         </div>
 
-        {/* ── RIGHT COLUMN — tabbed sidebar ── */}
-        <div className="space-y-0">
+        {/* ── RIGHT COLUMN — tabbed sidebar (hidden on mobile, docked at bottom) ── */}
+        <div className="hidden lg:block space-y-0">
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden sticky top-4">
 
             {/* Tab bar */}
@@ -796,6 +796,72 @@ export default function DealDetailPage() {
             )}
           </div>
         </div>
+
+        {/* ── MOBILE BOTTOM TABS ── */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30">
+          <div className="flex">
+            {([
+              { id: 'tasks',   label: 'Tasks' },
+              { id: 'contact', label: 'Contact' },
+              { id: 'info',    label: 'Info' },
+            ] as { id: SidebarTab; label: string }[]).map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setSidebarTab(tab.id)}
+                className={`flex-1 py-3 text-xs font-semibold transition-all border-t-2 ${
+                  sidebarTab === tab.id
+                    ? 'text-blue-600 border-blue-600 bg-blue-50/50'
+                    : 'text-slate-500 border-transparent hover:text-slate-700'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Mobile content drawer */}
+          <div className="max-h-48 overflow-y-auto bg-white">
+            {sidebarTab === 'tasks' && (
+              <DealTasksPanel key={taskRefreshKey} dealId={deal.id} />
+            )}
+
+            {sidebarTab === 'contact' && (
+              <div className="p-4 space-y-4">
+                <ContactPanel contact={deal.primaryContact} />
+                {deal.primaryContact?.email && (
+                  <button
+                    onClick={() => setEmailModalOpen(true)}
+                    className="w-full py-2.5 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                      <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    Send Email
+                  </button>
+                )}
+              </div>
+            )}
+
+            {sidebarTab === 'info' && (
+              <div className="divide-y divide-slate-50">
+                <FollowUpScheduling dealId={deal.id} dueDate={deal.dueDate} nextAction={deal.nextAction} />
+                {isClosed && (
+                  <DealClosureSection
+                    dealId={deal.id}
+                    stage={editStage}
+                    closureReason={deal.closureReason}
+                    lossReason={deal.lossReason}
+                    onUpdate={() => window.location.reload()}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Padding for mobile bottom tabs */}
+        <div className="lg:hidden h-64" />
       </div>
 
       {/* Floating save bar */}

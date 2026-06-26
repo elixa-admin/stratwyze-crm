@@ -173,7 +173,7 @@ export default function NewDealModal({ isOpen, onClose, onSubmit }: NewDealModal
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full mx-4 sm:mx-0 max-w-sm sm:max-w-xl max-h-[90vh] sm:max-h-[92vh] flex flex-col overflow-hidden">
 
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-start justify-between bg-gradient-to-r from-blue-600 to-indigo-600">
