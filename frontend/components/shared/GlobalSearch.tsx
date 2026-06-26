@@ -180,7 +180,7 @@ export default function GlobalSearch({ dark = false }: { dark?: boolean }) {
   let flatIndex = -1;
 
   return (
-    <div ref={containerRef} className="relative flex-1 sm:max-w-md">
+    <div ref={containerRef} className="relative flex-1 max-w-md">
       <div className="relative">
         <span className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

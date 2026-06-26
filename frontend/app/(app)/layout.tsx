@@ -151,7 +151,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <aside className={`hidden sm:flex flex-shrink-0 h-screen bg-slate-900 flex flex-col sticky top-0 transition-all duration-200 overflow-hidden ${
+      <aside className={`flex-shrink-0 h-screen bg-slate-900 flex flex-col sticky top-0 transition-all duration-200 overflow-hidden ${
         collapsed ? 'w-[60px]' : 'w-64'
       }`}>
 
@@ -252,13 +252,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0 sm:pb-0 pb-16">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
         <header className="sticky top-0 z-30 bg-slate-900 border-b border-slate-800 h-16 flex-shrink-0">
-          <div className="flex items-center h-full sm:px-6 px-3 gap-2 sm:gap-4">
+          <div className="flex items-center h-full px-6 gap-4">
             <button
               onClick={() => setCollapsed(c => !c)}
-              className="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all"
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all"
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {collapsed ? <IconChevronsRight /> : <IconChevronsLeft />}
@@ -273,10 +273,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </button>
               <button
                 onClick={() => setShowNewDealModal(true)}
-                className="flex items-center gap-2 sm:px-3 px-2 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-sm"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-sm"
               >
                 <IconPlus />
-                <span className="hidden sm:inline">New</span>
+                <span>New</span>
               </button>
             </div>
           </div>
@@ -293,19 +293,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <NewDealModal isOpen={showNewDealModal} onClose={() => setShowNewDealModal(false)} onSubmit={handleNewDealSubmit} />
       <CreateAccountModal isOpen={showCreateAccountModal} onClose={() => setShowCreateAccountModal(false)} />
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-900 border-t border-slate-800 flex items-center justify-around z-40">
-        {NAV[0]?.items?.map(({ href, label, Icon: IconComponent }) => {
-          const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
-          return (
-            <Link key={href} href={href} className="flex flex-col items-center justify-center gap-1 flex-1 h-full">
-              <span className={active ? 'text-blue-400' : 'text-slate-400'}>{IconComponent && <IconComponent />}</span>
-              <span className={`text-[10px] ${active ? 'text-blue-400 font-medium' : 'text-slate-400'}`}>{label?.split(' ')?.[0]}</span>
-            </Link>
-          );
-        })}
-      </nav>
 
       {/* Global toast stack */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none">
