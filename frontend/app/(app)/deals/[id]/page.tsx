@@ -184,6 +184,10 @@ export default function DealDetailPage() {
   const [taskRefreshKey, setTaskRefreshKey] = useState(0);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('tasks');
+  // Activity filter state — must live with the other hooks, above any early return
+  const [activitySearch, setActivitySearch] = useState('');
+  const [activityTypeFilter, setActivityTypeFilter] = useState<string>('all');
+  const [activityDateFilter, setActivityDateFilter] = useState<string>('all');
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -266,11 +270,6 @@ export default function DealDetailPage() {
   const stageIndex = STAGES.indexOf(editStage);
   const activities = deal.activities ?? [];
   const isClosed = editStage === 'Closed Won' || editStage === 'Closed Lost';
-
-  // Activity filter state
-  const [activitySearch, setActivitySearch] = useState('');
-  const [activityTypeFilter, setActivityTypeFilter] = useState<string>('all');
-  const [activityDateFilter, setActivityDateFilter] = useState<string>('all');
 
   const ACTIVITY_TYPE_TABS = [
     { id: 'all',         label: 'All' },
